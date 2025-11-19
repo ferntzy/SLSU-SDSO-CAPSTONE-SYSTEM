@@ -1,0 +1,51 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Dashboard"
+    },
+    {
+      "url": "/vpsas/dashboard",
+      "name": "Analytics",
+      "slug": "vpsas-dashboard"
+    },
+    {
+      "menuHeader": "Event Oversight"
+    },
+    {
+      "url": "/vpsas/events/pending",
+      "name": "Pending Events",
+      "slug": "vpsas-events-pending"
+    },
+    {
+      "url": "/vpsas/events/approved",
+      "name": "Approved Events",
+      "slug": "vpsas-events-approved"
+    },
+    {
+      "url": "/vpsas/events/history",
+      "name": "Event History",
+      "slug": "vpsas-events-history"
+    },
+    {
+      "menuHeader": "Reports"
+    },
+    {
+      "url": "/vpsas/reports",
+      "name": "Summary Reports",
+      "slug": "vpsas-reports"
+    },
+    {
+      "menuHeader": "Account"
+    },
+    {
+      "url": "/vpsas/profile",
+      "name": "Profile",
+      "slug": "vpsas-profile"
+    },
+    {
+      "url": "/logout",
+      "name": "Logout",
+      "slug": "logout"
+    }
+  ]
+}

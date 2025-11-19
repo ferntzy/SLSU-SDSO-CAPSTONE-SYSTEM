@@ -1,0 +1,83 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Dashboard"
+    },
+    {
+      "url": "/admin/dashboard",
+      "name": "Analytics",
+      "icon": "menu-icon tf-icons mdi mdi-calendar-blank-outline",
+      "slug": "dashboard-analytics"
+    },
+    {
+      "url": "/admin/calendar",
+      "name": "Calendar",
+      "slug": "dashboard-calendar"
+    },
+    {
+      "menuHeader": "Event Requests"
+    },
+    {
+      "url": "/admin/event-requests",
+      "name": "All Requests",
+      "slug": "event-requests-all"
+    },
+    {
+      "menuHeader": "eSignatures"
+    },
+    {
+      "url": "/admin/esignatures/pending",
+      "name": "Pending eSignatures",
+      "slug": "esignatures-pending"
+    },
+    {
+      "url": "/admin/esignatures/completed",
+      "name": "Completed eSignatures",
+      "slug": "esignatures-completed"
+    },
+    {
+      "menuHeader": "Organizations"
+    },
+    {
+      "url": "/admin/organizations",
+      "name": "All Organizations",
+      "slug": "organizations-all"
+    },
+    {
+      "menuHeader": "User Management"
+    },
+    {
+      "url": "/admin/profiles",
+      "name": "List of Profiles",
+      "slug": "profiles-all"
+
+
+    },
+    {
+      "url": "/admin/users",
+      "name": "All Users",
+      "slug": "users-all"
+    },
+    {
+      "url": "/admin/logs",
+      "name": "User Logs",
+      "slug": "user-logs"
+    },
+    {
+      "menuHeader": "Account Settings"
+    },
+    {
+      "url": "/admin/account",
+      "name": "Profile",
+      "slug": "account-profile"
+    },
+    {
+      "menuHeader": "Account"
+    },
+    {
+      "url": "/logout",
+      "name": "Logout",
+      "slug": "logout"
+    }
+  ]
+}

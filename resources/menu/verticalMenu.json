@@ -1,0 +1,22 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Dashboard"
+    },
+    {
+      "url": "/dashboard",
+      "name": "Home",
+      "slug": "default-dashboard"
+    },
+    {
+      "url": "/help",
+      "name": "Help",
+      "slug": "default-help"
+    },
+    {
+      "url": "/logout",
+      "name": "Logout",
+      "slug": "logout"
+    }
+  ]
+}

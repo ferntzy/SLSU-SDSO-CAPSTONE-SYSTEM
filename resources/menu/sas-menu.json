@@ -1,0 +1,51 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Dashboard"
+    },
+    {
+      "url": "/sas/dashboard",
+      "name": "Overview",
+      "slug": "sas-dashboard"
+    },
+    {
+      "menuHeader": "Event Tracking"
+    },
+    {
+      "url": "/sas/events/pending",
+      "name": "Pending Events",
+      "slug": "sas-events-pending"
+    },
+    {
+      "url": "/sas/events/approved",
+      "name": "Approved Events",
+      "slug": "sas-events-approved"
+    },
+    {
+      "url": "/sas/events/rejected",
+      "name": "Rejected Events",
+      "slug": "sas-events-rejected"
+    },
+    {
+      "menuHeader": "Organizations"
+    },
+    {
+      "url": "/sas/organizations",
+      "name": "All Organizations",
+      "slug": "sas-organizations"
+    },
+    {
+      "menuHeader": "Account"
+    },
+    {
+      "url": "/sas/profile",
+      "name": "Profile",
+      "slug": "sas-profile"
+    },
+    {
+      "url": "/logout",
+      "name": "Logout",
+      "slug": "logout"
+    }
+  ]
+}

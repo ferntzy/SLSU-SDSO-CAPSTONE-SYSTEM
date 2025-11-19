@@ -1,0 +1,43 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Dashboard"
+    },
+    {
+      "url": "/adviser/dashboard",
+      "name": "Overview",
+      "slug": "adviser-dashboard"
+    },
+    {
+      "url": "/adviser/approvals",
+      "name": "Event Approvals",
+      "slug": "adviser-approvals"
+    },
+    {
+      "url": "/adviser/calendar",
+      "name": "Calendar",
+      "slug": "adviser-calendar"
+    },
+    {
+      "menuHeader": "Reports"
+    },
+    {
+      "url": "/adviser/reports",
+      "name": "My Reports",
+      "slug": "adviser-reports"
+    },
+    {
+      "menuHeader": "Account"
+    },
+    {
+      "url": "/adviser/profile",
+      "name": "Profile",
+      "slug": "adviser-profile"
+    },
+    {
+      "url": "/logout",
+      "name": "Logout",
+      "slug": "logout"
+    }
+  ]
+}

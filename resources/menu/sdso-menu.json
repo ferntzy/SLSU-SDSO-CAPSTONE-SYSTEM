@@ -1,0 +1,51 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Dashboard"
+    },
+    {
+      "url": "/sdso/dashboard",
+      "name": "Overview",
+      "slug": "sdso-dashboard"
+    },
+    {
+      "menuHeader": "Event Management"
+    },
+    {
+      "url": "/sdso/events/pending",
+      "name": "Pending Events",
+      "slug": "sdso-events-pending"
+    },
+    {
+      "url": "/sdso/events/approved",
+      "name": "Approved Events",
+      "slug": "sdso-events-approved"
+    },
+    {
+      "url": "/sdso/events/history",
+      "name": "Event History",
+      "slug": "sdso-events-history"
+    },
+    {
+      "menuHeader": "Organizations"
+    },
+    {
+      "url": "/sdso/organizations",
+      "name": "Recognized Orgs",
+      "slug": "sdso-organizations"
+    },
+    {
+      "menuHeader": "Account"
+    },
+    {
+      "url": "/sdso/profile",
+      "name": "Profile",
+      "slug": "sdso-profile"
+    },
+    {
+      "url": "/logout",
+      "name": "Logout",
+      "slug": "logout"
+    }
+  ]
+}

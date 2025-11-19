@@ -1,0 +1,45 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Dashboard"
+    },
+    {
+      "url": "/student/dashboard",
+      "name": "My Dashboard",
+      "icon": "mdi:home-outline",
+      "slug": "student-dashboard"
+    },
+    {
+      "url": "/student/permit/form",
+      "name": "Apply for Activity Permit",
+      "icon": "mdi:file-document-edit-outline",
+      "slug": "student-activity-permit"
+    },
+    {
+      "url": "/student/calendar",
+      "name": "Calendar",
+      "icon": "mdi:calendar-month-outline",
+      "slug": "student-calendar"
+    },
+    {
+      "url": "/student/permit/tracking",
+      "name": "Permit Tracking",
+      "slug": "student-tracking"
+    },
+    {
+      "menuHeader": "Account"
+    },
+    {
+      "url": "/student/profile",
+      "name": "Profile",
+      "icon": "mdi:account-circle-outline",
+      "slug": "student-profile"
+    },
+    {
+      "url": "/logout",
+      "name": "Logout",
+      "icon": "mdi:logout",
+      "slug": "logout"
+    }
+  ]
+}

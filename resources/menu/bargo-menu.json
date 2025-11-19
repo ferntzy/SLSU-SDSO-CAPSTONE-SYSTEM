@@ -1,0 +1,43 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Dashboard"
+    },
+    {
+      "url": "/bargo/dashboard",
+      "name": "Overview",
+      "slug": "bargo-dashboard"
+    },
+    {
+      "menuHeader": "Event Monitoring"
+    },
+    {
+      "url": "/bargo/events/pending",
+      "name": "Pending Approvals",
+      "slug": "bargo-events-pending"
+    },
+    {
+      "url": "/bargo/events/approved",
+      "name": "Approved Events",
+      "slug": "bargo-events-approved"
+    },
+    {
+      "url": "/bargo/events/history",
+      "name": "Event History",
+      "slug": "bargo-events-history"
+    },
+    {
+      "menuHeader": "Account"
+    },
+    {
+      "url": "/bargo/profile",
+      "name": "Profile",
+      "slug": "bargo-profile"
+    },
+    {
+      "url": "/logout",
+      "name": "Logout",
+      "slug": "logout"
+    }
+  ]
+}
