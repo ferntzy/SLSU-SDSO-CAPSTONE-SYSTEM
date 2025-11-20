@@ -19,20 +19,14 @@ $(document).on("click", ".delete-org-btn", function(e) {
 
     let orgId = $(this).data("id");
     let orgName = $(this).data("name");
-    let orgCard = $(this).closest(".col-md-6");
-
-    if (!orgId) {
-        console.error("Organization ID is missing!");
-        return;
-    }
+    let orgRow = $(this).closest("tr"); // FIXED
 
     Swal.fire({
         title: 'Are you sure?',
-        text: `Delete organization "${orgName}"? This action cannot be undone!`,
+        text: `Delete organization "${orgName}"?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
         confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
         if (result.isConfirmed) {
@@ -42,19 +36,15 @@ $(document).on("click", ".delete-org-btn", function(e) {
                 data: { _token: $('meta[name="csrf-token"]').attr('content') },
                 success: function(response) {
                     if (response.success) {
-                        orgCard.remove();
+                        orgRow.remove(); // FIXED
                         Swal.fire('Deleted!', response.message, 'success');
-                    } else {
-                        Swal.fire('Error!', response.message, 'error');
                     }
-                },
-                error: function(xhr) {
-                    Swal.fire('Error!', 'Request failed: ' + xhr.responseText, 'error');
                 }
             });
         }
     });
 });
+
 </script>
 <script>document.addEventListener("DOMContentLoaded", function () {
     let successMessage = document.querySelector('meta[name="success-message"]');
@@ -74,7 +64,7 @@ $(document).on("click", ".delete-org-btn", function(e) {
 <script>
 $(document).ready(function () {
     // When a "View" button is clicked
-    $(document).on('click', '.viewOrgBtn', function (e) {
+    $(document).on('click', '.view-details-btn', function (e) {
         e.preventDefault();
 
         let orgId = $(this).data('id');
@@ -140,5 +130,6 @@ $(document).ready(function () {
         });
     });
 });
+
 </script>
 

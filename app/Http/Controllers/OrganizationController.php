@@ -38,7 +38,7 @@ class OrganizationController extends Controller
             'description'       => 'nullable|string',
             'contact_email'     => 'nullable|email',
             'contact_number'    => 'nullable|string|max:20',
-            'officer_id'        => 'nullable|integer|exists:users,user_id',
+            'profile_id'        => 'required|integer',
         ]);
 
         // creator user
@@ -51,6 +51,7 @@ class OrganizationController extends Controller
             $organization->officers()->create([
                 'user_id' => $validated['officer_id'],
                 'role'    => 'Officer',
+                'profile_id' => $request->profile_id, // <-- include here
             ]);
         }
 
