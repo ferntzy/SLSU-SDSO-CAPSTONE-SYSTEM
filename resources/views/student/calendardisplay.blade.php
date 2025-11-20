@@ -53,13 +53,16 @@
 
 
               <div class="col-md-6">
-              <label class="form-label">Organization</label>
-              <select name="organization_id" class="form-select" required>
+                <label class="form-label">Organization</label>
+                @php
+                  $userOrg = $organizations->firstWhere('organization_id', auth()->user()->organization_id);
+                @endphp
+               <select name="organization_id" class="form-select" required>
                 @foreach ($organizations as $org)
                   <option value="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                 @endforeach
               </select>
-            </div>
+              </div>
             </div>
 
             <div class="mb-3">
