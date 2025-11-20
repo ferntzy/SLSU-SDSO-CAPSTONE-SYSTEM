@@ -14,89 +14,95 @@ class Organization extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'user_id',
+        'user_id',              // the user who created/owns the org
         'organization_name',
         'organization_type',
-        'adviser_name',
-        'contact_email',
-        'contact_number',
         'status',
         'description',
+        'contact_email',
+        'contact_number',
+        'profile_id',           // linked profile (Employee or Student)
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
+
+    // 🔗 The user account who created the organization
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    // New
+    public function adviser()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id')
+                    ->where('account_role', 'Faculty_Adviser');
+    }
+
+
+    // 🔗 The profile connected to the organization (Employee or Student)
+    public function profile()
+    {
+        return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
+    }
+
+    // 🔗 Officers of this organization
     public function officers()
     {
         return $this->hasMany(Officer::class, 'organization_id', 'organization_id');
     }
 
-    // Link back to creator user
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    // 🔗 Link to members
+    // 🔗 Members of this organization
     public function members()
     {
         return $this->hasMany(Member::class, 'organization_id', 'organization_id');
     }
-    // 🧮 Accessor for member count
+
+    // 🔗 Events created by this organization
+    public function events()
+    {
+        return $this->hasMany(Event::class, 'organization_id', 'organization_id');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSORS / HELPERS
+    |--------------------------------------------------------------------------
+    */
+
+    // Count members without extra queries in Blade
     public function getMembersCountAttribute()
     {
         return $this->members()->count();
     }
 
-
-    // Link to events
-    public function events()
-    {
-        return $this->hasMany(Event::class, 'organization_id');
-    }
-
-    // Link to adviser user
-    public function adviserUser()
-    {
-        return $this->belongsTo(User::class, 'adviser_name', 'user_id')
-                    ->where('account_role', 'Faculty_Adviser');
-    }
-
-    // Accessor for adviser full name
-    public function getAdvisorAttribute()
-    {
-        return $this->adviserUser?->profile?->full_name ?? 'N/A';
-    }
-
-    // Optional accessors
+    // Default status if empty
     public function getStatusAttribute($value)
     {
-        return $value ?? 'Active';
+        return $value ?: 'Active';
     }
 
+    // Return empty string if no description
     public function getDescriptionAttribute($value)
     {
-        return $value ?? '';
+        return $value ?: '';
     }
 
+    // Shortcut accessor for organization name
     public function getNameAttribute()
     {
         return $this->organization_name;
     }
 
+    // Shortcut accessor for type
     public function getTypeAttribute()
     {
         return $this->organization_type;
     }
-    public function studentOfficers()
-    {
-        return $this->hasManyThrough(
-            UserProfile::class, // final table
-            User::class,        // intermediate table
-            'organization_id',  // FK on users table
-            'user_id',          // FK on user_profiles table
-            'organization_id',  // local key on organizations
-            'user_id'           // local key on users
-        )->where('account_role', 'Student_Organization');
-    }
 
 }
-
