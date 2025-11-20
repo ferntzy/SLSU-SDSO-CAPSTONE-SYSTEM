@@ -127,7 +127,7 @@
                             <option value=""></option>
                             @foreach($officers as $officer)
                                 <option value="{{ $officer->user_id }}">
-                                    {{ $officer->profile->first_name }} {{ $officer->profile->last_name }}
+                                    {{ $officer->profile?->first_name ?? ''}} {{ $officer->profile?->last_name ?? '' }}
                                 </option>
                             @endforeach
                         </select>
