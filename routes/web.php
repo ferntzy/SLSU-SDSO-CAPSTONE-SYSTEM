@@ -117,8 +117,12 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
   Route::get('/permit/form', [PermitController::class, 'showForm'])->name('permit.form');
   Route::post('/permit/generate', [PermitController::class, 'generate'])->name('permit.generate');
   Route::get('/permit/tracking', [PermitController::class, 'track'])->name('student.permit.tracking');
- Route::view('/calendar', 'student.calendardisplay');
+  Route::view('/calendar', 'student.calendardisplay');
   // hashed view route
+  Route::get('/calendar', [PermitController::class, 'showCalendar']);
+
+
+
   Route::get('/permit/view/{hashed_id}', [PermitController::class, 'view'])->name('student.permit.view');
 });
 

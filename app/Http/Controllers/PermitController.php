@@ -21,6 +21,15 @@ class PermitController extends Controller
     $organizations = Organization::where('user_id', $user->user_id)->get();
     return view('student.permit.form', compact('organizations'));
   }
+
+  public function showCalendar()
+{
+      $user = auth()->user();
+    $organizations = Organization::where('user_id', $user->user_id)->get();
+    return view('student.calendardisplay', compact('organizations'));
+}
+
+
   public function generate(Request $request)
   {
     $request->validate([
