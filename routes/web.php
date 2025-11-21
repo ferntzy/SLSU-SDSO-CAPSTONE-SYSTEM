@@ -104,44 +104,27 @@ Route::middleware(['auth', 'role:admin'])
         // ======================
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
         Route::post('/organizations/store', [OrganizationController::class, 'store'])->name('organizations.store');
+        Route::put('/organizations/{organization}', [OrganizationController::class, 'update'])->name('organizations.update');
         Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
         Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
 
-<<<<<<< Updated upstream
-        // ======================
-        // PROFILES (USER PROFILES)
-        // ======================
-        Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
-        Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
-        Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
-=======
-    // ======================
-    // ORGANIZATIONS
-    // ======================
-    Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
-    Route::post('/organizations/store', [OrganizationController::class, 'store'])->name('organizations.store');
-    Route::put('/organizations/{organization}', [OrganizationController::class, 'update'])->name('organizations.update');
-    Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
-    Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
->>>>>>> Stashed changes
+            // ACCOUNT SETTINGS
+            Route::view('/account', 'admin.profile.account');
 
-        // ACCOUNT SETTINGS
-        Route::view('/account', 'admin.profile.account');
+            // REPORTING
+            Route::view('/reports/minutes', 'admin.reports.minutes');
 
-        // REPORTING
-        Route::view('/reports/minutes', 'admin.reports.minutes');
+            // ROLES
+            Route::view('/roles', 'admin.users.roles');
 
-        // ROLES
-        Route::view('/roles', 'admin.users.roles');
+            // HELP
+            Route::view('/help', 'admin.help.help');
+        });
 
-        // HELP
-        Route::view('/help', 'admin.help.help');
-    });
-
-// ============================
-// STUDENT ORGANIZATION ROUTES
-// ============================
-Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->group(function () {
+    // ============================
+    // STUDENT ORGANIZATION ROUTES
+    // ============================
+    Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->group(function () {
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
     Route::get('/permit/form', [PermitController::class, 'showForm'])->name('permit.form');
     Route::post('/permit/generate', [PermitController::class, 'generate'])->name('permit.generate');
