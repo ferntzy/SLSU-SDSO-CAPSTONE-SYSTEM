@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Organization;
 use App\Models\User;
+use App\Models\Officer;
+use App\Models\UserProfile;
 use Illuminate\Http\Request;
 
 class OrganizationController extends Controller
@@ -32,31 +34,63 @@ class OrganizationController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'organization_name' => 'required|string|max:255',
-            'organization_type' => 'required|string|max:255',
-            'description'       => 'nullable|string',
-            'contact_email'     => 'nullable|email',
-            'contact_number'    => 'nullable|string|max:20',
-            'profile_id'        => 'required|integer',
+            'organization_type' => 'required|string|max:100',
+            'description' => 'nullable|string',
         ]);
 
-        // creator user
-        $validated['user_id'] = auth()->id();
+        Organization::create([
+            'organization_name' => $request->organization_name,
+            'organization_type' => $request->organization_type,
+            'description' => $request->description,
+            'status' => 'Active', // default status
+        ]);
 
-        $organization = Organization::create($validated);
+        return redirect()->back()->with('success', 'Organization added successfully!');
+    }
+    public function update(Request $request, Organization $organization)
+    {
+        $request->validate([
+            'organization_name' => 'required|string|max:255',
+            'organization_type' => 'required|string',
+            'description' => 'nullable|string',
+        ]);
 
-        // Create officer record if selected
-        if (!empty($validated['officer_id'])) {
-            $organization->officers()->create([
-                'user_id' => $validated['officer_id'],
-                'role'    => 'Officer',
-                'profile_id' => $request->profile_id, // <-- include here
-            ]);
+        // Update organization fields
+        $organization->organization_name = $request->organization_name;
+        $organization->organization_type = $request->organization_type;
+        $organization->description = $request->description;
+
+        // ========= SAVE ADVISER =========
+        if ($request->adviser_id) {
+            $organization->user_id = $request->adviser_id; // adviser stored here
         }
 
-        return back()->with('success', 'Organization added successfully!');
+        $organization->save();
+
+        // ========= SAVE OFFICER =========
+        if ($request->officer_id) {
+
+            // find the student’s profile_id
+            $profileId = User::where('user_id', $request->officer_id)->value('profile_id');
+
+            Officer::updateOrCreate(
+                [
+                    'organization_id' => $organization->organization_id,
+                    'user_id' => $request->officer_id
+                ],
+                [
+                    'profile_id' => $profileId,
+                    'role' => 'officer'
+                ]
+            );
+        }
+
+        return redirect()->back()->with('success', 'Organization updated successfully!');
     }
+
+
 
     public function show($organization_id)
     {

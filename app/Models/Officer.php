@@ -9,37 +9,29 @@ class Officer extends Model
 {
     use HasFactory;
 
-    protected $table = 'officers';
     protected $primaryKey = 'officer_id';
     protected $fillable = [
-        'organization_id',
         'user_id',
+        'profile_id',
+        'organization_id',
         'role',
-        'officer_name',
-        'contact_email',
-        'contact_number',
-        'member_id'
     ];
 
+    // Link back to the organization
     public function organization()
     {
         return $this->belongsTo(Organization::class, 'organization_id', 'organization_id');
     }
 
+    // Link to user (optional)
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
+
+    // Link to profile
     public function profile()
     {
-        return $this->hasOneThrough(
-            UserProfile::class, // final target
-            User::class,        // intermediate model
-            'user_id',          // FK on User table
-            'user_id',          // FK on UserProfile table
-            'user_id',          // local key on Officer table
-            'user_id'           // local key on User table
-        );
+        return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
     }
 }
-

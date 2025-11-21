@@ -57,7 +57,7 @@
               <div class="input-group input-group-merge">
                 <span class="input-group-text"><i class="mdi mdi-account-outline"></i></span>
                 <select name="suffix" class="form-control">
-                  <option value=""></option>
+                  <option value="">(e.g. JR, SR, III)</option>
                   <option value="JR">Jr</option>
                   <option value="SR">Sr</option>
                   <option value="II">II</option>

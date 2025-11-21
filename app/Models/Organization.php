@@ -14,14 +14,11 @@ class Organization extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'user_id',              // the user who created/owns the org
+        'user_id',
         'organization_name',
         'organization_type',
         'status',
         'description',
-        'contact_email',
-        'contact_number',
-        'profile_id',           // linked profile (Employee or Student)
     ];
 
     /*

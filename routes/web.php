@@ -107,12 +107,23 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
         Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
 
+<<<<<<< Updated upstream
         // ======================
         // PROFILES (USER PROFILES)
         // ======================
         Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
         Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
         Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
+=======
+    // ======================
+    // ORGANIZATIONS
+    // ======================
+    Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
+    Route::post('/organizations/store', [OrganizationController::class, 'store'])->name('organizations.store');
+    Route::put('/organizations/{organization}', [OrganizationController::class, 'update'])->name('organizations.update');
+    Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
+    Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
+>>>>>>> Stashed changes
 
         // ACCOUNT SETTINGS
         Route::view('/account', 'admin.profile.account');
