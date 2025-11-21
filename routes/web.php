@@ -108,6 +108,13 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
         Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
 
+        // ======================
+        // PROFILES (USER PROFILES)
+        // ======================
+        Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
+        Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
+        Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
+
             // ACCOUNT SETTINGS
             Route::view('/account', 'admin.profile.account');
 
