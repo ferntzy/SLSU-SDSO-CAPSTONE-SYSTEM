@@ -22,9 +22,45 @@
       "slug": "student-calendar"
     },
     {
+      "menuHeader": "PERMIT"
+    },
+    {
       "url": "/student/permit/tracking",
       "name": "Permit Tracking",
       "slug": "student-tracking"
+    },
+    {
+      "url": "/student/permit/approved-permits",
+      "name": "Approved Permits",
+      "slug": "student-approved-permits"
+    },
+    {
+      "url": "/student/permit/pending-permits",
+      "name": "Pending Permits",
+      "slug": "student-pending-permits"
+    },
+    {
+      "url": "/student/permit/rejected-permits",
+      "name": "Rejected Permits",
+      "slug": "student-rejected-permits"
+    },
+    {
+      "menuHeader": "event"
+    },
+    {
+      "url": "/student/permit/ongoing-events",
+      "name": "Ongoing Events",
+      "slug": "student-ongoing-event"
+    },
+    {
+      "url": "/student/permit/succesful-events",
+      "name": "Succesful Events",
+      "slug": "student-succesful-event"
+    },
+    {
+      "url": "/student/permit/canceled-events",
+      "name": "Canceled Events",
+      "slug": "student-canceled-event"
     },
     {
       "menuHeader": "Account"
