@@ -15,10 +15,9 @@
     @if(session('success'))
         <meta name="success-message" content="{{ session('success') }}">
     @endif
-
 </head>
 @endsection
-    @include("admin.organizations.orgjs")
+@include("admin.organizations.orgjs")
 @section('content')
 <div class="{{ $container }}">
     <div class="card shadow-sm">
@@ -44,7 +43,7 @@
                 </thead>
                 <tbody>
                     @forelse($organizations as $org)
-                    <tr>
+                    <tr id="org-{{ $org->organization_id }}">
                         <td>{{ $org->organization_name }}</td>
                         <td>{{ $org->organization_type }}</td>
                         <td>{{ $org->members_count }}</td>
@@ -105,7 +104,7 @@
 <div class="modal fade" id="addOrgModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form action="{{ route('organizations.store') }}" method="POST">
+            <form action="{{ route('organizations.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Add Organization</h5>
@@ -116,7 +115,7 @@
                         <label class="form-label">Organization Name</label>
                         <input type="text" name="organization_name" class="form-control" required>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="form-label">Organization Type</label>
                         <select name="organization_type" class="form-select" required>
                             <option value="">Select Organization Type</option>
@@ -124,9 +123,28 @@
                             <option>Non-Academic Organization</option>
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="form-label">Description</label>
                         <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label text-dark">ADD ORGANIZATION LOGO</label>
+
+                      <!-- Hidden real file input -->
+                      <input
+                          type="file"
+                          id="logoInput"
+                          name="organization_logo"
+                          class="d-none"
+                          accept="image/*"
+                      >
+                      <!-- Button that triggers the file dialog -->
+                      <button type="button" class="btn btn-primary btn-lg w-100" onclick="document.getElementById('logoInput').click()">
+                          choose file
+                      </button>
+
+                      <!-- Optional: Preview selected filename -->
+                      <small id="logoFilename" class="text-muted d-block mt-2"></small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -289,9 +307,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const modal = new bootstrap.Modal(document.getElementById('editOrgModal'));
           modal.show();
       });
-
-
-    // Optional: Add your JS for view/edit/delete buttons here
 });
 </script>
 @endsection

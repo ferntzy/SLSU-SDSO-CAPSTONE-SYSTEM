@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\UserProfile;
-
+use Exception;
 class ProfileController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
       $user_profiles = UserProfile::all(); // fetch all profiles
+
+      if ($request->ajax()){
+        return view('admin.profile.profile-list', compact('user_profiles'));
+      }
       return view('admin.profile.profile_list', compact('user_profiles'));
     }
     public function create()
@@ -18,8 +22,10 @@ class ProfileController extends Controller
     }
     public function store(Request $request)
     {
-        // dd($request->all());
-        // Validate the fields
+
+        try{
+
+
         $validated = $request->validate([
             'first_name'   => 'required|string|max:255',
             'last_name'    => 'required|string|max:255',
@@ -28,15 +34,17 @@ class ProfileController extends Controller
             'email'        => 'required|email|max:255',
             'contact_number'=> 'required|string|max:20',
             'address'      => 'required|string|max:255',
-            'sex'          => 'required|string',
             'type'         => 'required|string',
         ]);
 
         // Store to database
         $user_profile = UserProfile::create($validated);
 
-        return redirect()->route('profiles.index')
-        ->with('success', 'Profile created successfully!')
-        ->with('highlight_id', $user_profile->profile_id);
+        if (!$user_profile){
+          throw new Exception('Unable to save the profile.');
+        }
+      }catch(Exception $e){
+        return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
+      }
     }
 }

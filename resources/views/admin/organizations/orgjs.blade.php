@@ -1,25 +1,16 @@
-<!-- jQuery first (if your scripts need it) -->
-<script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
-
-<!-- Bootstrap Bundle (includes Popper.js) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-$.ajaxSetup({
-    headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    }
-});
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
 
-$(document).on("click", ".delete-org-btn", function(e) {
-    e.preventDefault();
+    $(document).on("click", ".delete-org-btn", function(e) {
+        e.preventDefault();
 
-    let orgId = $(this).data("id");
-    let orgName = $(this).data("name");
-    let orgRow = $(this).closest("tr"); // FIXED
+        let orgId = $(this).data("id");
+        let orgName = $(this).data("name");
+        let orgRow = $(this).closest("tr"); // FIXED
 
     Swal.fire({
         title: 'Are you sure?',
@@ -46,19 +37,21 @@ $(document).on("click", ".delete-org-btn", function(e) {
 });
 
 </script>
-<script>document.addEventListener("DOMContentLoaded", function () {
-    let successMessage = document.querySelector('meta[name="success-message"]');
+<script>
 
-    if (successMessage && successMessage.content.trim() !== "") {
-        Swal.fire({
-            title: 'Success!',
-            text: successMessage.content,
-            icon: 'success',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'OK'
-        });
-    }
-});
+    document.addEventListener("DOMContentLoaded", function () {
+        let successMessage = document.querySelector('meta[name="success-message"]');
+
+        if (successMessage && successMessage.content.trim() !== "") {
+            Swal.fire({
+                title: 'Success!',
+                text: successMessage.content,
+                icon: 'success',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
+        }
+    });
 </script>
 
 <script>
@@ -132,4 +125,24 @@ $(document).ready(function () {
 });
 
 </script>
+
+@if(session('new_org_id'))
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let row = document.getElementById("org-{{ session('new_org_id') }}");
+    if (row) {
+        row.classList.add("highlight");
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Organization Created!',
+            text: 'The organization was added successfully.',
+            timer: 2000,
+            showConfirmButton: false,
+        });
+    }
+});
+</script>
+@endif
+
 

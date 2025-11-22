@@ -38,16 +38,23 @@ class OrganizationController extends Controller
             'organization_name' => 'required|string|max:255',
             'organization_type' => 'required|string|max:100',
             'description' => 'nullable|string',
+            'organization_logo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
+        $logoPath = null;
+        if ($request->hasFile('organization_logo')) {
+            $logoPath = $request->file('organization_logo')->store('logos', 'public');
+        }
+        $organization = Organization::create([
+                          'organization_name' => $request->organization_name,
+                          'organization_type' => $request->organization_type,
+                          'description' => $request->description,
+                          'organization_logo' => $logoPath,
+                          'status' => 'Active', // default status
+                      ]);
 
-        Organization::create([
-            'organization_name' => $request->organization_name,
-            'organization_type' => $request->organization_type,
-            'description' => $request->description,
-            'status' => 'Active', // default status
-        ]);
-
-        return redirect()->back()->with('success', 'Organization added successfully!');
+        return redirect()->back()
+                        ->with('success', 'Organization added successfully!')
+                        ->with('new_org_id', $organization->organization_id);
     }
     public function update(Request $request, Organization $organization)
     {

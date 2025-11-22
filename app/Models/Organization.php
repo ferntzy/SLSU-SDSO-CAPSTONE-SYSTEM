@@ -18,6 +18,7 @@ class Organization extends Model
         'organization_name',
         'organization_type',
         'status',
+        'sex',
         'description',
     ];
 
