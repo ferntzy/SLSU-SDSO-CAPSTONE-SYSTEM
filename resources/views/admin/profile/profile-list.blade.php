@@ -20,7 +20,7 @@
           <a href="" class="btn rounded-pill btn-icon btn-secondary btn-sm"><i class="mdi mdi-account-eye"></i></a>
 
           <button type="button" href="#" class="btn rounded-pill btn-icon btn-primary btn-sm btn-edit"
-                data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                data-id="{{ Crypt::encryptstring($user_profile->profile_id)}}">
                 <i class="mdi mdi-text-box-edit-outline"></i>
           </button>
 
@@ -39,7 +39,6 @@
     @endforelse
   </tbody>
 </table>
-@include('admin.profile.edit-profile')
 @section('page-script')
 @include('admin.profile.js')
 @endsection

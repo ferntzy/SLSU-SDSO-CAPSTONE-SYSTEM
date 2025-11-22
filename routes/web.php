@@ -114,8 +114,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
         Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
         Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
+        Route::post('/profiles/update', [ProfileController::class, 'update'])->name('profiles.update');
         Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
-        // Route::get('/profiles', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::post('/profiles/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
 
 
             // ACCOUNT SETTINGS

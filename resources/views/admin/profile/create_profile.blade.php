@@ -3,14 +3,15 @@
   <div class="modal-dialog modal-xl modal-dialog-centered ">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">NEW PROFILE REGISTRATION</h1>
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">PROFILE REGISTRATION</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div id="profiledatamsg"></div>
         <form id = "frmProfileData">
           @csrf
-
+          <input type = "text" value = "0" id = "hiddenProfileID" name = "hiddenProfileID">
+          <input type = "text" value = "POST" id = "hiddenProfileFlag">
           <!-- FULL NAME -->
           <div class="form text-dark mb-3">FULL NAME</div>
 
@@ -105,8 +106,8 @@
                 <span class="input-group-text"><i class="mdi mdi-account-badge-horizontal-outline"></i></span>
                 <select name="type" class="txt form-control">
                   <option selected disabled>Select User Profile Type</option>
-                  <option value="Student">Student</option>
-                  <option value="Employee">Employee</option>
+                  <option value="student">Student</option>
+                  <option value="employee">Employee</option>
                 </select>
               </div>
             </div>

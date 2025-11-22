@@ -7,10 +7,10 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div id="profiledatamsg"></div>
-        <form id = "frmProfileData">
+        <div id="profiledataeditmsg"></div>
+        <form id = "frmProfileDataEdit">
           @csrf
-
+          <input type = "text" value = "" name = "hiddenProfileID" id = "hiddenProfileID" value = "0">
           <!-- FULL NAME -->
           <div class="form text-dark mb-3">FULL NAME</div>
 
