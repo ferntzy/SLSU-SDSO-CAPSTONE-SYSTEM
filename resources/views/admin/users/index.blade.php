@@ -19,7 +19,7 @@
 
       <div class="input-group">
         <input type="text" id="searchAccount" class="form-control" placeholder="Search Account">
-        <span class="input-group-text"><i class="mdi mdi-account-search-outline"></i></span>
+        <button class="input-group-text" id = "btnSearchUser"><i class="mdi mdi-account-search-outline"></i></button>
 
         <a href="#" class="input-group-text bg-primary text-white"
           data-bs-toggle="modal" data-bs-target="#createAccountModal">

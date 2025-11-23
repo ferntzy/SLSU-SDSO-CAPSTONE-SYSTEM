@@ -69,14 +69,16 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
         Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
-        Route::put('/users/update', [UserController::class, 'update'])->name('users.update');
+        Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
 
         Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
+
 
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
 
 
+        Route::post('user/check-username', [UserController::class, 'checkUsername']);
 
 
 

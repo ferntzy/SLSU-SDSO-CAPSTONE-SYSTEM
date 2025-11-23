@@ -14,7 +14,23 @@ class UserController extends Controller
 {
  public function index(Request $request)
     {
-      $user_accounts = User::with('profile')->get();
+      $user_accounts = User::with('profile');
+
+      if (!empty($request->str)) {
+          $query = $request->str;
+
+          $user_accounts = $user_accounts->where(function($q) use ($query) {
+              $q->where('username', 'LIKE', "%{$query}%")
+                ->orWhereHas('profile', function($q2) use ($query) {
+                    $q2->where('first_name', 'LIKE', "%{$query}%")
+                      ->orWhere('last_name', 'LIKE', "%{$query}%")
+                      ->orWhere('type', 'LIKE', "%{$query}%");
+                });
+          });
+      }
+
+      $user_accounts = $user_accounts->get();
+
       $user_profiles_student = UserProfile::where('type','student')->orderby('last_name')->orderby('first_name')->get();  // <-- ADD THIS
       $user_profiles_employee = UserProfile::where('type','employee')->orderby('last_name')->orderby('first_name')->get();
       if ($request->ajax()){
@@ -37,11 +53,12 @@ public function create()
     {
         try {
             // Validate inputs
+
             $validated = $request->validate([
                 'username'     => 'required|unique:users,username',
                 'password'     => 'required|min:6|confirmed',
                 'account_role' => 'required',
-                'profile_id'   => 'required|exists:user_profiles,profile_id',
+                'profile_id'   => 'required',
             ]);
 
             // Hash PASSWORD
@@ -62,6 +79,20 @@ public function create()
             ], 400);
         }
     }
+
+
+    public function checkUsername(Request $request)
+      {
+          $exists = User::where('username', $request->username)->exists();
+
+          return response()->json(['exists' => $exists]);
+      }
+
+
+
+
+
+
 
 
     public function update(Request $request, User $user)

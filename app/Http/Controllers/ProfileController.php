@@ -11,16 +11,36 @@ class ProfileController extends Controller
     public function index(Request $request)
     {
       $user_profiles = UserProfile::all(); // fetch all profiles
+       if (!empty($request->str)) {
+          $query = $request->str;
+
+          $user_profiles = $user_profiles->where(function($q) use ($query) {
+              $q->where('username', 'LIKE', "%{$query}%")
+                ->orWhereHas('profile', function($q2) use ($query) {
+                    $q2->where('first_name', 'LIKE', "%{$query}%")
+                      ->orWhere('last_name', 'LIKE', "%{$query}%")
+                      ->orWhere('type', 'LIKE', "%{$query}%");
+                });
+          });}
 
       if ($request->ajax()){
         return view('admin.profile.profile-list', compact('user_profiles'));
       }
       return view('admin.profile.profile_list', compact('user_profiles'));
     }
+
+
+
+
     public function create()
     {
         return view('admin.profile.create_profile');
     }
+
+
+
+
+
     public function store(Request $request)
     {
 
