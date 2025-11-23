@@ -1,0 +1,107 @@
+ @php
+    $container = 'container-xxl';
+
+    $approvedPermits = $permits->where('status', 'approved');
+    $pendingPermits  = $permits->where('status', 'pending');
+    $rejectedPermits = $permits->where('status', 'rejected');
+
+    $ongoingEvents = $permits->where('event_status', 'ongoing');
+    $successfulEvents = $permits->where('event_status', 'successful');
+    $canceledEvents = $permits->where('event_status', 'canceled');
+@endphp
+
+@extends('layouts/contentNavbarLayout')
+
+@section('title', 'Permit Tracking')
+
+@section('content')
+<div class="{{ $container }} py-4">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">My Permit Tracking</h5>
+        </div>
+
+        <div class="card-body">
+
+            {{-- Navigation Tabs --}}
+            <ul class="nav nav-tabs mb-3">
+
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pendingTab">Pending</button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#approvedTab">Approved</button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rejectedTab">Rejected</button>
+                </li>
+
+                <li class="nav-item ms-5 fw-bold text-primary pt-2">Events</li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#ongoingTab">Ongoing</button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#successfulTab">Successful</button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#canceledTab">Canceled</button>
+                </li>
+
+            </ul>
+
+            <div class="tab-content">
+
+                {{-- PENDING PERMITS --}}
+                <div class="tab-pane fade show active" id="pendingTab">
+                    @include('student.permit.pending', [
+                        'items' => $pendingPermits
+                    ])
+                </div>
+
+                {{-- APPROVED PERMITS --}}
+                <div class="tab-pane fade" id="approvedTab">
+                    @include('student.permit.approved', [
+                        'items' => $approvedPermits
+                    ])
+                </div>
+
+                {{-- REJECTED PERMITS --}}
+                <div class="tab-pane fade" id="rejectedTab">
+                    @include('student.permit.rejected', [
+                        'items' => $rejectedPermits
+                    ])
+                </div>
+
+                {{-- ONGOING EVENTS --}}
+                <div class="tab-pane fade" id="ongoingTab">
+                    @include('student.permit.ongoing', [
+                        'items' => $ongoingEvents
+                    ])
+                </div>
+
+                {{-- SUCCESSFUL EVENTS --}}
+                <div class="tab-pane fade" id="successfulTab">
+                    @include('student.permit.successful', [
+                        'items' => $successfulEvents
+                    ])
+                </div>
+
+                {{-- CANCELED EVENTS --}}
+                <div class="tab-pane fade" id="canceledTab">
+                    @include('student.permit.canceled', [
+                        'items' => $canceledEvents
+                    ])
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+@endsection

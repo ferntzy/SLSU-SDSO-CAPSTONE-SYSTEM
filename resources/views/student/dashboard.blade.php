@@ -1,107 +1,315 @@
 @php
-  $container = 'container-xxl';
+    $container = 'container-xxl';
+
+    $approvedPermits = $permits->where('status', 'approved');
+    $pendingPermits  = $permits->where('status', 'pending');
+    $rejectedPermits = $permits->where('status', 'rejected');
+
+    $ongoingEvents = $permits->where('event_status', 'ongoing');
+    $successfulEvents = $permits->where('event_status', 'successful');
+    $canceledEvents = $permits->where('event_status', 'canceled');
+
+    $fullName =
+        Auth::user()->profile?->first_name . ' ' .
+        (Auth::user()->profile?->middle_name ? strtoupper(substr(Auth::user()->profile->middle_name, 0, 1)) . '. ' : '') .
+        Auth::user()->profile?->last_name . ' ' .
+        Auth::user()->profile?->suffix;
 @endphp
 
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Student Dashboard')
+@section('title', 'Permit Tracking')
 
-@section('vendor-style')
-  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+@section('page-style')
+<style>
+    .stats-card-modern {
+        transition: all 0.3s ease;
+    }
+    .stats-card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1) !important;
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        color: #697a8d;
+        font-weight: 500;
+        padding: 0.75rem 1.25rem;
+    }
+    .nav-tabs .nav-link.active {
+        color: #696cff;
+        border-bottom: 2px solid #696cff;
+        background: transparent;
+    }
+    .nav-tabs .nav-link:hover {
+        color: #696cff;
+        border: none;
+    }
+    .section-label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #b4bdc6;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.75rem 1.25rem;
+        pointer-events: none;
+    }
+</style>
 @endsection
 
 @section('content')
-  <div class="{{ $container }} py-4">
+<div class="{{ $container }} flex-grow-1 container-p-y">
 
-    {{-- Welcome Message --}}
-    <div class="mb-4">
-      <h4 class="fw-bold">Welcome, {{ Auth::user()->username ?? 'Student' }}! 👋</h4>
-      <p class="text-muted mb-0">Here’s an overview of your organization’s activities and upcoming events.</p>
+    {{-- Page Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold">Welcome, {{ trim($fullName) }}!</h4>
+      <p class="text-muted mb-0">Monitor your permit submissions and event status</p>
+        </div>
     </div>
 
-    {{-- Stats Overview --}}
+    {{-- Statistics Cards --}}
     <div class="row g-4 mb-4">
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body d-flex align-items-center">
-            <div class="flex-shrink-0 bg-primary text-white rounded-circle p-3 me-3">
-              <i class="bx bx-time-five bx-md"></i>
-            </div>
-            <div>
-              <h6 class="mb-1 text-muted">Pending Events</h6>
-              <h4 class="mb-0 fw-bold">{{ $pendingEvents ?? 0 }}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body d-flex align-items-center">
-            <div class="flex-shrink-0 bg-success text-white rounded-circle p-3 me-3">
-              <i class="bx bx-check-circle bx-md"></i>
+        {{-- Pending --}}
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stats-card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-muted d-block mb-1">Pending</span>
+                            <div class="d-flex align-items-center">
+                                <h3 class="mb-0 me-2">{{ $pendingPermits->count() }}</h3>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-warning">
+                                <i class="bx bx-time-five bx-sm"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-              <h6 class="mb-1 text-muted">Approved Events</h6>
-              <h4 class="mb-0 fw-bold">{{ $approvedEvents ?? 0 }}</h4>
-            </div>
-          </div>
         </div>
-      </div>
 
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body d-flex align-items-center">
-            <div class="flex-shrink-0 bg-danger text-white rounded-circle p-3 me-3">
-              <i class="bx bx-x-circle bx-md"></i>
+        {{-- Approved --}}
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stats-card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-muted d-block mb-1">Approved</span>
+                            <div class="d-flex align-items-center">
+                                <h3 class="mb-0 me-2">{{ $approvedPermits->count() }}</h3>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-success">
+                                <i class="bx bx-check-circle bx-sm"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-              <h6 class="mb-1 text-muted">Rejected Events</h6>
-              <h4 class="mb-0 fw-bold">{{ $rejectedEvents ?? 0 }}</h4>
-            </div>
-          </div>
         </div>
-      </div>
+
+        {{-- Rejected --}}
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stats-card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-muted d-block mb-1">Rejected</span>
+                            <div class="d-flex align-items-center">
+                                <h3 class="mb-0 me-2">{{ $rejectedPermits->count() }}</h3>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-danger">
+                                <i class="bx bx-x-circle bx-sm"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Ongoing --}}
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stats-card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-muted d-block mb-1">Ongoing</span>
+                            <div class="d-flex align-items-center">
+                                <h3 class="mb-0 me-2">{{ $ongoingEvents->count() }}</h3>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-primary">
+                                <i class="bx bx-play-circle bx-sm"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Successful --}}
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stats-card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-muted d-block mb-1">Successful</span>
+                            <div class="d-flex align-items-center">
+                                <h3 class="mb-0 me-2">{{ $successfulEvents->count() }}</h3>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-success">
+                                <i class="bx bx-trophy bx-sm"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Canceled --}}
+        <div class="col-sm-6 col-lg-4 col-xl-2">
+            <div class="card stats-card-modern">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="content-left">
+                            <span class="text-muted d-block mb-1">Canceled</span>
+                            <div class="d-flex align-items-center">
+                                <h3 class="mb-0 me-2">{{ $canceledEvents->count() }}</h3>
+                            </div>
+                        </div>
+                        <div class="avatar">
+                            <span class="avatar-initial rounded bg-label-secondary">
+                                <i class="bx bx-block bx-sm"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="card mb-4 shadow-sm p-3">
-      <h5 class="fw-bold">Organization Information</h5>
-      <p><strong>Name:</strong> {{ $organization->organization_name ?? 'N/A' }}</p>
-      <p><strong>Type:</strong> {{ $organization->organization_type ?? 'N/A' }}</p>
-      <p><strong>Adviser:</strong> {{ $organization->adviser_name ?? 'N/A' }}</p>
-      <p><strong>Email:</strong> {{ $organization->contact_email ?? 'N/A' }}</p>
-      <p><strong>Contact:</strong> {{ $organization->contact_number ?? 'N/A' }}</p>
+    {{-- Main Content Card --}}
+    <div class="card">
+        <div class="card-body">
+
+            {{-- Navigation Tabs --}}
+            <ul class="nav nav-tabs" role="tablist">
+
+                {{-- Permits Section --}}
+                <li class="section-label">Permits</li>
+
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pendingTab" role="tab">
+                        <i class="bx bx-time-five me-1"></i>
+                        <span class="d-none d-sm-inline">Pending</span>
+                        <span class="badge rounded-pill badge-center bg-label-warning ms-1">{{ $pendingPermits->count() }}</span>
+                    </button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#approvedTab" role="tab">
+                        <i class="bx bx-check-circle me-1"></i>
+                        <span class="d-none d-sm-inline">Approved</span>
+                        <span class="badge rounded-pill badge-center bg-label-success ms-1">{{ $approvedPermits->count() }}</span>
+                    </button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rejectedTab" role="tab">
+                        <i class="bx bx-x-circle me-1"></i>
+                        <span class="d-none d-sm-inline">Rejected</span>
+                        <span class="badge rounded-pill badge-center bg-label-danger ms-1">{{ $rejectedPermits->count() }}</span>
+                    </button>
+                </li>
+
+                {{-- Events Section --}}
+                <li class="section-label ms-3">Events</li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#ongoingTab" role="tab">
+                        <i class="bx bx-play-circle me-1"></i>
+                        <span class="d-none d-sm-inline">Ongoing</span>
+                        <span class="badge rounded-pill badge-center bg-label-primary ms-1">{{ $ongoingEvents->count() }}</span>
+                    </button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#successfulTab" role="tab">
+                        <i class="bx bx-trophy me-1"></i>
+                        <span class="d-none d-sm-inline">Successful</span>
+                        <span class="badge rounded-pill badge-center bg-label-success ms-1">{{ $successfulEvents->count() }}</span>
+                    </button>
+                </li>
+
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#canceledTab" role="tab">
+                        <i class="bx bx-block me-1"></i>
+                        <span class="d-none d-sm-inline">Canceled</span>
+                        <span class="badge rounded-pill badge-center bg-label-secondary ms-1">{{ $canceledEvents->count() }}</span>
+                    </button>
+                </li>
+
+            </ul>
+
+            {{-- Tab Content --}}
+            <div class="tab-content pt-4">
+
+                {{-- PENDING PERMITS --}}
+                <div class="tab-pane fade show active" id="pendingTab" role="tabpanel">
+                    @include('student.permit.pending', [
+                        'items' => $pendingPermits
+                    ])
+                </div>
+
+                {{-- APPROVED PERMITS --}}
+                <div class="tab-pane fade" id="approvedTab" role="tabpanel">
+                    @include('student.permit.approved', [
+                        'items' => $approvedPermits
+                    ])
+                </div>
+
+                {{-- REJECTED PERMITS --}}
+                <div class="tab-pane fade" id="rejectedTab" role="tabpanel">
+                    @include('student.permit.rejected', [
+                        'items' => $rejectedPermits
+                    ])
+                </div>
+
+                {{-- ONGOING EVENTS --}}
+                <div class="tab-pane fade" id="ongoingTab" role="tabpanel">
+                    @include('student.permit.ongoing', [
+                        'items' => $ongoingEvents
+                    ])
+                </div>
+
+                {{-- SUCCESSFUL EVENTS --}}
+                <div class="tab-pane fade" id="successfulTab" role="tabpanel">
+                    @include('student.permit.successful', [
+                        'items' => $successfulEvents
+                    ])
+                </div>
+
+                {{-- CANCELED EVENTS --}}
+                <div class="tab-pane fade" id="canceledTab" role="tabpanel">
+                    @include('student.permit.canceled', [
+                        'items' => $canceledEvents
+                    ])
+                </div>
+
+            </div>
+
+        </div>
     </div>
 
-    {{-- Upcoming Events (Example placeholder) --}}
-    <div class="card border-0 shadow-sm">
-      <div class="card-header bg-light d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Upcoming Events</h5>
-      </div>
-      <div class="card-body">
-        @if(isset($upcomingEvents) && count($upcomingEvents) > 0)
-          <ul class="list-group list-group-flush">
-            @foreach($upcomingEvents as $event)
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>
-                  <i class="bx bx-calendar me-2"></i>
-                  <strong>{{ $event->event_title }}</strong> <br>
-                  <small class="text-muted">{{ \Carbon\Carbon::parse($event->event_date)->format('M d, Y') }}</small>
-                </span>
-                <span
-                  class="badge bg-{{ $event->proposal_status == 'approved' ? 'success' : ($event->proposal_status == 'pending' ? 'warning' : 'danger') }}">
-                  {{ ucfirst($event->proposal_status) }}
-                </span>
-              </li>
-            @endforeach
-          </ul>
-        @else
-          <div class="text-center text-muted py-3">
-            <i class="bx bx-calendar-x bx-lg mb-2"></i>
-            <p class="mb-0">No upcoming events yet.</p>
-          </div>
-        @endif
-      </div>
-    </div>
-  </div>
+</div>
 @endsection

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Permit;
 use Carbon\Carbon;
 
-class StudentDashboardController extends Controller
+class PermitTrackingController extends Controller
 {
     // Main tracking page
     public function index()
@@ -114,7 +114,7 @@ class StudentDashboardController extends Controller
     public function viewPDF($id)
     {
         $permit = Permit::where('hashed_id', $id)
-            ->where('user_id', auth()->id())
+            ->where('organization_id', auth()->id())
             ->firstOrFail();
 
         return view('permit.pdf_view', compact('permit'));

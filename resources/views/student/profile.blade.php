@@ -71,7 +71,32 @@ Swal.fire({
       </div>
     </div>
 
-    <!-- Optional: Remove profile picture button (if using profile pics elsewhere) -->
+<hr>
+
+   <div class="card">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Organization</h5>
+
+        @if(Auth::user()->organization)
+          <p class="mb-1"><strong>Name</strong></p>
+          <div class="text-muted">{{ Auth::user()->organization->organization_name }}</div>
+
+          <p class="mb-1 mt-3"><strong>Type</strong></p>
+          <div class="text-muted">{{ Auth::user()->organization->organization_type }}</div>
+
+          <p class="mb-1 mt-3"><strong>Description</strong></p>
+          <div class="text-muted">{{ Auth::user()->organization->description }}</div>
+
+          <p class="mb-1 mt-3"><strong>Status</strong></p>
+          <div class="text-muted">{{ Auth::user()->organization->status }}</div>
+
+          <p class="mb-1 mt-3"><strong>Created</strong></p>
+          <div class="text-muted">{{ Auth::user()->organization->created_at?->format('F d, Y') }}</div>
+        @else
+          <div class="text-muted">No organization assigned.</div>
+        @endif
+      </div>
+    </div>
 
   </div>
 
@@ -166,30 +191,7 @@ Swal.fire({
     </div>
 
     <!-- Organization Details (readonly) -->
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title mb-3">Organization</h5>
 
-        @if(Auth::user()->organization)
-          <p class="mb-1"><strong>Name</strong></p>
-          <div class="text-muted">{{ Auth::user()->organization->organization_name }}</div>
-
-          <p class="mb-1 mt-3"><strong>Type</strong></p>
-          <div class="text-muted">{{ Auth::user()->organization->organization_type }}</div>
-
-          <p class="mb-1 mt-3"><strong>Description</strong></p>
-          <div class="text-muted">{{ Auth::user()->organization->description }}</div>
-
-          <p class="mb-1 mt-3"><strong>Status</strong></p>
-          <div class="text-muted">{{ Auth::user()->organization->status }}</div>
-
-          <p class="mb-1 mt-3"><strong>Created</strong></p>
-          <div class="text-muted">{{ Auth::user()->organization->created_at?->format('F d, Y') }}</div>
-        @else
-          <div class="text-muted">No organization assigned.</div>
-        @endif
-      </div>
-    </div>
 
   </div>
 </div>

@@ -6,7 +6,7 @@
     {
       "url": "/student/dashboard",
       "name": "My Dashboard",
-      "icon": "mdi:home-outline",
+      "icon": "menu-icon tf-icons mdi mdi-view-dashboard-outline",
       "slug": "student-dashboard"
     },
     {
@@ -18,7 +18,7 @@
     {
       "url": "/student/calendar",
       "name": "Calendar",
-      "icon": "mdi:calendar-month-outline",
+      "icon": "menu-icon tf-icons mdi mdi-calendar-month-outline",
       "slug": "student-calendar"
     },
     {
@@ -68,13 +68,13 @@
     {
       "url": "/student/profile",
       "name": "Profile",
-      "icon": "mdi:account-circle-outline",
+      "icon": "menu-icon tf-icons mdi mdi-account-circle-outline",
       "slug": "student-profile"
     },
     {
       "url": "/logout",
       "name": "Logout",
-      "icon": "mdi:logout",
+      "icon": "menu-icon tf-icons mdi mdi-logout",
       "slug": "logout"
     }
   ]

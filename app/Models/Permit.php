@@ -29,8 +29,10 @@ class Permit extends Model
     'pdf_data',
     'hashed_id',
   ];
-
-
+ protected $casts = [
+        'date_start' => 'date',
+        'date_end' => 'date',
+    ];
   // Accessor for hashed id (use in blades/routes)
   // public function getHashedIdAttribute()
   // {
@@ -48,11 +50,50 @@ class Permit extends Model
   {
     return $this->belongsTo(Organization::class, 'organization_id', 'organization_id');
   }
-
+public function offCampusRequirements()
+    {
+        return $this->hasMany(OffCampusRequirement::class, 'permit_id', 'permit_id');
+    }
   protected static function booted()
   {
     static::creating(function ($permit) {
       $permit->hashed_id = bin2hex(random_bytes(8)); // generates unique hash
     });
   }
+  public function isOffCampus()
+    {
+        return $this->type === 'Off-Campus';
+    }
+    public function getCurrentStatus()
+    {
+        $pending = $this->approvals()->where('status', 'pending')->first();
+
+        if ($pending) {
+            return 'Pending at ' . str_replace('_', ' ', $pending->approver_role);
+        }
+
+        $rejected = $this->approvals()->where('status', 'rejected')->first();
+        if ($rejected) {
+            return 'Rejected by ' . str_replace('_', ' ', $rejected->approver_role);
+        }
+
+        $allApproved = $this->approvals()->where('status', 'approved')->count() === $this->approvals()->count();
+        if ($allApproved) {
+            return 'Fully Approved';
+        }
+
+        return 'Processing';
+    }
+    public function getSubmittedRequirements()
+    {
+        return $this->offCampusRequirements()->pluck('requirement_type')->toArray();
+    }
+    public function hasAllRequiredDocuments()
+    {
+        if (!$this->isOffCampus()) {
+            return true; // In-campus events don't need documents
+        }
+
+        return $this->offCampusRequirements()->count() > 0;
+    }
 }

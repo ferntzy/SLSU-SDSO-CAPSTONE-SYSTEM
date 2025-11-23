@@ -14,6 +14,7 @@ use App\Http\Controllers\BargoController;
 use App\Http\Controllers\UserLogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\PermitTrackingController;
 
 // ============================
 // AUTH ROUTES
@@ -65,8 +66,8 @@ Route::middleware(['auth', 'role:admin'])
         // USER MANAGEMENT
         // ======================
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::post('/users/list', [UserController::class, 'index'])->name('users.list');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+<<<<<<< Updated upstream
         Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
         Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
@@ -82,6 +83,13 @@ Route::middleware(['auth', 'role:admin'])
 
 
 
+=======
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+
+>>>>>>> Stashed changes
         // Username / Email Availability
         Route::post('/users/check-availability', [UserController::class, 'checkAvailability'])
             ->name('users.checkAvailability');
@@ -123,13 +131,11 @@ Route::middleware(['auth', 'role:admin'])
         // PROFILES (USER PROFILES)
         // ======================
         Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
-        Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
         Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
         Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
-        Route::post('/profiles/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
         Route::post('/profiles/update', [ProfileController::class, 'update'])->name('profiles.update');
-
-
+        Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
+        Route::post('/profiles/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
 
 
             // ACCOUNT SETTINGS
@@ -149,7 +155,7 @@ Route::middleware(['auth', 'role:admin'])
     // STUDENT ORGANIZATION ROUTES
     // ============================
     Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->group(function () {
-    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [PermitTrackingController::class, 'index'])->name('student.dashboard');
     Route::get('/permit/form', [PermitController::class, 'showForm'])->name('permit.form');
     Route::post('/permit/generate', [PermitController::class, 'generate'])->name('permit.generate');
     Route::get('/permit/tracking', [PermitController::class, 'track'])->name('student.permit.tracking');
@@ -161,18 +167,27 @@ Route::middleware(['auth', 'role:admin'])
 
 
     //profiles
+        Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
     Route::get('/profile', function() { return view('student.profile'); })->name('user.profile');
+    Route::post('/profile/signature/',[UserController::class, 'uploadSignature'])->name('user.uploadSignature');
+    Route::delete('/profile/signature/',[UserController::class, 'removeSignature'])->name('user.removeSignature');
+    // contact update Routeer')->group(function () {
 
-    // contact update
-    Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
 
-    // signature
-    Route::post('/profile/signature', [UserController::class, 'uploadSignature'])->name('user.uploadSignature');
-    Route::delete('/profile/signature', [UserController::class, 'removeSignature'])->name('user.removeSignature');
 
-    // remove profile pic (if you use profile pics)
-    Route::delete('/profile/picture', [UserController::class, 'removeProfilePicture'])->name('user.removeProfilePicture');
+    // View PDF securely (ensure hashed_id works)
+    Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])
+        ->name('faculty.permit.view');
+
+
+    // Approve & Reject
+    Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
+        ->name('faculty.approve');
+    Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
+        ->name('faculty.reject');
 });
+
+
 
 // ============================
 // FACULTY ADVISER ROUTES
@@ -196,6 +211,10 @@ Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(fu
     Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
         ->name('faculty.reject');
 });
+
+
+
+
 
 
 // ============================
