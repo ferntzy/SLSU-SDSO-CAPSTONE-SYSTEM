@@ -68,13 +68,16 @@
                             <input type="text" name="name" class="form-control" value="{{ auth()->user()->name ?? '' }}" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Organization <span class="text-danger">*</span></label>
-                            <select name="organization_id" class="form-select" required>
-                                <option value="" disabled selected>Select Organization</option>
+
+                          <label class="form-label">Organization <span class="text-danger">*</span></label>
+                            <label name="organization_id" class="form-select" required>
                                 @foreach ($organizations as $org)
                                     <option value="{{ $org->organization_id }}">{{ $org->organization_name }}</option>
                                 @endforeach
-                            </select>
+                            </label>
+
+
+
                         </div>
                     </div>
 

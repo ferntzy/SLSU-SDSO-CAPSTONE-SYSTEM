@@ -156,6 +156,20 @@ Route::middleware(['auth', 'role:admin'])
     Route::view('/calendar', 'student.calendardisplay');
 
     Route::get('/permit/view/{hashed_id}', [PermitController::class, 'view'])->name('student.permit.view');
+
+
+    //profiles
+    Route::get('/profile', function() { return view('student.profile'); })->name('user.profile');
+
+    // contact update
+    Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
+
+    // signature
+    Route::post('/profile/signature', [UserController::class, 'uploadSignature'])->name('user.uploadSignature');
+    Route::delete('/profile/signature', [UserController::class, 'removeSignature'])->name('user.removeSignature');
+
+    // remove profile pic (if you use profile pics)
+    Route::delete('/profile/picture', [UserController::class, 'removeProfilePicture'])->name('user.removeProfilePicture');
 });
 
 // ============================

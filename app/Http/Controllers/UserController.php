@@ -8,6 +8,7 @@ use App\Models\UserProfile;
 use Exception;
 use Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -189,7 +190,76 @@ public function destroy(Request $request, $id)
 
 
 
+ public function uploadSignature(Request $request)
+    {
+        $request->validate([
+            'signature' => 'required|image|mimes:jpg,jpeg,png,svg|max:3072', // 3MB
+        ]);
 
+        $user = auth()->user();
 
+        // Delete old signature file if exists (optional)
+        if ($user->signature) {
+            Storage::disk('public')->delete($user->signature);
+        }
+
+        $path = $request->file('signature')->store('signatures', 'public');
+
+        // Save path to users.signature
+        $user->signature = $path;
+        $user->save();
+
+        // Also insert in signatures table for history (optional)
+        try {
+            \DB::table('signatures')->insert([
+                'user_id' => $user->user_id,
+                'signature_path' => $path,
+                'created_at' => now(),
+            ]);
+        } catch (\Exception $e) {
+            // ignore or log if already exists, but main user.signature is saved
+        }
+
+        return back()->with('success', 'Signature uploaded successfully!');
+    }
+    public function removeSignature(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user->signature) {
+            return back()->with('error', 'No signature to remove.');
+        }
+
+        // delete file
+        Storage::disk('public')->delete($user->signature);
+
+        // remove path in users table
+        $user->signature = null;
+        $user->save();
+
+        return back()->with('success', 'Signature removed.');
+    }
+
+public function updateContact(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|max:50',
+            'contact_number' => 'required|string|max:20',
+        ]);
+
+        $user = auth()->user();
+        $profile = $user->profile;
+
+        if (! $profile) {
+            return back()->with('error', 'Profile not found.');
+        }
+
+        $profile->update([
+            'email' => $request->email,
+            'contact_number' => $request->contact_number,
+        ]);
+
+        return back()->with('success', 'Contact details updated successfully!');
+    }
 
 }
