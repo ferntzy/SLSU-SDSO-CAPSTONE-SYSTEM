@@ -6,77 +6,91 @@
     {
       "url": "/admin/dashboard",
       "name": "Analytics",
-      "icon": "menu-icon tf-icons mdi mdi-calendar-blank-outline",
+      "icon": "menu-icon tf-icons mdi mdi-view-dashboard-outline",
       "slug": "dashboard-analytics"
     },
     {
       "url": "/admin/calendar",
       "name": "Calendar",
+      "icon": "menu-icon tf-icons mdi mdi-calendar-month-outline",
       "slug": "dashboard-calendar"
     },
+
     {
       "menuHeader": "Event Requests"
     },
     {
       "url": "/admin/event-requests",
       "name": "All Requests",
+      "icon": "menu-icon tf-icons mdi mdi-file-document-multiple-outline",
       "slug": "event-requests-all"
     },
+
     {
       "menuHeader": "eSignatures"
     },
     {
       "url": "/admin/esignatures/pending",
       "name": "Pending eSignatures",
+      "icon": "menu-icon tf-icons mdi mdi-file-sign",
       "slug": "esignatures-pending"
     },
     {
       "url": "/admin/esignatures/completed",
       "name": "Completed eSignatures",
+      "icon": "menu-icon tf-icons mdi mdi-file-check-outline",
       "slug": "esignatures-completed"
     },
+
     {
       "menuHeader": "Organizations"
     },
     {
       "url": "/admin/organizations",
       "name": "All Organizations",
+      "icon": "menu-icon tf-icons mdi mdi-account-group-outline",
       "slug": "organizations-all"
     },
+
     {
       "menuHeader": "User Management"
     },
     {
       "url": "/admin/profiles",
       "name": "List of Profiles",
+      "icon": "menu-icon tf-icons mdi mdi-account-box-multiple-outline",
       "slug": "profiles-all"
-
-
     },
     {
       "url": "/admin/users",
       "name": "All Users",
+      "icon": "menu-icon tf-icons mdi mdi-account-multiple-outline",
       "slug": "users-all"
     },
     {
       "url": "/admin/logs",
       "name": "User Logs",
+      "icon": "menu-icon tf-icons mdi mdi-history",
       "slug": "user-logs"
     },
+
     {
       "menuHeader": "Account Settings"
     },
     {
       "url": "/admin/account",
       "name": "Profile",
+      "icon": "menu-icon tf-icons mdi mdi-account-circle-outline",
       "slug": "account-profile"
     },
+
     {
       "menuHeader": "Account"
     },
     {
       "url": "/logout",
       "name": "Logout",
+      "icon": "menu-icon tf-icons mdi mdi-logout",
       "slug": "logout"
     }
   ]

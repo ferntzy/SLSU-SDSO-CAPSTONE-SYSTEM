@@ -1,219 +1,225 @@
-
-
-
-<!-- jQuery first (if your scripts need it) -->
-<script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
-
-<!-- Bootstrap Bundle (includes Popper.js) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-
-  /* ==========================
-     BOOTSTRAP SAFETY CHECK
-  ========================== */
-  if (typeof bootstrap === 'undefined') {
-    console.error('Bootstrap JS not loaded!');
-  }
-
-  /* ==========================
-     TOGGLE PASSWORDS (ANY MODAL OR FORM)
-  ========================== */
-  document.addEventListener('click', function(e) {
-    // Edit / Create / Admin password toggle
-    if (e.target.closest('.toggle-password')) {
-      const toggle = e.target.closest('.toggle-password');
-      const input = toggle.closest('.input-group').querySelector('input');
-      const icon = toggle.querySelector('i');
-      if (!input || !icon) return;
-
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.replace('bi-eye-slash','bi-eye');
-      } else {
-        input.type = 'password';
-        icon.classList.replace('bi-eye','bi-eye-slash');
+  $.ajaxSetup({
+      headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       }
-    }
   });
 
-  // /* ==========================
-  //    EDIT USER MODAL
-  // ========================== */
-  const editUserModalEl = document.getElementById('editUserModal');
-  const editUserForm = document.getElementById('editUserForm');
-  if(editUserModalEl && editUserForm){
-    document.querySelectorAll('.editUserBtn').forEach(button => {
-      button.addEventListener('click', function() {
-        // Fill modal fields
-        const userId = this.dataset.userId;
-        document.getElementById('edit-user-id').value = userId || '';
-        document.getElementById('edit-username').value = this.dataset.username || '';
-        document.getElementById('edit-email').value = this.dataset.email || '';
-        document.getElementById('edit-role').value = this.dataset.role || '';
-        document.getElementById('edit-password').value = '';
+  // add account script
 
-        // Set form action dynamically
-      //  editUserForm.action = `{{ url('/users') }}/${userId}`;
-       editUserForm.action = `{{ route('users.update', ':id') }}`.replace(':id', userId);
+  $("#createAccounteModal").on('show.bs.modal', function(){
+    $("#hiddenAccountID").val(0);
+    $("#hiddenAccountFlag").val("POST");
 
+    $('.txt').val('');
+  })
 
+  $("#createAccountModal").on('shown.bs.modal', function(){
+    $("#username").focus();
+  })
 
-        // Show modal
-        new bootstrap.Modal(editUserModalEl).show();
-      });
-    });
-  }
+  $(document).on("click", "#btnaccountsave", function(e){
+    e.preventDefault();
+    let flag = $("#hiddenAccountFlag").val();
 
-  /* ==========================
-     DELETE USER MODAL
-  ========================== */
-  const deleteModalEl = document.getElementById('confirmDeleteModal');
-  const deleteForm = document.getElementById('deleteUserForm');
-  if(deleteModalEl && deleteForm){
-    deleteModalEl.addEventListener('show.bs.modal', function(event){
-      const button = event.relatedTarget;
-      if(!button) return;
+    $.ajax({
+        url: (flag == "POST" ? "{{ route('users.store') }}" : "{{ route('users.update') }}"),
+        method: "POST",
+        data: $("#frmAccountData").serialize(),
+        beforeSend:function(){
+            $("#accountdatamsg").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Saving, please wait...</div>");
+            $("#btnaccountsave").prop("disabled", true);
+        },
+        success: function (data) {
+            $("#btnaccounsave").prop("disabled", false);
+            $("#accoundatamsg").html("<div class = 'alert alert-success'>Profile data saved.</div>");
+            list();
+            setTimeout(() => {
+              $('.txt').val('');
+              $("#username").focus();
+            }, 1000);
+        },
 
-      const userId = button.dataset.userId;
-      const username = button.dataset.username || 'this account';
-
-      deleteForm.action = "{{ route('users.destroy', ':id') }}".replace(':id', userId);
-      const messageEl = document.getElementById('deleteMessage');
-      if(messageEl) messageEl.textContent = `Are you sure you want to delete "${username}"?`;
-
-      // Reset password and error
-      const adminPasswordInput = document.getElementById('adminPassword');
-      const passwordError = document.getElementById('passwordError');
-      if(adminPasswordInput) adminPasswordInput.value = '';
-      if(passwordError) passwordError.classList.add('d-none');
-    });
-  }
-
-  /* ==========================
-     AVATAR SIZE VALIDATION (10MB max)
-  ========================== */
-  const avatarInput = document.getElementById('avatar'); // Adjust if needed
-
-  if (avatarInput) {
-    avatarInput.addEventListener('change', function () {
-      const file = this.files[0];
-      if (file) {
-        const fileSizeKB = file.size / 1024;
-        if (fileSizeKB > 10240) { // 10MB = 10240KB
-          Swal.fire({
-            icon: 'warning',
-            title: 'File Too Large!',
-            text: 'The selected image exceeds 10MB. Please upload a smaller file.',
-            confirmButtonColor: '#d33',
-          });
-          this.value = ''; // Reset file input
+        error: function (response) {
+            $("#btnaccounsave").prop("disabled", false);
+            var errors = response.responseJSON.errors;
+            $("#accoundatamsg").html(errors);
         }
-      }
+    });
+  })
+
+
+
+  $(document).on("click", "#btnaccountupdate", function(e){
+    e.preventDefault();
+    $.ajax({
+        url: "{{ route('users.store') }}",
+        method: "POST",
+        data: $("#frmAccountData").serialize(),
+        beforeSend:function(){
+            $("#accoundatamsg").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Saving, please wait...</div>");
+            $("#btnaccounsave").prop("disabled", true);
+        },
+        success: function (data) {
+            $("#btnaccounsave").prop("disabled", false);
+            $("#accoundatamsg").html("<div class = 'alert alert-success'>Account data saved.</div>");
+            list();
+            setTimeout(() => {
+              $('.txt').val('');
+              $("#username").focus();
+            }, 1000);
+        },
+
+        error: function (response) {
+            $("#btnaccountsave").prop("disabled", false);
+            var errors = response.responseJSON.errors;
+            $("#accountdatamsg").html(errors);
+        }
+    });
+  })
+
+
+
+  // profile list
+
+  function list(){
+    $.ajax({
+        url: "{{ route('users.list') }}",
+        method: "POST",
+        beforeSend:function(){
+            $("#accountlist").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Generating, please wait...</div>");
+        },
+        success: function (data) {
+            $("#accountlist").html(data);
+        },
+
+        error: function (response) {
+            var errors = response.responseJSON.errors;
+            $("#data").html(errors);
+        }
     });
   }
 
-  /* ==========================
-     CREATE ACCOUNT PAGE PASSWORD CHECK
-     (only if elements exist)
-  ========================== */
-  const usernameInput = document.getElementById('username');
-  const emailInput = document.getElementById('email');
-  const passwordInput = document.querySelector('input[name="password"]');
-  const passwordConfirmInput = document.querySelector('input[name="password_confirmation"]');
-  const form = document.querySelector('form');
-  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-  if(usernameInput && emailInput && passwordInput && passwordConfirmInput && form){
-    let usernameTaken = false;
-    let emailTaken = false;
-    let timer;
+// =====================================================
+// EDIT ACCOUNT MODAL POPULATION
+// =====================================================
+$(document).on("click", '.btn-edit', function(e) {
+    e.preventDefault();
 
-    function debounceCheck(field, value){
-      clearTimeout(timer);
-      timer = setTimeout(()=>checkAvailability(field,value),400);
-    }
+    let id = $(this).data('id'); // encrypted user_id
 
-    async function checkAvailability(field,value){
-      if(!value.trim()) return;
-      try {
-        const res = await fetch("{{ route('users.checkAvailability') }}",{
-          method:'POST',
-          headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN': csrfToken },
-          body: JSON.stringify({field,value})
-        });
-        const data = await res.json();
-        if(field==='username'){
-          usernameTaken = !data.available;
-          document.getElementById('username-error').style.display = usernameTaken ? 'block' : 'none';
-          usernameInput.classList.toggle('is-invalid', usernameTaken);
-        } else if(field==='email'){
-          emailTaken = !data.available;
-          document.getElementById('email-error').style.display = emailTaken ? 'block' : 'none';
-          emailInput.classList.toggle('is-invalid', emailTaken);
+    $.ajax({
+        url: "{{ route('users.edit') }}",
+        type: "POST",
+        data: { id: id },
+        beforeSend: function() {
+            // Open modal
+            $("#editAccountModal").modal('show');
+            // Show loading message
+            $("#accountdataeditmsg").html(
+                "<div class='alert alert-warning'><i class='spinner-grow spinner-grow-sm'></i> Populating, please wait...</div>"
+            );
+        },
+        success: function(data) {
+            // Clear loading message
+            $("#accountdataeditmsg").html("");
+
+            // Set hidden ID
+            $("#hiddenProfileID").val(data.user_id);
+
+            // Profile dropdown
+            $("#dropdownInput").val(data.profile.first_name + " " + data.profile.last_name);
+            $("#profile_id").val(data.profile.profile_id);
+
+            // Set account type in dropdown
+            $("#typeFilter").val(data.profile.type.toLowerCase());
+
+            // Account info
+            $("select[name='account_role']").val(data.account_role);
+            $("input[name='username']").val(data.username);
+
+            // Passwords empty for security
+            $("input[name='password']").val('');
+            $("input[name='password_confirmation']").val('');
+
+        },
+        error: function(response) {
+            var errors = response.responseJSON.errors;
+            $("#accountdataeditmsg").html(errors);
         }
-      } catch(err){ console.error(err); }
-    }
-
-    usernameInput.addEventListener('input', e=>debounceCheck('username', e.target.value));
-    emailInput.addEventListener('input', e=>debounceCheck('email', e.target.value));
-
-    function checkPasswords(){
-      if(passwordInput.value && passwordConfirmInput.value && passwordInput.value !== passwordConfirmInput.value){
-        document.getElementById('password-match-error').style.display='block';
-        passwordConfirmInput.classList.add('is-invalid');
-        return false;
-      } else {
-        document.getElementById('password-match-error').style.display='none';
-        passwordConfirmInput.classList.remove('is-invalid');
-        return true;
-      }
-    }
-
-    passwordInput.addEventListener('input', checkPasswords);
-    passwordConfirmInput.addEventListener('input', checkPasswords);
-
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      const passwordsMatch = checkPasswords();
-      const passwordTooShort = passwordInput.value.length < 6;
-
-      if(usernameTaken || emailTaken || !passwordsMatch || passwordTooShort){
-        let msg='';
-        if(usernameTaken && emailTaken) msg='Both username and email are already used!';
-        else if(usernameTaken) msg='Username is already used!';
-        else if(emailTaken) msg='Email is already used!';
-        else if(passwordTooShort) msg='Password must be at least 6 characters!';
-        else if(!passwordsMatch) msg='Passwords do not match!';
-
-        Swal.fire({icon:'error', title:'Validation Error', text:msg, confirmButtonColor:'#d33'});
-        return false;
-      }
-
-      // Show loading
-      Swal.fire({title:'Creating Account...', text:'Please wait.', icon:'info', showConfirmButton:false, allowOutsideClick:false, didOpen:()=>Swal.showLoading()});
-
-      // Submit via fetch
-      const formData = new FormData(form);
-      fetch(form.action, {method: form.method||'POST', headers:{'X-CSRF-TOKEN': csrfToken}, body: formData})
-      .then(async res=>{
-        const data = await res.json().catch(()=>({}));
-        Swal.close();
-        if(res.ok){
-          Swal.fire({icon:'success', title:'Account Created!', text:data.message||'Success!', confirmButtonColor:'#3085d6'}).then(()=>window.location.href='{{ route("users.index") }}');
-        } else {
-          Swal.fire({icon:'error', title:'Error', text:data.message||'Please try again.', confirmButtonColor:'#d33'});
-        }
-      }).catch(err=>{ Swal.close(); console.error(err); });
     });
-  }
+});
 
-}); // DOMContentLoaded end
+
+
+
+    //showing all profile based on the type----------------------------------
+
+// =================================================
+// DROPDOWN SELECT FOR FIRSTNAME + LASTNAME
+// =================================================
+
+$(document).ready(function () {
+    $(document).on('change', "#typeFilter", function(){
+        $("#dropdownList-student").hide();
+        $("#dropdownList-employee").hide();
+        $("#account_role_student").hide();
+        $("#account_role_emloyee").hide();
+        if ($(this).val() == 'student'){
+          $("#dropdownList-student").show();
+          $("#account_role_student").show();
+        }else{
+          $("#dropdownList-employee").show();
+          $("#account_role_employee").show();
+        }
+    })
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================================
+// SEARCH PROFILES (AUTO FILTER, SEARCH ALL COLUMNS)
+// =====================================================
+
+// $(document).ready(function () {
+
+//     $("#searchAccount").on("keyup", function () {
+
+//         let searchValue = $(this).val().toLowerCase();
+
+//         // Loop through all table rows
+//         $("table tbody tr").filter(function () {
+
+//             // Check if ANY cell in the row contains the text
+//             let rowText = $(this).text().toLowerCase();
+
+//             $(this).toggle(rowText.indexOf(searchValue) > -1);
+
+//         });
+
+//     });
+
+// });
+
+
+
 </script>
-
-

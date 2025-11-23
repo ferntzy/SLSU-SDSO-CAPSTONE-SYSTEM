@@ -65,11 +65,20 @@ Route::middleware(['auth', 'role:admin'])
         // USER MANAGEMENT
         // ======================
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users/list', [UserController::class, 'index'])->name('users.list');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-        Route::post('/users', [UserController::class, 'store'])->name('users.store');
-        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
+        Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/update', [UserController::class, 'update'])->name('users.update');
+
+        Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
+
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+
+
+
+
+
 
         // Username / Email Availability
         Route::post('/users/check-availability', [UserController::class, 'checkAvailability'])
@@ -112,11 +121,13 @@ Route::middleware(['auth', 'role:admin'])
         // PROFILES (USER PROFILES)
         // ======================
         Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
+        Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
         Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
         Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
-        Route::post('/profiles/update', [ProfileController::class, 'update'])->name('profiles.update');
-        Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
         Route::post('/profiles/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
+        Route::post('/profiles/update', [ProfileController::class, 'update'])->name('profiles.update');
+
+
 
 
             // ACCOUNT SETTINGS

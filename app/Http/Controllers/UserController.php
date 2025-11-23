@@ -2,60 +2,102 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\UserProfile;
+use Exception;
+use Crypt;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
  public function index(Request $request)
-{
-    // Allowed columns for sorting
-    $sortable = ['account_role', 'created_at'];
+    {
+      $user_accounts = User::with('profile')->get();
+      $user_profiles_student = UserProfile::where('type','student')->orderby('last_name')->orderby('first_name')->get();  // <-- ADD THIS
+      $user_profiles_employee = UserProfile::where('type','employee')->orderby('last_name')->orderby('first_name')->get();
+      if ($request->ajax()){
+        return view('admin.users.index-list', compact('user_accounts'));
+      }
 
-    // Get query parameters
-    $sortField = $request->query('sort');
-    $sortDirection = $request->query('direction', 'asc');
-
-    // Validate sorting
-    if (!in_array($sortField, $sortable)) {
-        $sortField = 'created_at'; // default sort
+    return view('admin.users.index', compact('user_accounts', 'user_profiles_student','user_profiles_employee'));
     }
-    if (!in_array($sortDirection, ['asc', 'desc'])) {
-        $sortDirection = 'asc';
-    }
-
-    // Fetch users with sorting
-    $users = User::orderBy($sortField, $sortDirection)->get();
-
-    // Pass sort info to the view (so arrows know which is active)
-    return view('admin.users.index', compact('users', 'sortField', 'sortDirection'));
-}
-
 
 
 public function create()
 {
+
     return view('admin.users.create');
 }
 
 
+
   public function store(Request $request)
-  {
-    $request->validate([
-      'username' => 'required|unique:users,username',
-      'password' => 'required|min:6',
-      'account_role' => 'required',
-    ]);
+    {
+        try {
+            // Validate inputs
+            $validated = $request->validate([
+                'username'     => 'required|unique:users,username',
+                'password'     => 'required|min:6|confirmed',
+                'account_role' => 'required',
+                'profile_id'   => 'required|exists:user_profiles,profile_id',
+            ]);
 
-    User::create([
-      'username' => $request->username,
-      'password' => Hash::make($request->password),
-      'account_role' => $request->account_role,
-    ]);
+            // Hash PASSWORD
+            $validated['password'] = Hash::make($validated['password']);
 
-    return redirect()->route('users.index')->with('success', 'User created successfully!');
-  }
+            // Save
+            $user = User::create($validated);
+
+            if (!$user) {
+                throw new Exception("Unable to save the user.");
+            }
+
+            return response()->json(['success' => true]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'errors' => '<div class="alert alert-danger">'.$e->getMessage().'</div>'
+            ], 400);
+        }
+    }
+
+
+    public function update(Request $request, User $user)
+    {
+
+        try{
+
+          $id = Crypt::decryptstring($request->hiddenAccountID);
+          $validated = $request->validate([
+              'username'   => 'required|string|max:255',
+              'account_role'   => 'required|string|max:255',
+              'password'  => 'nullable|min:6',
+
+          ]);
+
+        // Store to database
+        $user_account = User::where('user_id', $id)->update($validated);
+
+        if (!$user_account){
+          throw new Exception('Unable to save the profile.');
+        }
+      }catch(Exception $e){
+        return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
+      }
+    }
+
+
+    public function edit(Request $request)
+    {
+      try{
+        $id = Crypt::decryptstring($request->id);
+        $user_account = UserProfile::findOrFail($id);
+        return response()->json($user_account);
+      }catch(Exception $e){
+        return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
+      }
+    }
 
 
   public function viewProfile($id)
@@ -67,42 +109,33 @@ public function create()
 
 
 
-
-
-
-public function edit(User $user)
-  {
-    return view('admin.users.edit', compact('user'));
-  }
-
-public function update(Request $request, User $user)
+public function search(Request $request)
 {
+    $query = $request->get('query', '');
 
-    // dd($user);
+    $user_accounts = User::with('profile')
+        ->where('username', 'LIKE', "%{$query}%")
+        ->orWhereHas('profile', function($q) use ($query){
+            $q->where('first_name', 'LIKE', "%{$query}%")
+              ->orWhere('last_name', 'LIKE', "%{$query}%")
+              ->orWhere('type', 'LIKE', "%{$query}%");
+        })
+        ->orWhere('account_role', 'LIKE', "%{$query}%")
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-    try {
-        $request->validate([
-            'username' => 'required|unique:users,username,' . $user->user_id . ',user_id',
-            'account_role' => 'required|string',
-            'password' => 'nullable|min:6',
-        ]);
-
-        $data = $request->only('username', 'account_role');
-
-        if ($request->filled('password')) {
-            $data['password'] = bcrypt($request->password);
-        }
-
-        $user->update($data);
-
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return back()->withErrors($e->errors())->withInput();
-    } catch (\Exception $e) {
-        return back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+    if($user_accounts->count()){
+        return view('admin.users.partials.userlist', compact('user_accounts'))->render();
+    } else {
+        return '<tr><td colspan="8" class="text-center text-muted">No Profiles found.</td></tr>';
     }
 }
+
+
+
+
+
+
 
 
 
