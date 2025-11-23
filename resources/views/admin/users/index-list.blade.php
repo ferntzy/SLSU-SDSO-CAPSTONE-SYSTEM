@@ -17,7 +17,7 @@
     @forelse ($user_accounts as $user_account)
       <tr>
         <td>{{ $user_account->username  ?? ''}}</td>
-        <td>{{ $user_account->last_name ?? '' }}</td>
+        <td>{{ $user_account->profile->last_name ?? '' }}</td>
         <td>{{ $user_account->profile->first_name  ?? '' }}</td>
         <td><span class="badge bg-label-info">{{ $user_account->account_role }}</span></td>
         <td>{{ $user_account->profile->type  ?? ''}}</td>

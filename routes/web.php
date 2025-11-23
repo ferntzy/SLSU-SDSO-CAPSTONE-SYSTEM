@@ -67,6 +67,10 @@ Route::middleware(['auth', 'role:admin'])
         // ======================
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+<<<<<<< Updated upstream
+=======
+        Route::post('/users/list', [UserController::class, 'index'])->name('users.list');
+>>>>>>> Stashed changes
         Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
         Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
@@ -74,6 +78,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
 
 
+<<<<<<< Updated upstream
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
 
@@ -82,6 +87,8 @@ Route::middleware(['auth', 'role:admin'])
 
 
 
+=======
+>>>>>>> Stashed changes
         // Username / Email Availability
         Route::post('/users/check-availability', [UserController::class, 'checkAvailability'])
             ->name('users.checkAvailability');
