@@ -7,8 +7,8 @@
       <th>First Name</th>
       <th>Role</th>
       <th>Type</th>
+      <th>Date CreatedTime</th>
       <th>Time</th>
-      <th>Date Created</th>
 
       <th class="text-center">Actions</th>
     </tr>

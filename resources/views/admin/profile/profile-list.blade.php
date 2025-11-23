@@ -15,7 +15,7 @@
         <td>{{ $user_profile->last_name }}</td>
         <td>{{ $user_profile->first_name }}</td>
         <td>{{ $user_profile->email }}</td>
-        <td>{{ $user_profile->type }}</td>
+        <td><span class="badge bg-label-info">{{ $user_profile->type }}</span></td>
         <td class="text-center">
           <button type="button" href="#" class="btn rounded-pill btn-icon btn-secondary btn-sm btn-view"
                 data-id="{{ Crypt::encryptstring($user_profile->profile_id)}}">

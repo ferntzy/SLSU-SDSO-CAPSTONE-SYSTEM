@@ -189,7 +189,7 @@
 
             // SEX + TYPE
             $('#view_sex').html(data.sex);
-            $('#view_type"]').html(data.type);
+            $('#view_type').html(data.type);
 
             $('#viewProfileModal').modal({
                 backdrop: true,   // clicking outside closes the modal
