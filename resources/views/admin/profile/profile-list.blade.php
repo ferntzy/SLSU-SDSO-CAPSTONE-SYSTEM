@@ -26,9 +26,8 @@
                 <i class="mdi mdi-text-box-edit-outline"></i>
           </button>
 
-          <button type="button" class="btn rounded-pill btn-icon btn-danger btn-sm"
-                  data-bs-target="#confirmDeleteModal" data-user-id=""
-                  data-username="">
+          <button type="button" href="#" class="btn rounded-pill btn-icon btn-danger btn-sm btn-delete"
+                  data-url="{{ route('profiles.destroy', ['profile_id' => urlencode(Crypt::encryptString($user_profile->profile_id))]) }}">
                   <i class=" mdi mdi-delete-forever"></i>
           </button>
         </td>

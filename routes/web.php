@@ -129,6 +129,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
         Route::post('/profiles/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
         Route::post('/profiles/view', [ProfileController::class, 'view'])->name('profiles.view');
+        Route::delete('profiles/{profile_id}', [ProfileController::class, 'destroy'])->name('profiles.destroy');
 
 
             // ACCOUNT SETTINGS

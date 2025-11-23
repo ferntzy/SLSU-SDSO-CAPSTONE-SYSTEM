@@ -206,6 +206,49 @@
 
     });
 
+    $(document).on("click", ".btn-delete", function(e){
+        e.preventDefault();
+
+        let button = $(this);
+        let url = button.data('url');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Delete this profile ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if(result.isConfirmed){
+                $.ajax({
+                    url: url,
+                    type: "DELETE",
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if(response.success) {
+                            button.closest('tr').fadeOut();
+                            Swal.fire(
+                                'Deleted!',
+                                'Organization has been deleted.',
+                                'success'
+                            );
+                        } else if(response.errors) {
+                            $('body').prepend(response.errors);
+                        }
+                    },
+                    error: function (response) {
+                        var errors = response.responseJSON.errors;
+                        $("#data").html(errors);
+                    }
+                });
+            }
+        });
+    });
+
 
 
 

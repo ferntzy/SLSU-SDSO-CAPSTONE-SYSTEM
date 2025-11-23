@@ -126,5 +126,16 @@ class ProfileController extends Controller
       }
     }
 
+    public function destroy($profile_id)
+    {
+      try{
+        $id = Crypt::decryptString(urldecode($profile_id));
+        $user_profile = UserProfile::findOrFail($id);
+        $user_profile->delete();
+        return response()->json(['success' => true, 'id' => $id]);
+      }catch (Exception $e){
+        return reponse()->json(['errors' => '<div class = "alert arlert-danger">'.$e->getMessage().'</div>']);
+      }
+    }
 
 }
