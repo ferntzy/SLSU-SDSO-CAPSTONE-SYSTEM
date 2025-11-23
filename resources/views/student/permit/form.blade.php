@@ -411,6 +411,7 @@
                 }
                 // If the pad is empty, the file upload input is used by the browser/server.
             });
+
         });
     </script>
 @endsection
