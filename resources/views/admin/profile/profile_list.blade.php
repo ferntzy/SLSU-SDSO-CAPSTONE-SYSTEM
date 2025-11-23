@@ -17,8 +17,9 @@
     </div>
     <div class="card-action">
       <div class="input-group">
-        <input type="text" class="form-control" aria-label="" placeholder = "Search Profile">
-        <span class="input-group-text"><i class = "mdi mdi-account-search-outline"></i></span>
+       <input type="text" id="searchProfile" class="form-control" placeholder="Search Profile">
+      <button class="input-group-text" id = "btnSearchProfile"><i class="mdi mdi-account-search-outline"></i></button>
+
         <a href="#" class="input-group-text bg-primary text-white"
            data-bs-toggle="modal" data-bs-target="#createProfileModal">
             <span class="mdi mdi-account-plus"></span>

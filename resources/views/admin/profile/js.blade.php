@@ -78,6 +78,47 @@
 
 
 
+
+
+
+
+// SEARCH ACCOUNT ----------
+
+  $(document).on("keypress", "#searchProfile", function(e) {
+      if (e.which === 13) { // 13 = Enter key
+          e.preventDefault(); // Prevent form submission
+          listprofile();             // Call your AJAX list function
+      }
+  });
+
+  // Trigger list() on button click
+  $(document).on("click", "#btnSearchProfile", function(e) {
+      e.preventDefault();
+      listprofile();                 // Call your AJAX list function
+  });
+
+  // profile list
+
+  function listprofile(){
+    let str = $("#searchProfile").val();
+    $.ajax({
+        url: "{{ route('profiles.list') }}",
+        method: "POST",
+        data: {str},
+        beforeSend:function(){
+            $("#profilelist").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Generating, please wait...</div>");
+        },
+        success: function (data) {
+            $("#profilelist").html(data);
+        },
+
+        error: function (response) {
+            var errors = response.responseJSON.errors;
+            $("#data").html(errors);
+        }
+    });
+  }
+
   // profile list
 
   function list(){

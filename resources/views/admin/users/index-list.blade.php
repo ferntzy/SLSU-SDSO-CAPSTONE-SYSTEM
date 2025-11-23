@@ -28,6 +28,7 @@
 
         <button type="button"
                 class="btn rounded-pill btn-icon btn-primary btn-sm btn-edit"
+                data-bs-target="#editAccountModal"
                 data-id="{{ Crypt::encryptString($user_account->user_id) }}">
             <i class="mdi mdi-text-box-edit-outline"></i>
         </button>

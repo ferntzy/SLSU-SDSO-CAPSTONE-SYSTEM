@@ -24,6 +24,7 @@ class UserController extends Controller
                 ->orWhereHas('profile', function($q2) use ($query) {
                     $q2->where('first_name', 'LIKE', "%{$query}%")
                       ->orWhere('last_name', 'LIKE', "%{$query}%")
+                      ->orWhere('email', 'LIKE', "%{$query}%")
                       ->orWhere('type', 'LIKE', "%{$query}%");
                 });
           });
@@ -81,12 +82,12 @@ public function create()
     }
 
 
-    public function checkUsername(Request $request)
-      {
-          $exists = User::where('username', $request->username)->exists();
+    // public function checkUsername(Request $request)
+    //   {
+    //       $exists = User::where('username', $request->username)->exists();
 
-          return response()->json(['exists' => $exists]);
-      }
+    //       return response()->json(['exists' => $exists]);
+    //   }
 
 
 

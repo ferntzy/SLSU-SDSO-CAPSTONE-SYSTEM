@@ -12,8 +12,8 @@
 
         <form id="frmAccountData">
           @csrf
-          {{-- <input type = "text" value = "0" id = "hiddenAccountID" name = "hiddenAccountID">
-          <input type = "text" value = "POST" id = "hiddenAccountFlag"> --}}
+          <input type = "text" value = "0" id = "hiddenAccountID" name = "hiddenAccountID" class = "d-none">
+          <input type = "text" value = "POST" id = "hiddenAccountFlag" class = "d-none">
 
           <!-- Horizontal Row: Type Filter, Profile, Account Role -->
           <div class="row g-3 mb-3">

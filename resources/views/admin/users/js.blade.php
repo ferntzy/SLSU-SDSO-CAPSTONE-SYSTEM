@@ -20,19 +20,24 @@
 
   $(document).on("click", "#btnaccountsave", function(e){
     e.preventDefault();
+
     let flag = $("#hiddenAccountFlag").val();
 
     var form = $("#frmAccountData")[0];
 
     var formData = new FormData(form);
     let profile_id = 0;
+    let account_role = "" ;
     if ($("#typeFilter").val() == "student"){
       profile_id = $("#dropdownList-student").val();
+      account_role = $("#account_role_student").val();
     }else{
       profile_id = $("#dropdownList-employee").val();
+      account_role = $("#account_role_employee").val();
     }
 
     formData.append('profile_id', profile_id);
+    formData.append('account_role', account_role);
 
 
     $.ajax({
@@ -48,7 +53,7 @@
         success: function (data) {
             $("#btnaccountsave").prop("disabled", false);
             $("#accountdatamsg").html("<div class = 'alert alert-success'>Profile data saved.</div>");
-            list();
+            listuser();
             setTimeout(() => {
               $('.txt').val('');
               $("#username").focus();
@@ -64,34 +69,6 @@
   })
 
 
-
-  $(document).on("click", "#btnaccountupdate", function(e){
-    e.preventDefault();
-    $.ajax({
-        url: "{{ route('users.store') }}",
-        method: "POST",
-        data: $("#frmAccountData").serialize(),
-        beforeSend:function(){
-            $("#accoundatamsg").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Saving, please wait...</div>");
-            $("#btnaccounsave").prop("disabled", true);
-        },
-        success: function (data) {
-            $("#btnaccounsave").prop("disabled", false);
-            $("#accoundatamsg").html("<div class = 'alert alert-success'>Account data saved.</div>");
-            list();
-            setTimeout(() => {
-              $('.txt').val('');
-              $("#username").focus();
-            }, 1000);
-        },
-
-        error: function (response) {
-            $("#btnaccountsave").prop("disabled", false);
-            var errors = response.responseJSON.errors;
-            $("#accountdatamsg").html(errors);
-        }
-    });
-  })
 
 
 // SEARCH ACCOUNT ----------
@@ -109,8 +86,7 @@
       listuser();                 // Call your AJAX list function
   });
 
-  // profile list
-
+  // account list ---------------
   function listuser(){
     let str = $("#searchAccount").val();
     $.ajax({
@@ -196,7 +172,8 @@
           $("#dropdownList-student").hide();
           $("#dropdownList-employee").hide();
           $("#account_role_student").hide();
-          $("#account_role_emloyee").hide();
+          $("#account_role_employee").hide();
+
           if ($(this).val() == 'student'){
             $("#dropdownList-student").show();
             $("#account_role_student").show();
@@ -210,46 +187,46 @@
 
 
 
-// =================================================
-// USERNAME TRAP KUNG ALREADY EXISTS
+// // =================================================
+// // USERNAME TRAP KUNG ALREADY EXISTS
 
 
-  let typingTimer;
+//   let typingTimer;
 
-  $(document).on("keyup", "#username", function () {
+//   $(document).on("keyup", "#username", function () {
 
-      clearTimeout(typingTimer);
+//       clearTimeout(typingTimer);
 
-      let username = $(this).val();
+//       let username = $(this).val();
 
-      if (username.length === 0) {
-          $("#username-error").hide();
-          $("#username").removeClass("is-invalid");
-          return;
-      }
-      typingTimer = setTimeout(function () {
+//       if (username.length === 0) {
+//           $("#username-error").hide();
+//           $("#username").removeClass("is-invalid");
+//           return;
+//       }
+//       typingTimer = setTimeout(function () {
 
-          $.ajax({
-              url: "/user/check-username",
-              type: "POST",
-              data: {
-                  username: username,
-                  _token: $('meta[name="csrf-token"]').attr("content")
-              },
-              success: function (response) {
-                  if (response.exists) {
+//           $.ajax({
+//               url: "/user/check-username",
+//               type: "POST",
+//               data: {
+//                   username: username,
+//                   _token: $('meta[name="csrf-token"]').attr("content")
+//               },
+//               success: function (response) {
+//                   if (response.exists) {
 
-                      $("#username-error").show();
-                      $("#username").addClass("is-invalid");
-                  } else {
-                      $("#username-error").hide();
-                      $("#username").removeClass("is-invalid");
-                  }
-              }
-          });
+//                       $("#username-error").show();
+//                       $("#username").addClass("is-invalid");
+//                   } else {
+//                       $("#username-error").hide();
+//                       $("#username").removeClass("is-invalid");
+//                   }
+//               }
+//           });
 
-      }, 300);
-  });
+//       }, 300);
+//   });
 
 
 

@@ -8,25 +8,31 @@ use Exception;
 use Crypt;
 class ProfileController extends Controller
 {
-    public function index(Request $request)
+      public function index(Request $request)
     {
-      $user_profiles = UserProfile::all(); // fetch all profiles
-       if (!empty($request->str)) {
-          $query = $request->str;
+        // Start a query builder on UserProfile
+        $user_profiles = UserProfile::query();
 
-          $user_profiles = $user_profiles->where(function($q) use ($query) {
-              $q->where('username', 'LIKE', "%{$query}%")
-                ->orWhereHas('profile', function($q2) use ($query) {
-                    $q2->where('first_name', 'LIKE', "%{$query}%")
-                      ->orWhere('last_name', 'LIKE', "%{$query}%")
-                      ->orWhere('type', 'LIKE', "%{$query}%");
-                });
-          });}
+        // Apply search filter if provided
+        if (!empty($request->str)) {
+            $query = $request->str;
 
-      if ($request->ajax()){
-        return view('admin.profile.profile-list', compact('user_profiles'));
-      }
-      return view('admin.profile.profile_list', compact('user_profiles'));
+            $user_profiles->where(function($q) use ($query) {
+                $q->where('first_name', 'LIKE', "%{$query}%")
+                  ->orWhere('last_name', 'LIKE', "%{$query}%")
+                  ->orWhere('email', 'LIKE', "%{$query}%")
+                  ->orWhere('type', 'LIKE', "%{$query}%");
+            });
+        }
+
+        // Get results
+        $user_profiles = $user_profiles->get();
+
+        if ($request->ajax()) {
+            return view('admin.profile.profile-list', compact('user_profiles'));
+        }
+
+        return view('admin.profile.profile_list', compact('user_profiles'));
     }
 
 

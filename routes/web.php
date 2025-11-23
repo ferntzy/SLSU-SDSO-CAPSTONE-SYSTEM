@@ -79,7 +79,7 @@ Route::middleware(['auth', 'role:admin'])
 
 
 
-        Route::post('user/check-username', [UserController::class, 'checkUsername']);
+        // Route::post('user/check-username', [UserController::class, 'checkUsername']);
 
 
 
