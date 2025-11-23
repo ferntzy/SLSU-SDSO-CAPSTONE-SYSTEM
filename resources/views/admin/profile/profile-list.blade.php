@@ -17,8 +17,10 @@
         <td>{{ $user_profile->email }}</td>
         <td>{{ $user_profile->type }}</td>
         <td class="text-center">
-          <a href="" class="btn rounded-pill btn-icon btn-secondary btn-sm"><i class="mdi mdi-account-eye"></i></a>
-
+          <button type="button" href="#" class="btn rounded-pill btn-icon btn-secondary btn-sm btn-view"
+                data-id="{{ Crypt::encryptstring($user_profile->profile_id)}}">
+            <i class="mdi mdi-account-eye"></i></a>
+          </button>
           <button type="button" href="#" class="btn rounded-pill btn-icon btn-primary btn-sm btn-edit"
                 data-id="{{ Crypt::encryptstring($user_profile->profile_id)}}">
                 <i class="mdi mdi-text-box-edit-outline"></i>

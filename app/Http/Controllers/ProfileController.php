@@ -61,6 +61,7 @@ class ProfileController extends Controller
             'email'        => 'required|email|max:255',
             'contact_number'=> 'required|string|max:20',
             'address'      => 'required|string|max:255',
+            'sex'          => 'required|string|max:255',
             'type'         => 'required|string',
         ]);
 
@@ -89,6 +90,7 @@ class ProfileController extends Controller
               'email'        => 'required|email|max:255',
               'contact_number'=> 'required|string|max:20',
               'address'      => 'required|string|max:255',
+              'sex'          => 'required|string|max:255',
               'type'         => 'required|string',
           ]);
 
@@ -110,6 +112,17 @@ class ProfileController extends Controller
         return response()->json($user_profile);
       }catch(Exception $e){
         return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
+      }
+    }
+
+    public function view(Request $request)
+    {
+      try{
+        $id = Crypt::decryptstring($request->id);
+        $user_profile = UserProfile::findOrFail($id);
+        return response()->json($user_profile);
+      }catch (Exception $e){
+        return reponse()->json(['errors' => '<div class = "alert arlert-danger">'.$e->getMessage().'</div>']);
       }
     }
 

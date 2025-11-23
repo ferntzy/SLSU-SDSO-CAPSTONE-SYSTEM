@@ -1,4 +1,3 @@
-
 <div class="modal fade" id="createProfileModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered ">
     <div class="modal-content">
@@ -10,8 +9,8 @@
         <div id="profiledatamsg"></div>
         <form id = "frmProfileData">
           @csrf
-          <input type = "text" value = "0" id = "hiddenProfileID" name = "hiddenProfileID">
-          <input type = "text" value = "POST" id = "hiddenProfileFlag">
+          <input type = "text" value = "0" id = "hiddenProfileID" name = "hiddenProfileID" class="d-none">
+          <input type = "text" value = "POST" id = "hiddenProfileFlag" class="d-none" >
           <!-- FULL NAME -->
           <div class="form text-dark mb-3">FULL NAME</div>
 
@@ -94,7 +93,7 @@
               <div class="input-group input-group-merge">
                 <span class="input-group-text"><i class="mdi mdi-gender-male-female"></i></span>
                 <select name="sex" class="txt form-control">
-                  <option value=""></option>
+                  <option value="">Select Sex</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
@@ -105,7 +104,7 @@
               <div class="input-group input-group-merge">
                 <span class="input-group-text"><i class="mdi mdi-account-badge-horizontal-outline"></i></span>
                 <select name="type" class="txt form-control">
-                  <option selected disabled>Select User Profile Type</option>
+                  <option value="">Select User Profile Type</option>
                   <option value="student">Student</option>
                   <option value="employee">Employee</option>
                 </select>

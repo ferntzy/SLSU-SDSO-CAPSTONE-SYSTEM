@@ -33,6 +33,7 @@
   </div>
 </div>
 @include('admin.profile.create_profile')
+@include('admin.profile.view-profile')
 @if(session('success') && session('highlight_id'))
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
