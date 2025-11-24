@@ -131,6 +131,10 @@ class ProfileController extends Controller
       try{
         $id = Crypt::decryptString(urldecode($profile_id));
         $user_profile = UserProfile::findOrFail($id);
+
+            if ($user_profile->user) {
+            $user_profile->user->delete();
+        }
         $user_profile->delete();
         return response()->json(['success' => true, 'id' => $id]);
       }catch (Exception $e){

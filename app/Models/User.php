@@ -45,11 +45,14 @@ class User extends Authenticatable
         return $this->hasMany(EventApprovalFlow::class, 'approver_id', 'user_id');
     }
 
+    public function user_profile()
+    {
+        return $this->belongsTo(UserProfile::class, 'profile_id');
+    }
     public function profile()
-{
-    return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
-}
-
+    {
+        return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
+    }
     public function events()
     {
         return $this->hasMany(Event::class, 'organization_id', 'user_id');
