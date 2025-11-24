@@ -7,7 +7,7 @@
 
   // add account script
 
-  $("#createAccounteModal").on('show.bs.modal', function(){
+  $("#createAccountModal").on('show.bs.modal', function(){
     $("#hiddenAccountID").val(0);
     $("#hiddenAccountFlag").val("POST");
 
@@ -39,6 +39,10 @@
     formData.append('profile_id', profile_id);
     formData.append('account_role', account_role);
 
+       // FIX: send hiddenAccountID when updating
+    if (flag !== "POST") {
+        formData.append('hiddenAccountID', $("#hiddenAccountID").val());
+    }
 
     $.ajax({
         url: (flag == "POST" ? "{{ route('users.store') }}" : "{{ route('users.update') }}"),
@@ -52,11 +56,21 @@
         },
         success: function (data) {
             $("#btnaccountsave").prop("disabled", false);
-            $("#accountdatamsg").html("<div class = 'alert alert-success'>Profile data saved.</div>");
+            if(flag === "POST"){
+                $("#accountdatamsg").html("<div class = 'alert alert-success'>Account data saved.</div>");
+            }else {
+               $("#accountdatamsg").html("<div class = 'alert alert-success'>Account data update.</div>");
+
+            }
+
             listuser();
             setTimeout(() => {
+
+             if(flag === "POST"){
               $('.txt').val('');
-              $("#username").focus();
+             }
+
+            $("#username").focus();
             }, 1000);
         },
 
@@ -108,55 +122,152 @@
   }
 
 
+
+
+// view profile modal script
+    $(document).on("click", '.btn-view', function(e){
+
+        let id =$(this).data('id');
+
+        $.ajax({
+          url: "{{ route('users.view') }}",
+          type: "POST",
+          data: {id},
+          beforeSend:function(){
+              $("#viewAccountModal").modal('toggle');
+              $("#accountdataviewmsg").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Populating, please wait...</div>");
+          },
+          success: function(data) {
+            console.log(data);
+            $("#accountdataviewmsg").html("");
+
+               // <!-- USER DETAILS -->
+            $('#view_username').html(data.username);
+            $('#view_type').html(data.profile.type);
+            $('#view_role').html(data.account_role);
+            $('#view_date').html(new Date(data.created_at).toISOString().split('T')[0]);
+            $('#view_time').html(new Date(data.created_at).toLocaleTimeString('en-US', { hour12: true }));
+              // ACCOUNT INFO
+            $('#view_first_name').html(data.profile.first_name);
+            $('#view_last_name').html(data.profile.last_name);
+            $('#view_middle_name').html(data.profile.middle_name);
+            $('#view_suffix').html(data.profile.suffix);
+            $('#view_sex').html(data.profile.sex);
+
+            // CONTACT INFO
+            $('#view_email').html(data.profile.email);
+            $('#view_contact_number').html(data.profile.contact_number);
+            $('#view_address').html(data.profile.address);
+
+            $('#viewProfileModal').modal({
+                backdrop: true,   // clicking outside closes the modal
+                keyboard: true
+            });
+
+          },
+          error: function (response) {
+              var errors = response.responseJSON.errors;
+              $("#data").html(errors);
+          }
+
+        })
+
+    });
+
+
+
   // =====================================================
   // EDIT ACCOUNT MODAL POPULATION
   // =====================================================
-  $(document).on("click", '.btn-edit', function(e) {
-      e.preventDefault();
 
-      let id = $(this).data('id'); // encrypted user_id
+  $(document).on("click", '.btn-edit', function(e){
 
+      let id = $(this).data('id');
       $.ajax({
           url: "{{ route('users.edit') }}",
           type: "POST",
-          data: { id: id },
-          beforeSend: function() {
-              // Open modal
-              $("#editAccountModal").modal('show');
-              // Show loading message
-              $("#accountdataeditmsg").html(
-                  "<div class='alert alert-warning'><i class='spinner-grow spinner-grow-sm'></i> Populating, please wait...</div>"
-              );
+          data: {id},
+          beforeSend:function(){
+              $("#createAccountModal").modal('toggle');
+              $("#accountdatamsg").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Populating, please wait...</div>");
           },
           success: function(data) {
-              // Clear loading message
-              $("#accountdataeditmsg").html("");
+            $("#accountdatamsg").html("");
+              // FULL NAME
+            $('select[name="typeFilter"]').val(data.profile.type);
+            $('select[name="role"]').val(data.account_role);
+            $('input[name="username"]').val(data.username);
+            $('input[name="password"]').val(data.password);
+            $('input[name="retype-password"]').val(data.password);
 
-              // Set hidden ID
-              $("#hiddenProfileID").val(data.user_id);
 
-              // Profile dropdown
-              $("#dropdownInput").val(data.profile.first_name + " " + data.profile.last_name);
-              $("#profile_id").val(data.profile.profile_id);
 
-              // Set account type in dropdown
-              $("#typeFilter").val(data.profile.type.toLowerCase());
-
-              // Account info
-              $("select[name='account_role']").val(data.account_role);
-              $("input[name='username']").val(data.username);
-
-              // Passwords empty for security
-              $("input[name='password']").val('');
-              $("input[name='password_confirmation']").val('');
+            $("#hiddenAccountID").val(id);
+            $("#hiddenAccountFlag").val("UPDATE");
 
           },
-          error: function(response) {
+          error: function (response) {
               var errors = response.responseJSON.errors;
-              $("#accountdataeditmsg").html(errors);
+              $("#data").html(errors);
           }
       });
-  });
+    });
+
+
+
+
+  /// DELETE ACCOUNT
+
+  $(document).on("click", ".btn-delete", function(e){
+        e.preventDefault();
+
+        let button = $(this);
+        let url = button.data('url');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Delete this profile ?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if(result.isConfirmed){
+                $.ajax({
+                    url: url,
+                    type: "DELETE",
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if(response.success) {
+                            button.closest('tr').fadeOut();
+                            Swal.fire(
+                                'Deleted!',
+                                'Account has been deleted.',
+                                'success'
+                            );
+                        } else if(response.errors) {
+                            $('body').prepend(response.errors);
+                        }
+                    },
+                    error: function (response) {
+                        var errors = response.responseJSON.errors;
+                        $("#data").html(errors);
+                    }
+                });
+            }
+        });
+    });
+
+
+
+
+
+
+
+
 
 
 

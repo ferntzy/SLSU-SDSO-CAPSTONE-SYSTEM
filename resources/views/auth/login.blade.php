@@ -26,7 +26,8 @@
 
     <!-- LEFT SIDE: LOGIN FORM -->
     <div class="login-left">
-      <h3 class="login-title">STUDENT DEVEOPMENT SERVICE OFFICE (SDSO)</h3>
+    <h4 class="login-title">{{config('variables.templateSuffix')}}</h4>
+      <h6 class="text-center">{{config('variables.templateName')}}</h6>
 
       <div class="card shadow p-4 login-box">
         {{-- <h4 class="text-center mb-4">WELCOME</h4> --}}

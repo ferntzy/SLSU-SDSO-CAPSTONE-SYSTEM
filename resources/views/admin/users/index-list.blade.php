@@ -24,21 +24,22 @@
         <td>{{ $user_account->created_at->format('Y-m-d') }}</td>
         <td>{{ $user_account->created_at->format('H:i:s') }}</td>
         <td class="text-center">
-          <a href="" class="btn rounded-pill btn-icon btn-secondary btn-sm"><i class="mdi mdi-account-eye"></i></a>
+          <button type="button" href="#" class="btn rounded-pill btn-icon btn-secondary btn-sm btn-view"
+            data-id="{{ Crypt::encryptstring($user_account->user_id)}}">
+            <i class="mdi mdi-account-eye"></i></a>
+          </button>
 
-        <button type="button"
-                class="btn rounded-pill btn-icon btn-primary btn-sm btn-edit"
-                data-bs-target="#editAccountModal"
-                data-id="{{ Crypt::encryptString($user_account->user_id) }}">
-            <i class="mdi mdi-text-box-edit-outline"></i>
-        </button>
+          <button type="button" href="#" class="btn rounded-pill btn-icon btn-primary btn-sm btn-edit"
+                data-id="{{ Crypt::encryptstring($user_account->user_id)}}">
+                <i class="mdi mdi-text-box-edit-outline"></i>
+          </button>
 
 
-          <button type="button" class="btn rounded-pill btn-icon btn-danger btn-sm"
-                  data-bs-target="#confirmDeleteModal"
-                   data-id="{{ Crypt::encryptstring($user_account->user_id)}}">
+           <button type="button" class="btn rounded-pill btn-icon btn-danger btn-sm btn-delete"
+                  data-url="{{ route('users.destroy', ['id' => urlencode(Crypt::encryptString($user_account->user_id))]) }}">
                   <i class=" mdi mdi-delete-forever"></i>
           </button>
+
         </td>
       </tr>
 

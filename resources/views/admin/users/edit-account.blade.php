@@ -1,21 +1,18 @@
-<div class="modal fade" id="createAccountModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+{{-- <div class="modal fade" id="editAccountModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
-
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">ACCOUNT REGISTRATION</h1>
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">EDIT ACCOUNT INFORMATION</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
-        <div id="accountdatamsg"></div>
-
-        <form id="frmAccountData">
+        <div id="accountdataeditmsg"></div>
+        <form id="frmAccountDataEdit">
           @csrf
-          <input type = "text" value = "0" id = "hiddenAccountID" name = "hiddenAccountID" >
-          <input type = "text" value = "POST" id = "hiddenAccountFlag">
+          <input type="text" value="" name="hiddenAccountID" id="hiddenAccountID" value="0">
 
-          <!-- Horizontal Row: Type Filter, Profile, Account Role -->
+          <!-- FULL NAME -->
           <div class="row g-3 mb-3">
 
             <!-- Type Filter -->
@@ -91,7 +88,7 @@
                 <label class="form-label">Password</label>
                 <div class="input-group input-group-merge">
                   <span class="input-group-text"><i class="mdi mdi-lock"></i></span>
-                  <input type="password" name="password" id="password" class="form-control password-field" required>
+                  <input type="password" name="password" id=password class="form-control password-field" required>
                   <span class="input-group-text toggle-password" style="cursor:pointer;">
                     <i class="mdi mdi-eye-off" id="togglePasswordIcon"></i>
                   </span>
@@ -114,16 +111,13 @@
               </div>
 
             </div>
-
-
         </form>
       </div>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="btnaccountsave">Save</button>
+        <button type="button" class="btn btn-warning" id="btnprofileupdate">Update</button>
       </div>
-
     </div>
   </div>
-</div>
+</div> --}}

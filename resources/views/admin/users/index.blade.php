@@ -36,6 +36,7 @@
   </div>
 </div>
 @include('admin.users.create')
+@include('admin.users.view-account')
 @if(session('success') && session('highlight_id'))
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>

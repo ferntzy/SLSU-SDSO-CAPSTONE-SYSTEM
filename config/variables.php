@@ -3,8 +3,8 @@
 return [
   "creatorName" => "ThemeSelection",
   "creatorUrl" => "https://themeselection.com",
-  "templateName" => "SDSO",
-  "templateSuffix" => "SDSO - Student Document Service Online",
+  "templateName" => "SDSO",  //sub title
+  "templateSuffix" => "STUDENT EVENT MANAGEMENT INFORMATION SYSTEM(SEMIS)", //main title
   "templateVersion" => "1.0.0",
   "templateFree" => true,
   "templateDescription" => "Most Powerful & Comprehensive Bootstrap 5 HTML Admin Dashboard Template built for developers!",

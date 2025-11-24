@@ -50,36 +50,36 @@ public function create()
 
 
 
-  public function store(Request $request)
-    {
-        try {
-            // Validate inputs
+public function store(Request $request)
+  {
+      try {
+          // Validate inputs
 
-            $validated = $request->validate([
-                'username'     => 'required|unique:users,username',
-                'password'     => 'required|min:6|confirmed',
-                'account_role' => 'required',
-                'profile_id'   => 'required',
-            ]);
+          $validated = $request->validate([
+              'username'     => 'required|unique:users,username',
+              'password'     => 'required|min:6|confirmed',
+              'account_role' => 'required',
+              'profile_id'   => 'required',
+          ]);
 
-            // Hash PASSWORD
-            $validated['password'] = Hash::make($validated['password']);
+          // Hash PASSWORD
+          $validated['password'] = Hash::make($validated['password']);
 
-            // Save
-            $user = User::create($validated);
+          // Save
+          $user = User::create($validated);
 
-            if (!$user) {
-                throw new Exception("Unable to save the user.");
-            }
+          if (!$user) {
+              throw new Exception("Unable to save the user.");
+          }
 
-            return response()->json(['success' => true]);
+          return response()->json(['success' => true]);
 
-        } catch (Exception $e) {
-            return response()->json([
-                'errors' => '<div class="alert alert-danger">'.$e->getMessage().'</div>'
-            ], 400);
-        }
-    }
+      } catch (Exception $e) {
+          return response()->json([
+              'errors' => '<div class="alert alert-danger">'.$e->getMessage().'</div>'
+          ], 400);
+      }
+  }
 
 
     // public function checkUsername(Request $request)
@@ -96,49 +96,75 @@ public function create()
 
 
 
-    public function update(Request $request, User $user)
-    {
+  public function update(Request $request, User $user)
+  {
 
-        try{
-
-          $id = Crypt::decryptstring($request->hiddenAccountID);
-          $validated = $request->validate([
-              'username'   => 'required|string|max:255',
-              'account_role'   => 'required|string|max:255',
-              'password'  => 'nullable|min:6',
-
-          ]);
-
-        // Store to database
-        $user_account = User::where('user_id', $id)->update($validated);
-
-        if (!$user_account){
-          throw new Exception('Unable to save the profile.');
-        }
-      }catch(Exception $e){
-        return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
-      }
-    }
-
-
-    public function edit(Request $request)
-    {
       try{
-        $id = Crypt::decryptstring($request->id);
-        $user_account = UserProfile::findOrFail($id);
-        return response()->json($user_account);
-      }catch(Exception $e){
-        return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
+
+        $id = Crypt::decryptstring($request->hiddenAccountID);
+        $validated = $request->validate([
+            'username'   => 'required|string|max:255',
+            'account_role'   => 'required|string|max:255',
+            'password'  => 'nullable|min:6',
+
+        ]);
+
+      // Store to database
+      $user_account = User::where('user_id', $id)->update($validated);
+
+      if (!$user_account){
+        throw new Exception('Unable to save the profile.');
       }
+    }catch(Exception $e){
+      return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
     }
+  }
 
 
-  public function viewProfile($id)
+  public function edit(Request $request)
+  {
+    try{
+      $id = Crypt::decryptstring($request->id);
+      $user_account = User::with('profile')->findOrFail($id);
+      return response()->json($user_account);
+    }catch(Exception $e){
+      return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
+    }
+  }
+
+
+ public function view(Request $request)
 {
-    $user = User::with('profile')->findOrFail($id);
+    try {
+        $id = Crypt::decryptString($request->id);
 
-    return view('admin.users.partials.view-profile', compact('user'));
+        // load user + profile
+        $user_account = User::with('profile')->findOrFail($id);
+
+        return response()->json($user_account);
+
+    } catch (Exception $e) {
+        return response()->json([
+            'errors' => '<div class="alert alert-danger">'.$e->getMessage().'</div>'
+        ]);
+    }
 }
+
+
+public function destroy($user_id)
+{
+    try {
+        $user_id = Crypt::decryptString(urldecode($user_id));
+        $user_account = User::findOrFail($user_id);
+        $user_account->delete();
+        return response()->json(['success' => true, 'id' => $user_id]);
+    } catch (Exception $e) {
+        return response()->json([
+            'errors' => '<div class="alert alert-danger">' . $e->getMessage() . '</div>'
+        ]);
+    }
+}
+
 
 
 
@@ -193,32 +219,7 @@ public function search(Request $request)
 
 
 
-public function destroy(Request $request, $id)
-{
-    $admin = auth()->user();
 
-    if ($admin->account_role !== 'admin') {
-        return back()->with('error', 'Only admins can delete users.');
-    }
-
-    if (!Hash::check($request->admin_password, $admin->password)) {
-        return back()->with('error', 'Incorrect admin password.');
-    }
-
-    if ($admin->user_id == $id) {
-        return back()->with('error', 'You cannot delete your own account.');
-    }
-
-    $user = User::findOrFail($id);
-
-    // Delete all linked events first
-    $user->events()->delete();
-
-    // Then delete the user
-    $user->delete();
-
-    return redirect()->route('users.index')->with('success', 'Account deleted successfully.');
-}
 
 
 
