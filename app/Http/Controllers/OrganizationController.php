@@ -7,10 +7,11 @@ use App\Models\User;
 use App\Models\Officer;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
+use Exception;
 
 class OrganizationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Load organizations with members + adviser detection
         $organizations = Organization::with(['adviser.profile', 'members'])
@@ -27,103 +28,75 @@ class OrganizationController extends Controller
                         ->with('profile')
                         ->get();
 
+        if ($request->ajax()) {
+            return view('admin.organizations.list-organization', compact('organizations'));
+        }
         return view('admin.organizations.organizations', compact(
             'organizations', 'advisers', 'officers'
         ));
     }
+    public function create()
+    {
+        return view ('admin.organizations.create-organization');
+    }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'organization_name' => 'required|string|max:255',
-            'organization_type' => 'required|string|max:100',
-            'description' => 'nullable|string',
-            'organization_logo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-        ]);
-        $logoPath = null;
-        if ($request->hasFile('organization_logo')) {
-            $logoPath = $request->file('organization_logo')->store('logos', 'public');
-        }
-        $organization = Organization::create([
-                          'organization_name' => $request->organization_name,
-                          'organization_type' => $request->organization_type,
-                          'description' => $request->description,
-                          'organization_logo' => $logoPath,
-                          'status' => 'Active', // default status
-                      ]);
+        try {
+            // ===== VALIDATION =====
+            $request->validate([
+                'organization_name' => 'required|string|max:255',
+                'organization_type' => 'required|string',
+                'description' => 'nullable|string',
+                'adviser_id' => 'required|exists:users,user_id',  // adviser is required
+                'officer_id' => 'required|exists:users,user_id',  // officer is required
+                'organization_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
 
-        return redirect()->back()
-                        ->with('success', 'Organization added successfully!')
-                        ->with('new_org_id', $organization->organization_id);
+            // ===== CREATE ORGANIZATION =====
+            $organization = new Organization();
+            $organization->organization_name = $request->organization_name;
+            $organization->organization_type = $request->organization_type;
+            $organization->description = $request->description;
+            $organization->user_id = $request->adviser_id; // adviser is required
+            $organization->save();
+
+            if (!$organization->organization_id) {
+                throw new Exception('Unable to save organization.');
+            }
+
+            // ===== CREATE OFFICER =====
+            $officerUser = User::findOrFail($request->officer_id);
+            Officer::create([
+                'organization_id' => $organization->organization_id,
+                'user_id' => $officerUser->user_id,
+                'profile_id' => $officerUser->profile_id,
+                'role' => 'officer',
+            ]);
+
+            return response()->json([
+                'success' => '<div class="alert alert-success">Organization and officer created successfully.</div>'
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'errors' => '<div class="alert alert-danger">'.$e->getMessage().'</div>'
+            ], 400);
+        }
     }
-    public function update(Request $request, Organization $organization)
+    public function update(Request $request)
     {
-        $request->validate([
-            'organization_name' => 'required|string|max:255',
-            'organization_type' => 'required|string',
-            'description' => 'nullable|string',
-        ]);
 
-        // Update organization fields
-        $organization->organization_name = $request->organization_name;
-        $organization->organization_type = $request->organization_type;
-        $organization->description = $request->description;
-
-        // ========= SAVE ADVISER =========
-        if ($request->adviser_id) {
-            $organization->user_id = $request->adviser_id; // adviser stored here
-        }
-
-        $organization->save();
-
-        // ========= SAVE OFFICER =========
-        if ($request->officer_id) {
-
-            // find the student’s profile_id
-            $profileId = User::where('user_id', $request->officer_id)->value('profile_id');
-
-            Officer::updateOrCreate(
-                [
-                    'organization_id' => $organization->organization_id,
-                    'user_id' => $request->officer_id
-                ],
-                [
-                    'profile_id' => $profileId,
-                    'role' => 'officer'
-                ]
-            );
-        }
-
-        return redirect()->back()->with('success', 'Organization updated successfully!');
     }
-
-
-
-    public function show($organization_id)
+    public function edit(Request $request)
     {
-        $org = Organization::with([
-                'adviser.profile',
-                'officers.user.profile',
-            ])
-            ->withCount('members')
-            ->findOrFail($organization_id);
-
-        $officer = $org->officers->first()?->user?->profile;
-
-        return response()->json([
-            'organization_name' => $org->organization_name,
-            'organization_type' => $org->organization_type,
-            'description'       => $org->description,
-            'members_count'     => $org->members_count,
-            'adviser'           => $org->advisor_name,
-            'status'            => $org->status,
-            'created_at'        => $org->created_at->format('F d, Y'),
-
-            // Officer details
-            'officer_name'      => $officer?->full_name,
-            'contact_number'    => $officer?->contact_number,
-            'contact_email'     => $officer?->contact_email,
-        ]);
+      try{
+        $id = Crypt::decryptString($request->id);
+        $org = Organization::findOrFail($id);
+        return response()->json($org);
+      }catch(Exception $e){
+        return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
+      }
     }
 
     public function destroy($organization_id)

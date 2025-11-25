@@ -74,27 +74,7 @@
       listprofile();                 // Call your AJAX list function
   });
 
-  // profile list
 
-  function listprofile(){
-    let str = $("#searchProfile").val();
-    $.ajax({
-        url: "{{ route('profiles.list') }}",
-        method: "POST",
-        data: {str},
-        beforeSend:function(){
-            $("#profilelist").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Generating, please wait...</div>");
-        },
-        success: function (data) {
-            $("#profilelist").html(data);
-        },
-
-        error: function (response) {
-            var errors = response.responseJSON.errors;
-            $("#data").html(errors);
-        }
-    });
-  }
 
   // profile list
 
@@ -233,7 +213,7 @@
                             button.closest('tr').fadeOut();
                             Swal.fire(
                                 'Deleted!',
-                                'Organization has been deleted.',
+                                'User profile has been deleted.',
                                 'success'
                             );
                         } else if(response.errors) {

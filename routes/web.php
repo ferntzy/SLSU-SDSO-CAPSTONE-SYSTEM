@@ -118,10 +118,13 @@ Route::middleware(['auth', 'role:admin'])
         // ORGANIZATIONS
         // ======================
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
+        Route::get('/organizations/create', [OrganizationController::class, 'create'])->name('organizations.create');
         Route::post('/organizations/store', [OrganizationController::class, 'store'])->name('organizations.store');
-        Route::put('/organizations/{organization}', [OrganizationController::class, 'update'])->name('organizations.update');
-        Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
-        Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
+        Route::put('/organizations/update', [OrganizationController::class, 'update'])->name('organizations.update');
+        Route::post('/organizations/list', [OrganizationController::class, 'index'])->name('organizations.list');
+        Route::post('/organizations/edit', [OrganizationController::class, 'edit'])->name('organizations.edit');
+        // Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
+        // Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
 
         // ======================
         // PROFILES (USER PROFILES)

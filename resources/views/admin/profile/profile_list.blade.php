@@ -2,13 +2,11 @@
   $container = 'container-xxl';
   $containerNav = 'container-xxl';
 @endphp
-
 @extends('layouts/contentNavbarLayout')
 @section('title', 'User Profile List')
 
 @section('content')
 <!-- Hoverable Table rows -->
-
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
 

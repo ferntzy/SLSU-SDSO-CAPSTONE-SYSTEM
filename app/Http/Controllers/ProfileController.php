@@ -43,16 +43,9 @@ class ProfileController extends Controller
         return view('admin.profile.create_profile');
     }
 
-
-
-
-
     public function store(Request $request)
     {
-
         try{
-
-
         $validated = $request->validate([
             'first_name'   => 'required|string|max:255',
             'last_name'    => 'required|string|max:255',
