@@ -8,24 +8,29 @@ use Illuminate\Http\Request;
 class UserLogController extends Controller
 {
   public function index(Request $request)
-  {
-    $search = $request->input('search');
+{
+    $query = $request->str;
+    $logs = UserLog::with('user');
 
-    $logs = UserLog::with('user')
-      ->when($search, function ($query, $search) {
-        $query->whereHas('user', function ($q) use ($search) {
-          $q->where('username', 'like', "%{$search}%");
+    if (!empty($query)) {
+        $logs = $logs->whereHas('user', function ($q) use ($query) {
+            $q->where('username', 'LIKE', "%{$query}%");
         })
-          ->orWhere('action', 'like', "%{$search}%")
-          ->orWhere('ip_address', 'like', "%{$search}%");
-      })
-      ->orderByDesc('created_at')
-      ->get();
-    // ->withQueryString();
+        ->orWhere('action', 'LIKE', "%{$query}%")
+        ->orWhere('ip_address', 'LIKE', "%{$query}%")
+        ->orWhere('user_agent', 'LIKE', "%{$query}%");
+    }
+
+    $logs = $logs->orderByDesc('created_at')->get();
 
     if ($request->ajax()) {
-      return view('admin.partials.logs_table', compact('logs'))->render();
+        return view('admin.users.logs-list', compact('logs', 'query'))->render();
     }
-    return view('admin.logs', compact('logs', 'search'));
-  }
+
+    return view('admin.users.logs', compact('logs', 'query'));
+}
+
+
+
+
 }

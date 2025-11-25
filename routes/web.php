@@ -75,11 +75,13 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
         Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-        Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
+        // Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
 
 
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
+        // LOGS
+        Route::get('/logs', [UserLogController::class, 'index'])->name('users.logs-list');
 
 
         // Route::post('user/check-username', [UserController::class, 'checkUsername']);
@@ -90,8 +92,6 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/users/check-availability', [UserController::class, 'checkAvailability'])
             ->name('users.checkAvailability');
 
-        // LOGS
-        Route::get('/logs', [UserLogController::class, 'index'])->name('admin.logs');
 
         // ======================
         // PROFILE (ADMIN ACCOUNT)

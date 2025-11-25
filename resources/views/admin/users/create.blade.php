@@ -12,8 +12,8 @@
 
         <form id="frmAccountData">
           @csrf
-          <input type = "text" value = "0" id = "hiddenAccountID" name = "hiddenAccountID" >
-          <input type = "text" value = "POST" id = "hiddenAccountFlag">
+          <input type = "text" value = "0" id = "hiddenAccountID" name = "hiddenAccountID" class ="d-none">
+          <input type = "text" value = "POST" id = "hiddenAccountFlag" class ="d-none">
 
           <!-- Horizontal Row: Type Filter, Profile, Account Role -->
           <div class="row g-3 mb-3">
@@ -21,24 +21,24 @@
             <!-- Type Filter -->
             <div class="col-md-4">
               <label class="form-label">Select Type of User</label>
-              <select id="typeFilter" class="form-select w-100">
+              <select id="typeFilter" class="form-select w-100 txt">
                 <option value="">All Types</option>
                 <option value="student">Student</option>
                 <option value="employee">Employee</option>
               </select>
             </div>
 
-            <!-- Profile Dropdown -->
-            <div class="col-md-4">
-              <label class="form-label">Select Profile</label>
-              <select name = "profile_id" id="dropdownList-student" class="form-select" style="display:none;">
-                <option value="0">Please select from the list</option>
+            <!-- ACcounnt Dropdown -->
+            <div class="col-md-4 txt">
+              <label class="form-label ">Select Profile</label>
+              <select name = "profile_id" id="dropdownList-student" class="form-select" style="display:none;" >
+                <option value="0" >Please select from the list</option>
                 @foreach ($user_profiles_student as $user_profile)
-                  <option value="{{ $user_profile->profile_id }}">{{ $user_profile->last_name }}, {{ $user_profile->first_name }}</option>
+                  <option class="form-select txt" value="{{ $user_profile->profile_id }}">{{ $user_profile->last_name }}, {{ $user_profile->first_name }}</option>
                 @endforeach
               </select>
 
-              <select name = "profile_id" id="dropdownList-employee" class="form-select" style="display:none;">
+              <select name = "profile_id" id="dropdownList-employee" class="form-select " style="display:none;">
                 <option value="0">Please select from the list</option>
                 @foreach ($user_profiles_employee as $user_profile)
                   <option value="{{ $user_profile->profile_id }}">{{ $user_profile->last_name }}, {{ $user_profile->first_name }}</option>
@@ -49,7 +49,7 @@
             <!-- Account Role -->
             <div class="col-md-4">
               <label class="form-label">Select Account Role</label>
-              <select name="account_role" id="account_role_employee" class="form-select" style="display:none;" required>
+              <select name="account_role" id="account_role_employee" class="form-select txt" style="display:none;" required>
                 <option value="">Select Account Role</option>
                 <option value="SDSO_Head">SDSO Head</option>
                 <option value="Faculty_Adviser">Faculty Adviser</option>
@@ -59,8 +59,8 @@
                 <option value="admin">Admin</option>
               </select>
 
-              <select name="account_role" id="account_role_student" class="form-select" style="display:none;" required>
-                <option value="">Select Account Role</option>
+              <select name="account_role" id="account_role_student" class="form-select txt" style="display:none;" required>
+
                 <option value="Student_Organization">Student Organization</option>
               </select>
             </div>
@@ -76,7 +76,8 @@
               <div class="col-md-6 mb-3">
                 <div class="input-group input-group-merge">
                   <span class="input-group-text"><i class="mdi mdi-account-circle"></i></span>
-                  <input type="text" name="username" id="username" class="form-control" placeholder="Username" required>
+                  <input type="text" name="username" id="username" class="form-control txt" placeholder="Username" required>
+
                 </div>
                 <small id="username-error" class="text-danger mt-1" style="display:none;">
                   Username already exists
@@ -91,7 +92,7 @@
                 <label class="form-label">Password</label>
                 <div class="input-group input-group-merge">
                   <span class="input-group-text"><i class="mdi mdi-lock"></i></span>
-                  <input type="password" name="password" id="password" class="form-control password-field" required>
+                  <input type="password" name="password" id="password" class="form-control password-field txt" required>
                   <span class="input-group-text toggle-password" style="cursor:pointer;">
                     <i class="mdi mdi-eye-off" id="togglePasswordIcon"></i>
                   </span>
@@ -103,7 +104,7 @@
                 <label class="form-label">Re-type Password</label>
                 <div class="input-group input-group-merge">
                   <span class="input-group-text"><i class="mdi mdi-lock-alert-outline"></i></span>
-                  <input type="password" name="password_confirmation" id="retype-password" class="form-control password-field" required>
+                  <input type="password" name="password_confirmation" id="retype-password" class="form-control password-field txt" required>
                   <span class="input-group-text toggle-password" style="cursor:pointer;">
                     <i class="mdi mdi-eye-off"></i>
                   </span>

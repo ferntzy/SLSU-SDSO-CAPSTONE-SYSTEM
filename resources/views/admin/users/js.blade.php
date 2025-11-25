@@ -124,6 +124,55 @@
 
 
 
+
+
+
+
+
+// USER SEARCH LOGS ----------
+
+$(document).on("keypress", "#searchAccountlogs", function(e) {
+    if (e.which === 13) {
+        e.preventDefault();
+        listlogs();
+    }
+});
+
+// Trigger on button click
+$(document).on("click", "#btnSearchlogs", function(e) {
+    e.preventDefault();
+    listlogs();
+});
+
+// AJAX search function
+function listlogs() {
+    let str = $("#searchAccountlogs").val(); // FIXED ID
+
+    $.ajax({
+        url: "{{ route('users.logs-list') }}",
+        method: "GET",
+        data: { str },
+        beforeSend: function() {
+            $("#logsList").html(
+                "<div class='alert alert-warning'><i class='spinner-grow spinner-grow-sm'></i> Generating, please wait...</div>"
+            );
+        },
+        success: function(data) {
+            $("#logsList").html(data);
+        },
+        error: function(response) {
+            var errors = response.responseJSON.errors;
+            $("#data").html(errors);
+        }
+    });
+}
+
+
+
+
+
+
+
 // view profile modal script
     $(document).on("click", '.btn-view', function(e){
 
@@ -194,13 +243,28 @@
           success: function(data) {
             $("#accountdatamsg").html("");
               // FULL NAME
-            $('select[name="typeFilter"]').val(data.profile.type);
-            $('select[name="role"]').val(data.account_role);
+
+            $('input[name="role"]').val(data.account_role);
             $('input[name="username"]').val(data.username);
             $('input[name="password"]').val(data.password);
             $('input[name="retype-password"]').val(data.password);
 
+             $('select[name="typeFilter"]').val(data.profile.type).trigger("change");
 
+           setTimeout(function() {
+
+                // =============== PROFILE DROPDOWN ===============
+
+                if (data.profile.type === "student") {
+
+                  $("#dropdownList-student").val(data.profile.profile_id);
+                  $("#account_role_student").val(data.account_role);
+
+                } else {
+                  $("#dropdownList-employee").val(data.profile.profile_id);
+                  $("#account_role_employee").val(data.account_role);
+                }
+            }, 150); // s
 
             $("#hiddenAccountID").val(id);
             $("#hiddenAccountFlag").val("UPDATE");
@@ -212,6 +276,36 @@
           }
       });
     });
+
+
+
+
+
+      //showing all profile based on the type----------------------------------
+
+  // =================================================
+  // DROPDOWN SELECT FOR FIRSTNAME + LASTNAME
+  // =================================================
+
+  $(document).ready(function () {
+      $(document).on('change', "#typeFilter", function(){
+          $("#dropdownList-student").hide();
+          $("#dropdownList-student").hide();
+          $("#dropdownList-employee").hide();
+          $("#account_role_student").hide();
+          $("#account_role_employee").hide();
+
+          if ($(this).val() == 'student'){
+            $("#dropdownList-student").show();
+            $("#account_role_student").show();
+          }else{
+            $("#dropdownList-employee").show();
+            $("#account_role_employee").show();
+          }
+      })
+
+  });
+
 
 
 
@@ -271,30 +365,6 @@
 
 
 
-
-      //showing all profile based on the type----------------------------------
-
-  // =================================================
-  // DROPDOWN SELECT FOR FIRSTNAME + LASTNAME
-  // =================================================
-
-  $(document).ready(function () {
-      $(document).on('change', "#typeFilter", function(){
-          $("#dropdownList-student").hide();
-          $("#dropdownList-employee").hide();
-          $("#account_role_student").hide();
-          $("#account_role_employee").hide();
-
-          if ($(this).val() == 'student'){
-            $("#dropdownList-student").show();
-            $("#account_role_student").show();
-          }else{
-            $("#dropdownList-employee").show();
-            $("#account_role_employee").show();
-          }
-      })
-
-  });
 
 
 
