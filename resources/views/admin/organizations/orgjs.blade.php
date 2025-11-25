@@ -107,4 +107,46 @@
     });
   }
 
+
+// SEARCH ORGANIZATION----------
+
+  $(document).on("keypress", "#searchOrg", function(e) {
+      if (e.which === 13) { // 13 = Enter key
+          e.preventDefault(); // Prevent form submission
+          listorg();             // Call your AJAX list function
+      }
+  });
+
+  // Trigger list() on button click
+  $(document).on("click", "#btnSearchOrg", function(e) {
+      e.preventDefault();
+      listorg();                 // Call your AJAX list function
+  });
+
+  // account list ---------------
+  function listorg(){
+    let str = $("#searchOrg").val();
+    $.ajax({
+        url: "{{ route('organizations.list') }}",
+        method: "POST",
+        data: {str},
+        beforeSend:function(){
+            $("#orglist").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Generating, please wait...</div>");
+        },
+        success: function (data) {
+            $("#orglist").html(data);
+        },
+
+        error: function (response) {
+            var errors = response.responseJSON.errors;
+            $("#data").html(errors);
+        }
+    });
+  }
+
+
+
+
+
+
 </script>

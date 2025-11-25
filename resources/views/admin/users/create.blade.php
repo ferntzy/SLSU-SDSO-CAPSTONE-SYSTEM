@@ -21,7 +21,7 @@
             <!-- Type Filter -->
             <div class="col-md-4">
               <label class="form-label">Select Type of User</label>
-              <select id="typeFilter" class="form-select w-100 txt">
+              <select id="typeFilter" name= "typeFilter" class="form-select w-100 txt">
                 <option value="">All Types</option>
                 <option value="student">Student</option>
                 <option value="employee">Employee</option>
@@ -31,14 +31,14 @@
             <!-- ACcounnt Dropdown -->
             <div class="col-md-4 txt">
               <label class="form-label ">Select Profile</label>
-              <select name = "profile_id" id="dropdownList-student" class="form-select" style="display:none;" >
+              <select name = "profile_id" id="dropdownList-student" class="form-select txt" style="display:none;" >
                 <option value="0" >Please select from the list</option>
                 @foreach ($user_profiles_student as $user_profile)
-                  <option class="form-select txt" value="{{ $user_profile->profile_id }}">{{ $user_profile->last_name }}, {{ $user_profile->first_name }}</option>
+                  <option value="{{ $user_profile->profile_id }}">{{ $user_profile->last_name }}, {{ $user_profile->first_name }}</option>
                 @endforeach
               </select>
 
-              <select name = "profile_id" id="dropdownList-employee" class="form-select " style="display:none;">
+              <select name = "profile_id" id="dropdownList-employee" class="form-select txt" style="display:none;">
                 <option value="0">Please select from the list</option>
                 @foreach ($user_profiles_employee as $user_profile)
                   <option value="{{ $user_profile->profile_id }}">{{ $user_profile->last_name }}, {{ $user_profile->first_name }}</option>

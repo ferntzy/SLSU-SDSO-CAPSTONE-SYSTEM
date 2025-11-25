@@ -13,10 +13,17 @@
             <h5 class="mb-0 text-dark">REGISTERED ORGANIZATIONS</h5>
         </div>
         <div class="card-action">
-            <a href="#" class="btn btn-primary btn-sm"
+
+          <div class = "input-group">
+            <input type="text" id="searchOrg" class="form-control" placeholder="Search Organization">
+            <button class="input-group-text" id = "btnSearchOrg"><i class="mdi mdi-account-search-outline"></i></button>
+
+             <a href="#" class="btn btn-primary btn-sm"
                data-bs-toggle="modal" data-bs-target="#createOrgModal">
                 <i class="ti ti-plus"></i> Add Organization
             </a>
+          </div>
+
         </div>
     </div>
     <div class="table-responsive text-nowrap" id="orglist">

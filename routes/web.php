@@ -126,6 +126,8 @@ Route::middleware(['auth', 'role:admin'])
         // Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
         // Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
 
+
+
         // ======================
         // PROFILES (USER PROFILES)
         // ======================

@@ -96,29 +96,38 @@ public function store(Request $request)
 
 
 
-  public function update(Request $request, User $user)
-  {
+public function update(Request $request, User $user)
+{
+    try {
+        $id = Crypt::decryptString($request->hiddenAccountID);
 
-      try{
-
-        $id = Crypt::decryptstring($request->hiddenAccountID);
         $validated = $request->validate([
-            'username'   => 'required|string|max:255',
-            'account_role'   => 'required|string|max:255',
-            'password'  => 'nullable|min:6',
-
+            'username'      => 'required|string|max:255',
+            'account_role'  => 'required|string|max:255',
+            'password'      => 'nullable|min:6',
         ]);
 
-      // Store to database
-      $user_account = User::where('user_id', $id)->update($validated);
+        // Fetch the user
+        $user_account = User::where('user_id', $id)->firstOrFail();
 
-      if (!$user_account){
-        throw new Exception('Unable to save the profile.');
-      }
-    }catch(Exception $e){
-      return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
+        // Update username and account_role
+        $user_account->username = $validated['username'];
+        $user_account->account_role = $validated['account_role'];
+
+        // Update password only if user typed a new one
+        if (!empty($validated['password'])) {
+            $user_account->password = bcrypt($validated['password']);
+        }
+        // If password is empty, it stays the same
+
+        $user_account->save();
+
+        return response()->json(['success' => 'User updated successfully.']);
+
+    } catch (Exception $e) {
+        return response()->json(['errors' => '<div class="alert alert-danger">' . $e->getMessage() . '</div>'], 400);
     }
-  }
+}
 
 
   public function edit(Request $request)

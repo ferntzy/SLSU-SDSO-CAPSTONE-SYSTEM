@@ -249,15 +249,16 @@ function listlogs() {
             $('input[name="password"]').val(data.password);
             $('input[name="retype-password"]').val(data.password);
 
+
              $('select[name="typeFilter"]').val(data.profile.type).trigger("change");
 
            setTimeout(function() {
 
                 // =============== PROFILE DROPDOWN ===============
-
-                if (data.profile.type === "student") {
+                if (data.profile.type == "student") {
 
                   $("#dropdownList-student").val(data.profile.profile_id);
+                 console.log(data);
                   $("#account_role_student").val(data.account_role);
 
                 } else {
