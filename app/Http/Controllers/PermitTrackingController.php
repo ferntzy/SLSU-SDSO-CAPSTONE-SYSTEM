@@ -2,132 +2,194 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Permit;
-use Carbon\Carbon;
+use App\Models\Organization;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Log;
 
 class PermitTrackingController extends Controller
 {
-    // Main tracking page
-    public function index()
+    /**
+     * Get the organization ID that belongs to the authenticated user
+     */
+    private function getUserOrganizationId()
     {
-        $permits = Permit::with('organization', 'approvals')
-            ->where('organization_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $user = auth()->user();
 
-        return view('student.permit.tracking', compact('permits'));
+        // Critical fix: your `users` table uses `user_id`, not `id`
+        // So auth()->user()->user_id is correct
+        $organization = Organization::where('user_id', $user->user_id)->first();
+
+        if (!$organization) {
+            Log::warning('No organization found for user', [
+                'user_id' => $user->user_id,
+                'username' => $user->username,
+                'role' => $user->account_role
+            ]);
+
+            abort(403, "You are not associated with any student organization.");
+        }
+
+        return $organization->organization_id;
     }
 
-    // Pending permits
-    public function pending()
+    /**
+     * Base query for permits belonging to the user's organization
+     */
+    private function getOrganizationPermitsQuery()
     {
-        $permits = Permit::with('organization', 'approvals')
-            ->where('user_id', auth()->id())
-            ->whereHas('approvals', function ($q) {
-                $q->where('status', 'pending');
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $orgId = $this->getUserOrganizationId();
 
-        return view('permit.pending', compact('permits'));
+        return Permit::with([
+                'approvals' => fn($q) => $q->orderBy('created_at'),
+                'approvals.approver.profile'
+            ])
+            ->where('organization_id', $orgId)
+            ->latest('created_at');
     }
 
-    // Approved permits
-    public function approved()
+    /**
+     * Share permit counts in views (cached per organization)
+     */
+    private function sharePermitCounts()
     {
-        $permits = Permit::with('organization', 'approvals')
-            ->where('user_id', auth()->id())
-            ->whereDoesntHave('approvals', function ($q) {
-                $q->whereIn('status', ['pending', 'rejected']);
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        if (View::shared('pendingPermitsCount') !== null) return;
 
-        return view('permit.approved', compact('permits'));
-    }
+        $orgId = $this->getUserOrganizationId();
 
-    // Rejected permits
-    public function rejected()
-    {
-        $permits = Permit::with('organization', 'approvals')
-            ->where('user_id', auth()->id())
-            ->whereHas('approvals', function ($q) {
-                $q->where('status', 'rejected');
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $counts = Cache::remember("org_{$orgId}_permit_counts", 300, function () use ($orgId) {
+            $permits = Permit::with('approvals')->where('organization_id', $orgId)->get();
 
-        return view('permit.rejected', compact('permits'));
-    }
+            $pending = 0;
+            $approved = 0;
+            $rejected = 0;
 
-    // Ongoing events
-    public function ongoingEvents()
-    {
-        $today = Carbon::now()->format('Y-m-d');
+            foreach ($permits as $permit) {
+                $approvals = $permit->approvals;
 
-        $events = Permit::with('organization', 'approvals')
-            ->where('user_id', auth()->id())
-            ->where('date_start', '<=', $today)
-            ->where(function($q) use ($today) {
-                $q->whereNull('date_end')
-                  ->orWhere('date_end', '>=', $today);
-            })
-            ->orderBy('date_start', 'asc')
-            ->get();
+                $hasRejected = $approvals->contains('status', 'rejected');
+                $hasPending = $approvals->isEmpty() || $approvals->contains('status', 'pending');
+                $vpSasApproved = $approvals->where('approver_role', 'VP_SAS')->where('status', 'approved')->isNotEmpty();
 
-        return view('events.ongoing', compact('events'));
-    }
+                if ($hasRejected) {
+                    $rejected++;
+                } elseif ($vpSasApproved && !$hasPending) {
+                    $approved++;
+                } elseif ($hasPending || $approvals->isEmpty()) {
+                    $pending++;
+                }
+            }
 
-    // Successful events
-    public function successfulEvents()
-    {
-        $today = Carbon::now()->format('Y-m-d');
+            return compact('pending', 'approved', 'rejected');
+        });
 
-        $events = Permit::with('organization', 'approvals')
-            ->where('user_id', auth()->id())
-            ->where('date_end', '<', $today)
-            ->whereDoesntHave('approvals', function($q){
-                $q->where('status', 'rejected');
-            })
-            ->orderBy('date_end', 'desc')
-            ->get();
-
-        return view('events.successful', compact('events'));
-    }
-
-    // Canceled events
-    public function canceledEvents()
-    {
-        $events = Permit::with('organization', 'approvals')
-            ->where('user_id', auth()->id())
-            ->whereHas('approvals', function($q){
-                $q->where('status', 'rejected');
-            })
-            ->orderBy('date_start', 'desc')
-            ->get();
-
-        return view('events.canceled', compact('events'));
-    }
-
-    // View PDF
-    public function viewPDF($id)
-    {
-        $permit = Permit::where('hashed_id', $id)
-            ->where('organization_id', auth()->id())
-            ->firstOrFail();
-
-        return view('permit.pdf_view', compact('permit'));
-    }
-
-    // Generate permit (Ajax)
-    public function generate(Request $request)
-    {
-        // Example: Save permit and return JSON response
-        // Validation & saving logic here...
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Permit successfully generated.'
+        View::share([
+            'pendingPermitsCount'   => $counts['pending'],
+            'approvedPermitsCount'  => $counts['approved'],
+            'rejectedPermitsCount'  => $counts['rejected'],
         ]);
     }
+
+    /**
+     * Main tracking dashboard
+     */
+    public function track()
+    {
+        $this->sharePermitCounts();
+
+        $permits = $this->getOrganizationPermitsQuery()->get();
+
+        $now = now();
+
+        $pendingPermits = $permits->filter(function ($permit) {
+            $approvals = $permit->approvals;
+            return ($approvals->isEmpty() || $approvals->contains('status', 'pending'))
+                && !$approvals->contains('status', 'rejected');
+        });
+
+        $rejectedPermits = $permits->filter(fn($p) => $p->approvals->contains('status', 'rejected'));
+
+        $approvedPermits = $permits->filter(function ($permit) {
+            $approvals = $permit->approvals;
+            return $approvals->where('approver_role', 'VP_SAS')->where('status', 'approved')->isNotEmpty()
+                && !$approvals->whereIn('status', ['pending', 'rejected'])->count();
+        });
+
+        $ongoingEvents = $approvedPermits->filter(function ($permit) use ($now) {
+            return $permit->date_start <= $now && (!$permit->date_end || $permit->date_end >= $now);
+        });
+
+        $successfulEvents = $approvedPermits->filter(fn($p) => $p->date_end && $p->date_end < now());
+
+        $canceledEvents = $rejectedPermits;
+
+        return view('student.permit.tracking', compact(
+            'pendingPermits',
+            'approvedPermits',
+            'rejectedPermits',
+            'ongoingEvents',
+            'successfulEvents',
+            'canceledEvents'
+        ));
+    }
+
+    /**
+     * Pending permits page
+     */
+    public function pendingPage()
+    {
+        $this->sharePermitCounts();
+
+        $permits = $this->getOrganizationPermitsQuery()
+            ->where(function ($query) {
+                $query->whereHas('approvals', fn($q) => $q->where('status', 'pending'))
+                      ->orWhereDoesntHave('approvals');
+            })
+            ->whereDoesntHave('approvals', fn($q) => $q->where('status', 'rejected'))
+            ->paginate(10);
+
+        return view('student.page.pending', compact('permits'));
+    }
+
+    /**
+     * Approved permits page
+     */
+    public function approvedPage()
+    {
+        $this->sharePermitCounts();
+
+        $permits = $this->getOrganizationPermitsQuery()
+            ->whereHas('approvals', fn($q) =>
+                $q->where('approver_role', 'VP_SAS')->where('status', 'approved')
+            )
+            ->whereDoesntHave('approvals', fn($q) =>
+                $q->whereIn('status', ['pending', 'rejected'])
+            )
+            ->paginate(10);
+
+        return view('student.page.approved', compact('permits'));
+    }
+
+    /**
+     * Rejected permits page
+     */
+    public function rejectedPage()
+{
+    $this->sharePermitCounts();
+
+    $permits = $this->getOrganizationPermitsQuery()
+        ->whereHas('approvals', fn($q) => $q->where('status', 'rejected'))
+        ->paginate(10);
+
+    return view('student.permit.rejected', compact('permits'));
+        //                     ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+        //             This must match your actual Blade file path
+}
+
+    // Legacy route redirects
+    public function index()     { return $this->track(); }
+    public function pending()   { return $this->pendingPage(); }
+    public function approved()  { return $this->approvedPage(); }
+    public function rejected()  { return $this->rejectedPage(); }
 }

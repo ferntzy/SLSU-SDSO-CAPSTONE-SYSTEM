@@ -1,19 +1,20 @@
 @php
     $container = 'container-xxl';
 
-    $approvedPermits = $permits->where('status', 'approved');
-    $pendingPermits  = $permits->where('status', 'pending');
-    $rejectedPermits = $permits->where('status', 'rejected');
+    // These variables are now passed from the controller
+    // So we DON'T need to re-filter from $permits
+    // Just use the ones already sent: $pendingPermits, $approvedPermits, etc.
 
-    $ongoingEvents = $permits->where('event_status', 'ongoing');
-    $successfulEvents = $permits->where('event_status', 'successful');
-    $canceledEvents = $permits->where('event_status', 'canceled');
+    // For events: we don't have them yet → we'll add later (or set to empty)
+    $ongoingEvents     = $ongoingEvents ?? collect();
+    $successfulEvents  = $successfulEvents ?? collect();
+    $canceledEvents    = $canceledEvents ?? collect();
 
     $fullName =
         Auth::user()->profile?->first_name . ' ' .
         (Auth::user()->profile?->middle_name ? strtoupper(substr(Auth::user()->profile->middle_name, 0, 1)) . '. ' : '') .
         Auth::user()->profile?->last_name . ' ' .
-        Auth::user()->profile?->suffix;
+        (Auth::user()->profile?->suffix ?? '');
 @endphp
 
 @extends('layouts/contentNavbarLayout')
@@ -57,6 +58,7 @@
 @endsection
 
 @section('content')
+
 <div class="{{ $container }} flex-grow-1 container-p-y">
 
     {{-- Page Header --}}

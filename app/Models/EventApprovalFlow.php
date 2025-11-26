@@ -22,19 +22,25 @@ class EventApprovalFlow extends Model
     'signature_path',
     'approved_at',
   ];
-
+  protected function casts(): array
+{
+    return [
+        'approved_at' => 'datetime',
+        'created_at'  => 'datetime',
+        'updated_at'  => 'datetime',
+    ];
+}
   protected $dates = ['approved_at'];
 
-  public function permit()
-  {
-    return $this->belongsTo(Permit::class, 'permit_id', 'permit_id');
-  }
+ public function permit()
+    {
+        return $this->belongsTo(Permit::class, 'permit_id');
+    }
 
   public function approver()
-  {
-    return $this->belongsTo(User::class, 'approver_id', 'user_id');
-  }
-
+{
+    return $this->belongsTo(\App\Models\User::class,  'approver_id'); // not 'user_id'
+}
   public function scopePending($q)
   {
     return $q->where('status', 'pending');

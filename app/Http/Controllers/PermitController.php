@@ -278,16 +278,17 @@ class PermitController extends Controller
   }
 
   public function view($hashed_id)
-  {
+{
     $permit = Permit::where('hashed_id', $hashed_id)->firstOrFail();
 
-    if ($permit->pdf_data) {
-      return response($permit->pdf_data)
-        ->header('Content-Type', 'application/pdf');
+    if (!$permit->pdf_data) {
+        abort(404, 'PDF not available.');
     }
 
-    abort(404, 'PDF not available.');
-  }
+    return response($permit->pdf_data)
+        ->header('Content-Type', 'application/pdf')
+        ->header('Content-Disposition', 'attachment; filename="Permit-'.$hashed_id.'.pdf"');
+}
 
   public function status($id)
   {

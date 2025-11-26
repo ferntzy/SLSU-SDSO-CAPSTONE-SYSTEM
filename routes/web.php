@@ -19,14 +19,17 @@ use App\Http\Controllers\PermitTrackingController;
 // ============================
 // AUTH ROUTES
 // ============================
+Route::get('/', function () {
+  return redirect()->route('login');
+});
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
 Route::get('/logout', function () {
-    Auth::logout();
-    session()->invalidate();
-    session()->regenerateToken();
-    return redirect('/login')->with('logout_success', true);
+  Auth::logout();
+  session()->invalidate();
+  session()->regenerateToken();
+  return redirect('/login')->with('logout_success', true);
 })->name('logout');
 
 
@@ -36,19 +39,19 @@ Route::get('/logout', function () {
 // fixing the "Route not defined" error caused by specific role middleware.
 // ============================
 Route::middleware(['auth'])->group(function () {
-    // CALENDAR VIEWS (Main page for logged-in users)
-    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+  // CALENDAR VIEWS (Main page for logged-in users)
+  Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
 
-    // CALENDAR API ENDPOINTS
-    Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
+  // CALENDAR API ENDPOINTS
+  Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
 
-    // Permit Form/Submission for Calendar
-    Route::get('/calendar/permit/form-content', [CalendarController::class, 'showPermitFormContent'])->name('calendar.permit.form');
-    Route::post('/calendar/events/store', [CalendarController::class, 'storeEvent'])->name('calendar.store');
+  // Permit Form/Submission for Calendar
+  Route::get('/calendar/permit/form-content', [CalendarController::class, 'showPermitFormContent'])->name('calendar.permit.form');
+  Route::post('/calendar/events/store', [CalendarController::class, 'storeEvent'])->name('calendar.store');
 
-    // PROFILE
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+  // PROFILE
+  Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+  Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 
@@ -56,138 +59,150 @@ Route::middleware(['auth'])->group(function () {
 // ADMIN ROUTES (MERGED CLEAN VERSION)
 // ============================
 Route::middleware(['auth', 'role:admin'])
-    ->prefix('admin')
-    ->group(function () {
+  ->prefix('admin')
+  ->group(function () {
 
-        // DASHBOARD
-        Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
+    // DASHBOARD
+    Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
 
-        // ======================
-        // USER MANAGEMENT
-        // ======================
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-          Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
-        Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
-        Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-        Route::post('/users/list', [UserController::class, 'index'])->name('users.list');
-        Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
-        Route::post('/users/view', [UserController::class, 'view'])->name('users.view');
-        Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
-        Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
-        Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-        // Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
-
-
-        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-
-        // LOGS
-        Route::get('/logs', [UserLogController::class, 'index'])->name('users.logs-list');
+    // ======================
+    // USER MANAGEMENT
+    // ======================
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/users/list', [UserController::class, 'index'])->name('users.list');
+    Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
+    Route::post('/users/view', [UserController::class, 'view'])->name('users.view');
+    Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
+    Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+    // Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
 
 
-        // Route::post('user/check-username', [UserController::class, 'checkUsername']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // LOGS
+    Route::get('/logs-list', [UserLogController::class, 'index'])->name('users.logs-list');
 
 
-
-        // Username / Email Availability
-        Route::post('/users/check-availability', [UserController::class, 'checkAvailability'])
-            ->name('users.checkAvailability');
-
-
-        // ======================
-        // PROFILE (ADMIN ACCOUNT)
-        // ======================
-        Route::get('/profile', [AdminProfileController::class, 'show'])->name('admin.profile.show');
-        Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
-
-        // ======================
-        // EVENT REQUEST VIEWS
-        // ======================
-        Route::view('/event-requests', 'admin.EventRequest.AllRequest');
-        Route::view('/event-requests/pending', 'admin.EventRequest.PendingApproval');
-        Route::view('/event-requests/approved-events', 'admin.EventRequest.ApprovedEvents');
-
-        // APPROVALS
-        Route::view('/approvals/pending', 'admin.approvals.pending');
-        Route::view('/approvals/history', 'admin.approvals.history');
-
-        // E-SIGNATURES
-        Route::view('/esignatures/pending', 'admin.ESignature.pending');
-        Route::view('/esignatures/completed', 'admin.ESignature.completed');
-
-        // ======================
-        // ORGANIZATIONS
-        // ======================
-        Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
-        Route::get('/organizations/create', [OrganizationController::class, 'create'])->name('organizations.create');
-        Route::post('/organizations/store', [OrganizationController::class, 'store'])->name('organizations.store');
-        Route::put('/organizations/update', [OrganizationController::class, 'update'])->name('organizations.update');
-        Route::post('/organizations/list', [OrganizationController::class, 'index'])->name('organizations.list');
-        Route::post('/organizations/edit', [OrganizationController::class, 'edit'])->name('organizations.edit');
-        // Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
-        // Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
+    // Route::post('user/check-username', [UserController::class, 'checkUsername']);
 
 
 
-        // ======================
-        // PROFILES (USER PROFILES)
-        // ======================
-        Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
-        Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
-        Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
-        Route::post('/profiles/update', [ProfileController::class, 'update'])->name('profiles.update');
-        Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
-        Route::post('/profiles/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
-        Route::post('/profiles/view', [ProfileController::class, 'view'])->name('profiles.view');
-        Route::delete('profiles/{profile_id}', [ProfileController::class, 'destroy'])->name('profiles.destroy');
+    // Username / Email Availability
+    // Route::post('/users/check-availability', [UserController::class, 'checkAvailability'])
+    //   ->name('users.checkAvailability');
+
+    // LOGS
+    Route::get('/logs', [UserLogController::class, 'index'])->name('admin.logs');
+
+    // ======================
+    // PROFILE (ADMIN ACCOUNT)
+    // ======================
+    Route::get('/profile', [AdminProfileController::class, 'show'])->name('admin.profile.show');
+    Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+
+    // ======================
+    // EVENT REQUEST VIEWS
+    // ======================
+    Route::view('/event-requests', 'admin.EventRequest.AllRequest');
+    Route::view('/event-requests/pending', 'admin.EventRequest.PendingApproval');
+    Route::view('/event-requests/approved-events', 'admin.EventRequest.ApprovedEvents');
+
+    // APPROVALS
+    Route::view('/approvals/pending', 'admin.approvals.pending');
+    Route::view('/approvals/history', 'admin.approvals.history');
+
+    // E-SIGNATURES
+    Route::view('/esignatures/pending', 'admin.ESignature.pending');
+    Route::view('/esignatures/completed', 'admin.ESignature.completed');
+
+    // ======================
+    // ORGANIZATIONS
+    // ======================
+    Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
+    Route::get('/organizations/create', [OrganizationController::class, 'create'])->name('organizations.create');
+    Route::post('/organizations/store', [OrganizationController::class, 'store'])->name('organizations.store');
+    Route::put('/organizations/update', [OrganizationController::class, 'update'])->name('organizations.update');
+    Route::post('/organizations/list', [OrganizationController::class, 'index'])->name('organizations.list');
+    Route::post('/organizations/edit', [OrganizationController::class, 'edit'])->name('organizations.edit');
+
+    // ======================
+    // PROFILES (USER PROFILES)
+    // ======================
+    Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
+    Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
+    Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
+    Route::post('/profiles/update', [ProfileController::class, 'update'])->name('profiles.update');
+    Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
+    Route::post('/profiles/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
+    Route::post('/profiles/view', [ProfileController::class, 'view'])->name('profiles.view');
+    Route::delete('profiles/{profile_id}', [ProfileController::class, 'destroy'])->name('profiles.destroy');
 
 
-            // ACCOUNT SETTINGS
-            Route::view('/account', 'admin.profile.account');
+    // ACCOUNT SETTINGS
+    Route::view('/account', 'admin.profile.account');
 
-            // REPORTING
-            Route::view('/reports/minutes', 'admin.reports.minutes');
+    // REPORTING
+    Route::view('/reports/minutes', 'admin.reports.minutes');
 
-            // ROLES
-            Route::view('/roles', 'admin.users.roles');
+    // ROLES
+    Route::view('/roles', 'admin.users.roles');
 
-            // HELP
-            Route::view('/help', 'admin.help.help');
-        });
+    // HELP
+    Route::view('/help', 'admin.help.help');
+  });
 
-    // ============================
-    // STUDENT ORGANIZATION ROUTES
-    // ============================
-    Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->group(function () {
-    Route::get('/dashboard', [PermitTrackingController::class, 'index'])->name('student.dashboard');
-    Route::get('/permit/form', [PermitController::class, 'showForm'])->name('permit.form');
-    Route::post('/permit/generate', [PermitController::class, 'generate'])->name('permit.generate');
-    Route::get('/permit/tracking', [PermitController::class, 'track'])->name('student.permit.tracking');
+// ============================
+// STUDENT ORGANIZATION ROUTES
+// ============================
+Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->group(function () {
+  Route::get('/dashboard', [PermitTrackingController::class, 'index'])->name('student.dashboard');
+  Route::get('/permit/form', [PermitController::class, 'showForm'])->name('permit.form');
+  Route::post('/permit/generate', [PermitController::class, 'generate'])->name('permit.generate');
+  Route::get('/permit/tracking', [PermitController::class, 'track'])->name('student.permit.tracking');
 
-    // Calendar view route (the main page) - This is now just a helper view route.
-    Route::view('/calendar', 'student.calendardisplay');
+  // Calendar view route (the main page) - This is now just a helper view route.
+  Route::view('/calendar', 'student.calendardisplay');
 
-    Route::get('/permit/view/{hashed_id}', [PermitController::class, 'view'])->name('student.permit.view');
-
-
-    //profiles
-        Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
-    Route::get('/profile', function() { return view('student.profile'); })->name('user.profile');
-    Route::post('/profile/signature/',[UserController::class, 'uploadSignature'])->name('user.uploadSignature');
-    Route::delete('/profile/signature/',[UserController::class, 'removeSignature'])->name('user.removeSignature');
-    // contact update Routeer')->group(function () {
+  Route::get('/permit/view/{hashed_id}', [PermitController::class, 'view'])->name('student.permit.view');
 
 
+  //profiles
+  Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
+  Route::get('/profile', function () {
+    return view('student.profile');
+  })->name('user.profile');
+  Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('user.uploadSignature');
+  Route::delete('/profile/signature/', [UserController::class, 'removeSignature'])->name('user.removeSignature');
+  // contact update Routeer')->group(function () {
 
-    // View PDF securely (ensure hashed_id works)
-    Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])
-        ->name('faculty.permit.view');
+
+  Route::get('page/pending-permits', [PermitTrackingController::class, 'pendingPage'])
+    ->name('student.page.pending');
+
+  Route::get('page/approved-permits', [PermitTrackingController::class, 'approvedPage'])
+    ->name('student.page.approved');
+
+  Route::get('page/rejected-permits', [PermitTrackingController::class, 'rejectedPage'])
+    ->name('student.page.rejected');
 
 
-    // Approve & Reject
-    Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
-        ->name('faculty.approve');
-    Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
-        ->name('faculty.reject');
+
+
+
+  // View PDF securely (ensure hashed_id works)
+  Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])
+    ->name('faculty.permit.view');
+
+
+  // Approve & Reject
+  Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
+    ->name('faculty.approve');
+  Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
+    ->name('faculty.reject');
 });
 
 
@@ -197,22 +212,22 @@ Route::middleware(['auth', 'role:admin'])
 // ============================
 Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(function () {
 
-    Route::get('/dashboard', [FacultyAdviserController::class, 'dashboard'])
-        ->name('adviser.dashboard');
+  Route::get('/dashboard', [FacultyAdviserController::class, 'dashboard'])
+    ->name('adviser.dashboard');
 
-    Route::get('/approvals', [FacultyAdviserController::class, 'approvals'])
-        ->name('adviser.approvals');
+  Route::get('/approvals', [FacultyAdviserController::class, 'approvals'])
+    ->name('adviser.approvals');
 
-    // View PDF securely (ensure hashed_id works)
-    Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])
-        ->name('faculty.permit.view');
+  // View PDF securely (ensure hashed_id works)
+  Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])
+    ->name('faculty.permit.view');
 
 
-    // Approve & Reject
-    Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
-        ->name('faculty.approve');
-    Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
-        ->name('faculty.reject');
+  // Approve & Reject
+  Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
+    ->name('faculty.approve');
+  Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
+    ->name('faculty.reject');
 });
 
 
@@ -225,23 +240,23 @@ Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(fu
 // ============================
 Route::middleware(['auth', 'role:BARGO'])->group(function () {
 
-    // Dashboard
-    Route::get('/bargo/dashboard', [BargoController::class, 'dashboard'])->name('bargo.dashboard');
+  // Dashboard
+  Route::get('/bargo/dashboard', [BargoController::class, 'dashboard'])->name('bargo.dashboard');
 
-    // View/Approve PDF
-    Route::get('/bargo/permit/{hashed_id}', [BargoController::class, 'viewPermitPdf'])->name('bargo.view.pdf');
+  // View/Approve PDF
+  Route::get('/bargo/permit/{hashed_id}', [BargoController::class, 'viewPermitPdf'])->name('bargo.view.pdf');
 
-    // Approvals Page (this is the one missing)
-    Route::get('/bargo/approval', [BargoController::class, 'approvals'])->name('bargo.approvals');
+  // Approvals Page (this is the one missing)
+  Route::get('/bargo/approval', [BargoController::class, 'approvals'])->name('bargo.approvals');
 
-    // Approve / Reject actions
-    Route::post('/bargo/approve/{approval_id}', [BargoController::class, 'approve'])->name('bargo.approve');
-    Route::post('/bargo/reject/{approval_id}', [BargoController::class, 'reject'])->name('bargo.reject');
+  // Approve / Reject actions
+  Route::post('/bargo/approve/{approval_id}', [BargoController::class, 'approve'])->name('bargo.approve');
+  Route::post('/bargo/reject/{approval_id}', [BargoController::class, 'reject'])->name('bargo.reject');
 
-    // Event monitoring pages
-    Route::get('/bargo/events/pending', [BargoController::class, 'pending'])->name('bargo.events.pending');
-    Route::get('/bargo/events/approved', [BargoController::class, 'approved'])->name('bargo.events.approved');
-    Route::get('/bargo/events/history', [BargoController::class, 'history'])->name('bargo.events.history');
+  // Event monitoring pages
+  Route::get('/bargo/events/pending', [BargoController::class, 'pending'])->name('bargo.events.pending');
+  Route::get('/bargo/events/approved', [BargoController::class, 'approved'])->name('bargo.events.approved');
+  Route::get('/bargo/events/history', [BargoController::class, 'history'])->name('bargo.events.history');
 });
 
 
@@ -250,17 +265,17 @@ Route::middleware(['auth', 'role:BARGO'])->group(function () {
 // OTHER ROLES
 // ============================
 Route::middleware(['auth', 'role:SDSO_Head'])->group(function () {
-    Route::view('/sdso/dashboard', 'sdso.dashboard')->name('sdso.dashboard');
+  Route::view('/sdso/dashboard', 'sdso.dashboard')->name('sdso.dashboard');
 });
 
 Route::middleware(['auth', 'role:VP_SAS'])->group(function () {
-    Route::view('/vpsas/dashboard', 'vpsas.dashboard')->name('vpsas.dashboard');
+  Route::view('/vpsas/dashboard', 'vpsas.dashboard')->name('vpsas.dashboard');
 });
 
 Route::middleware(['auth', 'role:SAS_Director'])->group(function () {
-    Route::view('/sas/dashboard', 'sas.dashboard')->name('sas.dashboard');
+  Route::view('/sas/dashboard', 'sas.dashboard')->name('sas.dashboard');
 });
 
 
 Route::get('/adviser/temp/view/{hashed_id}', [FacultyAdviserController::class, 'viewTempPdf'])
-    ->name('adviser.view.temp.pdf');
+  ->name('adviser.view.temp.pdf');

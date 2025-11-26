@@ -9,61 +9,73 @@
       "icon": "menu-icon tf-icons mdi mdi-view-dashboard-outline",
       "slug": "student-dashboard"
     },
+
     {
       "url": "/student/permit/form",
       "name": "Apply for Activity Permit",
-      "icon": "mdi:file-document-edit-outline",
+      "icon": "menu-icon tf-icons mdi mdi-file-document-edit-outline",
       "slug": "student-activity-permit"
     },
+
     {
       "url": "/student/calendar",
       "name": "Calendar",
       "icon": "menu-icon tf-icons mdi mdi-calendar-month-outline",
       "slug": "student-calendar"
     },
+
     {
-      "menuHeader": "PERMIT"
+      "menuHeader": "PERMIT MANAGEMENT"
     },
     {
-      "url": "/student/permit/tracking",
-      "name": "Permit Tracking",
-      "slug": "student-tracking"
-    },
-    {
-      "url": "/student/permit/approved-permits",
-      "name": "Approved Permits",
-      "slug": "student-approved-permits"
-    },
-    {
-      "url": "/student/permit/pending-permits",
+      "url": "/student/page/pending-permits",
       "name": "Pending Permits",
-      "slug": "student-pending-permits"
+      "icon": "menu-icon tf-icons mdi mdi-clock-outline",
+      "slug": "student-pending-permits",
+      "badge": "warning",
+      "badgeText": "{{ $pendingPermitsCount ?? 0 }}"
     },
     {
-      "url": "/student/permit/rejected-permits",
+      "url": "/student/page/approved-permits",
+      "name": "Approved Permits",
+      "icon": "menu-icon tf-icons mdi mdi-check-circle-outline",
+      "slug": "student-approved-permits",
+      "badge": "success",
+      "badgeText": "{{ $approvedPermitsCount ?? 0 }}"
+    },
+    {
+      "url": "/student/page/rejected-permits",
       "name": "Rejected Permits",
-      "slug": "student-rejected-permits"
+      "icon": "menu-icon tf-icons mdi mdi-close-circle-outline",
+      "slug": "student-rejected-permits",
+      "badge": "danger",
+      "badgeText": "{{ $rejectedPermitsCount ?? 0 }}"
     },
+
     {
-      "menuHeader": "event"
+      "menuHeader": "EVENT STATUS"
     },
     {
       "url": "/student/permit/ongoing-events",
       "name": "Ongoing Events",
-      "slug": "student-ongoing-event"
+      "icon": "menu-icon tf-icons mdi mdi-play-circle-outline",
+      "slug": "student-ongoing-events"
     },
     {
-      "url": "/student/permit/succesful-events",
-      "name": "Succesful Events",
-      "slug": "student-succesful-event"
+      "url": "/student/permit/successful-events",
+      "name": "Successful Events",
+      "icon": "menu-icon tf-icons mdi mdi-trophy-outline",
+      "slug": "student-successful-events"
     },
     {
       "url": "/student/permit/canceled-events",
       "name": "Canceled Events",
-      "slug": "student-canceled-event"
+      "icon": "menu-icon tf-icons mdi mdi-cancel",
+      "slug": "student-canceled-events"
     },
+
     {
-      "menuHeader": "Account"
+      "menuHeader": "ACCOUNT"
     },
     {
       "url": "/student/profile",
