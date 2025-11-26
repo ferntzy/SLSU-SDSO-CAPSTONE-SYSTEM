@@ -187,14 +187,27 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
   // contact update Routeer')->group(function () {
 
 
- Route::get('page/pending-permits', [PermitTrackingController::class, 'pendingPage'])
+  Route::get('page/pending-permits', [PermitTrackingController::class, 'pendingPage'])
     ->name('student.page.pending');
 
-Route::get('page/approved-permits', [PermitTrackingController::class, 'approvedPage'])
+  Route::get('page/approved-permits', [PermitTrackingController::class, 'approvedPage'])
     ->name('student.page.approved');
 
-Route::get('page/rejected-permits', [PermitTrackingController::class, 'rejectedPage'])
+  Route::get('page/rejected-permits', [PermitTrackingController::class, 'rejectedPage'])
     ->name('student.page.rejected');
+
+
+
+  // View PDF securely (ensure hashed_id works)
+  Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])
+    ->name('faculty.permit.view');
+
+
+  // Approve & Reject
+  Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
+    ->name('faculty.approve');
+  Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
+    ->name('faculty.reject');
 
 
 

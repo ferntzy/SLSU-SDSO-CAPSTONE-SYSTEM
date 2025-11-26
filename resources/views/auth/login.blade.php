@@ -26,7 +26,7 @@
 
     <!-- LEFT SIDE: LOGIN FORM -->
     <div class="login-left">
-    <h4 class="login-title">{{config('variables.templateSuffix')}}</h4>
+    <h3 class="login-title">{{config('variables.templateSuffix')}}</h3>
       <h6 class="text-center">{{config('variables.templateName')}}</h6>
 
       <div class="card shadow p-4 login-box">
@@ -56,7 +56,7 @@
               <label class="checkbox-form-check-label" for="showPasswordCheck">Show Password</label>
             </div>
           <div>
-            <a href="{{ route('password.request') }}" class="small text-decoration-none">Forgot Password?</a>
+            <a href="{{ route('password.request') }}" class="small text-decoration-none forgot-link">Forgot Password?</a>
           </div>
 
           </div>
