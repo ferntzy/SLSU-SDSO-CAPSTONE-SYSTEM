@@ -174,17 +174,17 @@ class PermitTrackingController extends Controller
     /**
      * Rejected permits page
      */
-    public function rejectedPage()
+   public function rejectedPage()
 {
     $this->sharePermitCounts();
 
     $permits = $this->getOrganizationPermitsQuery()
         ->whereHas('approvals', fn($q) => $q->where('status', 'rejected'))
+        ->with(['approvals.approver.profile'])  // Fixed eager loading too
         ->paginate(10);
 
-    return view('student.permit.rejected', compact('permits'));
-        //                     ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-        //             This must match your actual Blade file path
+    // CORRECT PATH — matches your actual file location
+    return view('student.page.rejected', compact('permits'));
 }
 
     // Legacy route redirects

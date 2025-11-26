@@ -50,10 +50,10 @@
   {
       return $this->belongsTo(Organization::class, 'organization_id');
   }
-    public function offCampusRequirements()
-    {
-      return $this->hasMany(OffCampusRequirement::class, 'permit_id', 'permit_id');
-    }
+    // public function offCampusRequirements()
+    // {
+    //   // return $this->hasMany(OffCampusRequirement::class, 'permit_id', 'permit_id');
+    // }
     protected static function booted()
     {
       static::creating(function ($permit) {

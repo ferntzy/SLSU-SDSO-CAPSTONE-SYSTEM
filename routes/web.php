@@ -187,16 +187,14 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
   // contact update Routeer')->group(function () {
 
 
-  Route::get('page/pending-permits', [PermitTrackingController::class, 'pendingPage'])
+ Route::get('page/pending-permits', [PermitTrackingController::class, 'pendingPage'])
     ->name('student.page.pending');
 
-  Route::get('page/approved-permits', [PermitTrackingController::class, 'approvedPage'])
+Route::get('page/approved-permits', [PermitTrackingController::class, 'approvedPage'])
     ->name('student.page.approved');
 
-  Route::get('page/rejected-permits', [PermitTrackingController::class, 'rejectedPage'])
+Route::get('page/rejected-permits', [PermitTrackingController::class, 'rejectedPage'])
     ->name('student.page.rejected');
-
-
 
 
 

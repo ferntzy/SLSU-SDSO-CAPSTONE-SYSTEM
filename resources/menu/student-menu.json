@@ -31,25 +31,19 @@
       "url": "/student/page/pending-permits",
       "name": "Pending Permits",
       "icon": "menu-icon tf-icons mdi mdi-clock-outline",
-      "slug": "student-pending-permits",
-      "badge": "warning",
-      "badgeText": "{{ $pendingPermitsCount ?? 0 }}"
+      "slug": "student-pending-permits"
     },
     {
       "url": "/student/page/approved-permits",
       "name": "Approved Permits",
       "icon": "menu-icon tf-icons mdi mdi-check-circle-outline",
-      "slug": "student-approved-permits",
-      "badge": "success",
-      "badgeText": "{{ $approvedPermitsCount ?? 0 }}"
+      "slug": "student-approved-permits"
     },
     {
       "url": "/student/page/rejected-permits",
       "name": "Rejected Permits",
       "icon": "menu-icon tf-icons mdi mdi-close-circle-outline",
-      "slug": "student-rejected-permits",
-      "badge": "danger",
-      "badgeText": "{{ $rejectedPermitsCount ?? 0 }}"
+      "slug": "student-rejected-permits"
     },
 
     {
