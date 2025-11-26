@@ -11,30 +11,29 @@ use Exception;
 
 class OrganizationController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
     {
-        // Load organizations with members + adviser detection
-        $organizations = Organization::with(['adviser.profile', 'members'])
-                                     ->withCount('members')
-                                     ->get();
+        $query = Organization::with(['adviser.profile', 'members'])
+                            ->withCount('members');
 
-        // Advisers list (for dropdown if needed)
-        $advisers = User::where('account_role', 'Faculty_Adviser')
-                        ->with('profile')
-                        ->get();
+        if ($request->ajax() && $request->filled('str')) {
+            $search = $request->str;
+            $query->where('organization_name', 'like', "%{$search}%")
+                  ->orWhere('organization_type', 'like', "%{$search}%");
+        }
 
-        // Student organization officers
-        $officers = User::where('account_role', 'Student_Organization')
-                        ->with('profile')
-                        ->get();
+        $organizations = $query->get();
+
+        $advisers = User::where('account_role', 'Faculty_Adviser')->with('profile')->get();
+        $officers = User::where('account_role', 'Student_Organization')->with('profile')->get();
 
         if ($request->ajax()) {
             return view('admin.organizations.list-organization', compact('organizations'));
         }
-        return view('admin.organizations.organizations', compact(
-            'organizations', 'advisers', 'officers'
-        ));
+
+        return view('admin.organizations.organizations', compact('organizations', 'advisers', 'officers'));
     }
+
     public function create()
     {
         return view ('admin.organizations.create-organization');

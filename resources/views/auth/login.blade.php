@@ -50,10 +50,16 @@
             <label for="password" class="form-label">Password</label>
             <input type="password" name="password" class="form-control" required>
           </div>
-          <div class="checkbox-form-check mt-2">
-            <input type="checkbox" class="checkbox-form-check-input" id="showPasswordCheck">
-            <label class="checkbox-form-check-label" for="showPasswordCheck">Show Password</label>
+         <div class="checkbox-form-check mt-2 d-flex justify-content-between align-items-center">
+            <div>
+              <input type="checkbox" class="checkbox-form-check-input" id="showPasswordCheck">
+              <label class="checkbox-form-check-label" for="showPasswordCheck">Show Password</label>
+            </div>
+            <div>
+              <a href="" class="small text-decoration-none">Forgot Password?</a>
+            </div>
           </div>
+
 
 
           <button type="submit" class="btn btn-primary w-100 login-btn">Login</button>

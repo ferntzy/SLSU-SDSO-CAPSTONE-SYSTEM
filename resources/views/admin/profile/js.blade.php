@@ -59,7 +59,7 @@
 
 
 
-// SEARCH ACCOUNT ----------
+// SEARCH PROFILE ----------
 
   $(document).on("keypress", "#searchProfile", function(e) {
       if (e.which === 13) { // 13 = Enter key
@@ -74,14 +74,14 @@
       listprofile();                 // Call your AJAX list function
   });
 
-
-
   // profile list
 
-  function list(){
+  function listprofile(){
+     let str = $("#searchProfile").val();
     $.ajax({
         url: "{{ route('profiles.list') }}",
         method: "POST",
+        data: { str},
         beforeSend:function(){
             $("#profilelist").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Generating, please wait...</div>");
         },
@@ -95,6 +95,10 @@
         }
     });
   }
+
+
+
+
 
   // populate edit form script
   $(document).on("click", '.btn-edit', function(e){

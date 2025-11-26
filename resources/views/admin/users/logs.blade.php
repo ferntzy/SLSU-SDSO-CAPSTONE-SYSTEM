@@ -8,6 +8,14 @@
 
 @section('content')
 
+<div class="d-flex align-items-center mb-3">
+    <span class="text-secondary fs-5 fw-normal">User Management</span>
+    <span class="mx-2 text-secondary">|</span>
+    <i class="mdi mdi-home-outline text-secondary fs-6"></i>
+    <span class="mx-1 text-secondary" style="font-size: 10px;">&gt;</span>
+    <span class="ms-2 text-muted fs-6">USer Logs</span>
+</div>
+
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
 
@@ -33,45 +41,8 @@
 </div>
 
 @endsection
-
-@section('page-script')
-<script>
-  // Pagination + Search Handling
-  document.addEventListener("DOMContentLoaded", () => {
-    const searchInput = document.querySelector('#searchAccountlogs');
-    const tableBody = document.querySelector('#logsBody');
-    const rows = Array.from(tableBody.querySelectorAll('tr'));
-    const paginationWrapper = document.querySelector('#paginationWrapper');
-    const rowsPerPage = 20;
-    let currentPage = 1;
-
-    function renderTable(filteredRows) {
-      const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-      const start = (currentPage - 1) * rowsPerPage;
-      const end = start + rowsPerPage;
-      const visibleRows = filteredRows.slice(start, end);
-
-      tableBody.innerHTML = '';
-      visibleRows.forEach(row => tableBody.appendChild(row));
-
-      paginationWrapper.innerHTML = '';
-      for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.textContent = i;
-        btn.className = 'btn btn-sm ' + (i === currentPage ? 'btn-primary' : 'btn-outline-primary');
-        btn.addEventListener('click', () => {
-          currentPage = i;
-          renderTable(filteredRows);
-        });
-        paginationWrapper.appendChild(btn);
-      }
-    }
-
-    // Initial load
-    renderTable(rows);
-  });
-</script>
-@endsection
 @section('page-script')
 @include('admin.users.js')
+
+@endsection
 

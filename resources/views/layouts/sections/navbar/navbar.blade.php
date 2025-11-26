@@ -37,7 +37,7 @@
         $searchVisibleRoutes = ['admin.logs', 'users.index'];
       @endphp
 
-      @if(in_array(Route::currentRouteName(), $searchVisibleRoutes))
+      {{-- @if(in_array(Route::currentRouteName(), $searchVisibleRoutes))
         <div class="navbar-nav align-items-center">
           <div class="nav-item d-flex align-items-center">
             <i class="mdi mdi-magnify mdi-24px lh-0"></i>
@@ -45,7 +45,7 @@
               aria-label="Search...">
           </div>
         </div>
-      @endif
+      @endif --}}
 
 
 

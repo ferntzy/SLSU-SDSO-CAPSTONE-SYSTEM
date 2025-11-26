@@ -17,7 +17,8 @@
   <tbody id="logsBody" class="table-border-bottom-0">
     @foreach ($logs as $index => $log)
       <tr>
-        <td class="text-center">{{ $index + 1 }}</td>
+        <!-- Use correct numbering with pagination -->
+        <td class="text-center">{{ ($logs->currentPage()-1) * $logs->perPage() + $index + 1 }}</td>
 
         <td>
           @if ($log->user)
@@ -44,6 +45,9 @@
   </tbody>
 </table>
 
-<div class="d-flex justify-content-center mt-3" id="paginationWrapper"></div>
+<!-- FIXED: Laravel Pagination Links -->
+<div class="d-flex justify-content-center mt-3" id="paginationLinks">
+    {!! $logs->links('pagination::bootstrap-5') !!}
+</div>
 
 @endif

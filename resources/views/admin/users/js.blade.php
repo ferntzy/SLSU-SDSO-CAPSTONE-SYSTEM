@@ -30,7 +30,7 @@
     let account_role = "" ;
     if ($("#typeFilter").val() == "student"){
       profile_id = $("#dropdownList-student").val();
-      account_role = $("#account_role_student").val();
+       account_role = "Student_Organization";
     }else{
       profile_id = $("#dropdownList-employee").val();
       account_role = $("#account_role_employee").val();
@@ -130,39 +130,47 @@
 
 
 // USER SEARCH LOGS ----------
-
-$(document).on("keypress", "#searchAccountlogs", function(e) {
+// SEARCH on enter
+$(document).on("keypress", "#searchAccountlogs", function (e) {
     if (e.which === 13) {
         e.preventDefault();
-        listlogs();
+        loadLogs(1);
     }
 });
 
-// Trigger on button click
-$(document).on("click", "#btnSearchlogs", function(e) {
+// SEARCH button click
+$(document).on("click", "#btnSearchlogs", function (e) {
     e.preventDefault();
-    listlogs();
+    loadLogs(1);
 });
 
-// AJAX search function
-function listlogs() {
-    let str = $("#searchAccountlogs").val(); // FIXED ID
+// PAGINATION
+$(document).on("click", ".pagination a", function (e) {
+    e.preventDefault();
+
+    let page = $(this).attr('href').split('page=')[1];
+    loadLogs(page);
+});
+
+// MAIN AJAX FUNCTION
+function loadLogs(page = 1) {
+
+    let str = $("#searchAccountlogs").val(); // ← correct search input
 
     $.ajax({
-        url: "{{ route('users.logs-list') }}",
-        method: "GET",
-        data: { str },
-        beforeSend: function() {
+        url: "{{ route('users.logs-list') }}?page=" + page,
+        type: "GET",
+        data: { str: str },
+        beforeSend: function () {
             $("#logsList").html(
-                "<div class='alert alert-warning'><i class='spinner-grow spinner-grow-sm'></i> Generating, please wait...</div>"
+                "<div class='alert alert-warning'><i class='spinner-grow spinner-grow-sm'></i> Loading logs...</div>"
             );
         },
-        success: function(data) {
-            $("#logsList").html(data);
+        success: function (data) {
+            $("#logsList").html(data); // ← correct container
         },
-        error: function(response) {
-            var errors = response.responseJSON.errors;
-            $("#data").html(errors);
+        error: function (xhr) {
+            console.error(xhr);
         }
     });
 }
