@@ -1,12 +1,19 @@
 {
   "menu": [
-    {
-      "menuHeader": "Dashboard"
-    },
+
     {
       "url": "/bargo/dashboard",
-      "name": "Overview",
+      "name": "Dashboard",
+      "icon": "menu-icon tf-icons mdi mdi-view-dashboard-outline",
       "slug": "bargo-dashboard"
+    },
+
+    {
+       "url": "/bargo/calendar",
+      "name": "Calendar",
+      "icon": "menu-icon tf-icons mdi mdi-calendar-month-outline",
+      "slug": "bargo-calendar"
+
     },
     {
       "menuHeader": "Event Monitoring"
@@ -14,16 +21,26 @@
     {
       "url": "/bargo/events/pending",
       "name": "Pending Approvals",
+      "icon": "menu-icon tf-icons mdi mdi-receipt-clock-outline",
       "slug": "bargo-events-pending"
     },
     {
       "url": "/bargo/events/approved",
       "name": "Approved Events",
+      "icon": "menu-icon tf-icons mdi mdi-file-check",
       "slug": "bargo-events-approved"
+    },
+
+       {
+      "url": "/bargo/events/rejected",
+      "name": "Rejected Events",
+      "icon": "menu-icon tf-icons mdi mdi-file-document-remove-outline",
+      "slug": "bargo-events-rejected"
     },
     {
       "url": "/bargo/events/history",
       "name": "Event History",
+      "icon": "menu-icon tf-icons mdi mdi-history",
       "slug": "bargo-events-history"
     },
     {
@@ -32,11 +49,14 @@
     {
       "url": "/bargo/profile",
       "name": "Profile",
+      "icon": "menu-icon tf-icons mdi mdi-account-circle-outline",
       "slug": "bargo-profile"
+
     },
     {
       "url": "/logout",
       "name": "Logout",
+      "icon": "menu-icon tf-icons mdi mdi-logout",
       "slug": "logout"
     }
   ]

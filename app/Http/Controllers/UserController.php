@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\UserProfile;
 use Exception;
@@ -12,6 +13,20 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+
+  public function profile()
+    {
+        // User must be logged in
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        return view('admin.users.profile');
+    }
+
+
+
+
  public function index(Request $request)
     {
       $user_accounts = User::with('profile');
@@ -91,6 +106,14 @@ public function store(Request $request)
 
 
 
+public function checkPassword(Request $request)
+{
+    $user = User::findOrFail($request->user_id);
+
+    $match = Hash::check($request->password, $user->password);
+
+    return response()->json(['match' => $match]);
+}
 
 
 

@@ -11,10 +11,10 @@
       <span class="mx-1 text-secondary" style="font-size: 10px;">&gt;</span>
       <span class="ms-2 text-muted fs-6">Pending Events</span>
   </div>
-  
+
   <div class="container py-4">
 
-    <h3 class="mb-4">Pending Event Approvals (BARGO)</h3>
+    <h3 class="mb-4">Pending Event Approvals </h3>
 
     @if ($pendingReviews->isEmpty())
       <div class="alert alert-info">No pending approvals at the moment.</div>

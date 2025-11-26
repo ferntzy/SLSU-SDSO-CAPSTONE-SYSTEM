@@ -286,6 +286,8 @@ function loadLogs(page = 1) {
       });
     });
 
+    
+
 
 
 

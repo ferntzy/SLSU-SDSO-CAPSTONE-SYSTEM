@@ -11,6 +11,17 @@ use App\Models\Organization;
 
 class BargoController extends Controller
 {
+  public function show()
+    {
+        // User must be logged in
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        return view('bargo.profile');
+    }
+
+
   public function dashboard()
   {
     $bargoId = Auth::user()->user_id;
@@ -63,6 +74,23 @@ class BargoController extends Controller
       ->header('Content-Type', 'application/pdf')
       ->header('Content-Disposition', 'inline; filename="permit.pdf"');
   }
+
+    public function rejected()
+  {
+    $pendingPermits = EventApprovalFlow::with(['permit.organization'])
+      ->where('approver_role', 'BARGO')
+      ->where('status', 'pending')
+      ->orderBy('created_at', 'desc')
+      ->get();
+
+    return view('bargo.events.rejected', compact('pendingPermits'));
+  }
+
+
+
+
+
+
 
   public function approve(Request $request, $approval_id)
   {

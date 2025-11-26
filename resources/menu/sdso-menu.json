@@ -1,37 +1,60 @@
 {
   "menu": [
     {
-      "menuHeader": "Dashboard"
-    },
-    {
       "url": "/sdso/dashboard",
-      "name": "Overview",
+      "name": "dashboard",
+      "icon": "menu-icon tf-icons mdi mdi-view-dashboard-outline",
       "slug": "sdso-dashboard"
     },
+
+       {
+       "url": "/sdso/calendar",
+      "name": "Calendar",
+      "icon": "menu-icon tf-icons mdi mdi-calendar-month-outline",
+      "slug": "sdso-calendar"
+
+    },
+
+
+
     {
-      "menuHeader": "Event Management"
+      "menuHeader": "Event Monitoring"
     },
     {
       "url": "/sdso/events/pending",
       "name": "Pending Events",
+      "icon": "menu-icon tf-icons mdi mdi-receipt-clock-outline",
       "slug": "sdso-events-pending"
     },
     {
       "url": "/sdso/events/approved",
       "name": "Approved Events",
+      "icon": "menu-icon tf-icons mdi mdi-file-check",
       "slug": "sdso-events-approved"
     },
+
+      {
+      "url": "/sdso/events/rejected",
+      "name": "Rejected Events",
+      "icon": "menu-icon tf-icons mdi mdi-file-document-remove-outline",
+      "slug": "sdso-events-rejected"
+    },
+
     {
       "url": "/sdso/events/history",
       "name": "Event History",
+      "icon": "menu-icon tf-icons mdi mdi-history",
       "slug": "sdso-events-history"
     },
+
+
     {
       "menuHeader": "Organizations"
     },
     {
       "url": "/sdso/organizations",
       "name": "Recognized Orgs",
+     "icon": "menu-icon tf-icons mdi mdi-account-group",
       "slug": "sdso-organizations"
     },
     {
@@ -40,11 +63,13 @@
     {
       "url": "/sdso/profile",
       "name": "Profile",
+      "icon": "menu-icon tf-icons mdi mdi-account-circle-outline",
       "slug": "sdso-profile"
     },
     {
       "url": "/logout",
       "name": "Logout",
+       "icon": "menu-icon tf-icons mdi mdi-logout",
       "slug": "logout"
     }
   ]

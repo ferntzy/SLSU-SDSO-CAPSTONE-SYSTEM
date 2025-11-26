@@ -14,7 +14,7 @@
 
   <div class="container py-4">
 
-    <h3 class="mb-4">Approval History (BARGO)</h3>
+    <h3 class="mb-4">Approval History </h3>
 
     @if ($historyReviews->isEmpty())
       <div class="alert alert-info">No records found.</div>

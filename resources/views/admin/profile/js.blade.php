@@ -38,7 +38,7 @@
             }else {
               $("#profiledatamsg").html("<div class = 'alert alert-success'>Profile data updated.</div>");
             }
-            list();
+            profilelist();
             setTimeout(() => {
               if(flag === "POST"){
                 $('.txt').val('');
@@ -64,19 +64,19 @@
   $(document).on("keypress", "#searchProfile", function(e) {
       if (e.which === 13) { // 13 = Enter key
           e.preventDefault(); // Prevent form submission
-          listprofile();             // Call your AJAX list function
+          profilelist();             // Call your AJAX list function
       }
   });
 
   // Trigger list() on button click
   $(document).on("click", "#btnSearchProfile", function(e) {
       e.preventDefault();
-      listprofile();                 // Call your AJAX list function
+      profilelist();                 // Call your AJAX list function
   });
 
   // profile list
 
-  function listprofile(){
+  function profilelist(){
      let str = $("#searchProfile").val();
     $.ajax({
         url: "{{ route('profiles.list') }}",

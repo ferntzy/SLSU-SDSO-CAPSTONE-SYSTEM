@@ -55,9 +55,10 @@
               <input type="checkbox" class="checkbox-form-check-input" id="showPasswordCheck">
               <label class="checkbox-form-check-label" for="showPasswordCheck">Show Password</label>
             </div>
-            <div>
-              <a href="" class="small text-decoration-none">Forgot Password?</a>
-            </div>
+          <div>
+            <a href="{{ route('password.request') }}" class="small text-decoration-none">Forgot Password?</a>
+          </div>
+
           </div>
 
 

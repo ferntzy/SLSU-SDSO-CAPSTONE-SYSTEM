@@ -122,7 +122,7 @@
 
 
       <!-- User dropdown -->
-      <li class="nav-item navbar-dropdown dropdown-user dropdown">
+      {{-- <li class="nav-item navbar-dropdown dropdown-user dropdown">
         <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
           <div class="avatar avatar-online">
             <img src="{{ asset('images/slsu_logo.png') }}" alt class="w-px-40 h-auto rounded-circle">
@@ -142,7 +142,7 @@
             <div class="dropdown-divider my-1"></div>
           </li>
           <li>
-            <a class="dropdown-item" href="{{ route('admin.profile.show') }}">
+            <a class="dropdown-item" href="">
               <i class="mdi mdi-account-outline me-1 mdi-20px"></i>
               <span class="align-middle">My Profile</span>
             </a>
@@ -166,7 +166,7 @@
 
           </li>
         </ul>
-      </li>
+      </li> --}}
       </ul>
     </div>
   </div>

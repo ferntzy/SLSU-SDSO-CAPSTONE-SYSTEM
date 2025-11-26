@@ -13,8 +13,10 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\BargoController;
 use App\Http\Controllers\UserLogController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\PermitTrackingController;
+use App\Http\Controllers\SdsoheadController;
+use App\Http\Controllers\SasController;
+use App\Http\Controllers\Vp_sasController;
 
 // ============================
 // AUTH ROUTES
@@ -24,6 +26,12 @@ Route::get('/', function () {
 });
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+
+Route::get('/forgot-password', [LoginController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [LoginController::class, 'sendResetLink'])->name('password.forgot');
+Route::get('/reset-password/{token}', [LoginController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [LoginController::class, 'resetPassword'])->name('password.update');
+
 
 Route::get('/logout', function () {
   Auth::logout();
@@ -64,7 +72,7 @@ Route::middleware(['auth', 'role:admin'])
 
     // DASHBOARD
     Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
-
+    Route::get('users/profile',[UserController::class, 'profile'])->name('admin.users.profile');
     // ======================
     // USER MANAGEMENT
     // ======================
@@ -78,10 +86,13 @@ Route::middleware(['auth', 'role:admin'])
     Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+
+
+
     // Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
 
 
-    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+
 
     // LOGS
     Route::get('/logs-list', [UserLogController::class, 'index'])->name('users.logs-list');
@@ -98,11 +109,7 @@ Route::middleware(['auth', 'role:admin'])
     // LOGS
     Route::get('/logs', [UserLogController::class, 'index'])->name('admin.logs');
 
-    // ======================
-    // PROFILE (ADMIN ACCOUNT)
-    // ======================
-    Route::get('/profile', [AdminProfileController::class, 'show'])->name('admin.profile.show');
-    Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+
 
     // ======================
     // EVENT REQUEST VIEWS
@@ -256,7 +263,12 @@ Route::middleware(['auth', 'role:BARGO'])->group(function () {
   // Event monitoring pages
   Route::get('/bargo/events/pending', [BargoController::class, 'pending'])->name('bargo.events.pending');
   Route::get('/bargo/events/approved', [BargoController::class, 'approved'])->name('bargo.events.approved');
+  Route::get('/bargo/events/rejected', [BargoController::class, 'rejected'])->name('bargo.events.rejected');
   Route::get('/bargo/events/history', [BargoController::class, 'history'])->name('bargo.events.history');
+
+
+  //Profile
+  Route::get('bargo/profile',[BargoController::class, 'show'])->name('bargo.profile');
 });
 
 
@@ -264,16 +276,32 @@ Route::middleware(['auth', 'role:BARGO'])->group(function () {
 // ============================
 // OTHER ROLES
 // ============================
+
+
+//SDSO
+
 Route::middleware(['auth', 'role:SDSO_Head'])->group(function () {
   Route::view('/sdso/dashboard', 'sdso.dashboard')->name('sdso.dashboard');
+  Route::get('sdso/profile',[SdsoheadController::class, 'profile'])->name('sdso.profile');
+  Route::get('/sdso/events/pending', [SdsoheadController::class, 'pending'])->name('sdso.events.pending');
+  Route::get('/sdso/events/approved', [SdsoheadController::class, 'approved'])->name('sdso.events.approved');
+  Route::get('/sdso/events/history', [SdsoheadController::class, 'history'])->name('sdso.events.history');
+
 });
 
+
+
+//VPSAS
 Route::middleware(['auth', 'role:VP_SAS'])->group(function () {
-  Route::view('/vpsas/dashboard', 'vpsas.dashboard')->name('vpsas.dashboard');
+  Route::view('/vpsas/dashboard', 'vp_sas.dashboard')->name('vpsas.dashboard');
+  Route::get('vpsas/profile',[Vp_sasController::class, 'profile'])->name('vpsas.profile');
 });
 
+
+//SASDIRECTOR
 Route::middleware(['auth', 'role:SAS_Director'])->group(function () {
   Route::view('/sas/dashboard', 'sas.dashboard')->name('sas.dashboard');
+  Route::get('sas/profile',[SasController::class, 'profile'])->name('sas.profile');
 });
 
 

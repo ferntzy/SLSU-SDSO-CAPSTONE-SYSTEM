@@ -74,18 +74,16 @@
       "slug": "user-logs"
     },
 
-    {
-      "menuHeader": "Account Settings"
-    },
-    {
-      "url": "/admin/account",
-      "name": "Profile",
-      "icon": "menu-icon tf-icons mdi mdi-account-circle-outline",
-      "slug": "account-profile"
-    },
+
 
     {
       "menuHeader": "Account"
+    },
+      {
+      "url": "admin/users/profile",
+      "name": "Profile",
+      "icon": "menu-icon tf-icons mdi mdi-account-circle-outline",
+      "slug": "users-profile"
     },
     {
       "url": "/logout",

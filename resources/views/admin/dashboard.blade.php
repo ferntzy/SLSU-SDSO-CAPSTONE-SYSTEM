@@ -59,14 +59,17 @@
               <h6 class="mb-1">
                 {{ $msg }} <span class="text-muted"> | Current time: {{ $timeNow }}</span>
               </h6>
-              <h3 class="page-title mt-2">
-                {{ $greet }} {{ Auth::user()->account_role }}!
+              <h3 class="page-title fw-semibold mt-2">
+                {{ $greet }}  {{ strtoupper(str_replace('_', ' ', Auth::user()->account_role)) }}!
               </h3>
+
+         
+
             </div>
 
             <!-- Right Side: Dashboard Title -->
             <div class="col-sm text-end">
-              <h3 class="fw-bold mb-0">SLSU Event Management Dashboard</h3>
+              <h3 class="fw-bold mb-0">Student Event MIS Dashboard</h3>
               <p class="text-muted mb-0">Monitor events, users, and organizations at a glance.</p>
             </div>
           </div>
