@@ -235,14 +235,7 @@
                 </div>
             </div>
         @empty
-            {{-- <div class="col-12 text-center py-6">
-                <i class="bx bx-check-circle bx-lg text-success opacity-30"></i>
-                <h5 class="mt-4 text-muted">No pending permits</h5>
-                <p class="text-muted">All your submitted permits have been processed.</p>
-                <a href="{{ route('student.permit.create') }}" class="btn btn-outline-primary mt-3">
-                    Submit New Permit
-                </a>
-            </div> --}}
+
         @endforelse
     </div>
 
