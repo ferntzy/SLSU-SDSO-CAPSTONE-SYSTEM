@@ -1,11 +1,65 @@
 <script>
+
   $.ajaxSetup({
       headers: {
           'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
       }
   });
-  // add
+  //org members js
+  let selectedStudents = [];
 
+  $(document).on('change', '.select-student', function() {
+      selectedStudents = [];
+      $('.select-student:checked').each(function() {
+          selectedStudents.push($(this).val()); // get the value of checked checkbox
+      });
+  });
+
+  $("#addMembersModal").on("shown.bs.modal", function(e){
+      var encryptedId = $(e.relatedTarget).data('id'); // encrypted
+      $("#hiddenOrgID").val(encryptedId);
+  });
+
+
+  // SAVE BUTTON
+  $('#btnaddmembers').on('click', function (e) {
+      e.preventDefault();
+      let flag = $("hiddenOrgID").val();
+      $.ajax({
+          url: "{{route('organizations.add-members')}}",
+          type: "POST",
+          data: $("#frmMemberData").serialize(),
+          beforeSend:function(){
+            if(selectedStudents.length === 0){
+              $("#addmembermsg").html("<div class = 'alert alert-warning'>please select students</div>");
+              return;
+            }
+            $("#addmembermsg").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Saving, please wait...</div>");
+            $("#btnaddmembers").prop("disabled", true);
+          },
+          success: function(response) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Members successfully added!',
+                showConfirmButton: false,
+                timer: 600
+            });
+
+          },
+           error: function(xhr) {
+            console.log(xhr.responseText);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error saving members'
+            });
+            $("#btnaddmembers").prop("disabled", false);
+          }
+      });
+
+  });
+
+
+  // add
   $("#logoInput").on('change', function(){
       $("#logoFilename").text(this.files[0]?.name || '');
   });
@@ -73,7 +127,20 @@
           },
           success: function(data) {
             $("#organizationdatamsg").html("");
-              // populate
+                    // populate
+            $('input[name="organization_name"]').val(data.organization_name);
+            $('input[name="description"]').val(data.description);
+            $('select[name="organization_type"]').val(data.organization_type);
+            $('select[name="adviser_id"]').val(data.adviser_id);
+            $('select[name="officer_id"]').val(data.officer_id);
+            // console.log("Assigned officer_id:", data.officer_id);
+            // console.log("All officer options:");
+            // $('#officer_id option').each(function(){
+            //     console.log($(this).val(), $(this).text());
+            // });
+            // console.log("FULL DATA:", data);
+            // console.log("Officer officer_id:", data.officer_id);
+            // console.log("Adviser adviser_id:", data.adviser_id);
 
             $("#hiddenOrganizationID").val(id);
             $("#hiddenOrganizationFlag").val("UPDATE");
@@ -85,7 +152,11 @@
           }
       });
     });
-  // delete
+
+  // add members
+
+
+
 
   // list
 

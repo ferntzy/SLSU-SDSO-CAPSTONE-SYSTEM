@@ -27,24 +27,10 @@
                         <option>Non-Academic Organization</option>
                     </select>
                 </div>
-
-                <!-- Officer -->
-                <div class="mb-3">
-                  <label class="form-label">Student Organization Officer</label>
-                  <select name="officer_id" class="form-select" required>
-                      <option value="">Select Officer</option>
-                      @foreach($officers as $officer)
-                          <option value="{{ $officer->user_id }}">
-                              {{ $officer->profile->first_name }} {{ $officer->profile->last_name }}
-                          </option>
-                      @endforeach
-                  </select>
-                </div>
-
                 <!-- Adviser -->
                 <div class="mb-3">
                   <label class="form-label">Organization Adviser</label>
-                  <select name="adviser_id" class="form-select" id="editAdviser" required>
+                  <select name="adviser_id" id="adviser_id" class="form-select"  required>
                       <option value="">Select Adviser</option>
                       @foreach($advisers as $adviser)
                           <option value="{{ $adviser->user_id }}">

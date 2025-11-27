@@ -5,8 +5,7 @@
           <th>Type</th>
           <th class = "text-center" >Members</th>
           <th>Adviser</th>
-          <th>Officer</th>
-          <th>Status</th>
+          <th>President</th>
           <th class = "text-center">Actions</th>
       </tr>
   </thead>
@@ -32,28 +31,27 @@
                   @endif
               </td>
 
-              <td>
-                  <span class="badge bg-label-{{ $org->status === 'Active' ? 'success' : 'secondary' }}">
-                      {{ $org->status }}
-                  </span>
-              </td>
-
               <td class = "text-center">
+                <div class="dropdown">
+                  <a  href="#" class="text-primary btn-add-members"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addMembersModal" data-id="{{Crypt::encryptstring($org->organization_id)}}" >
+                        <i class="mdi mdi-account-multiple-plus-outline"></i>
+                  </a>
+                  <a href="#" class=" text-secondary btn-add-officers"
+                      data-bs-toggle="modal"
+                      data-bs-target="#addOfficersModal">
+                      <i class="mdi mdi-account-plus-outline"></i>
+                  </a>
 
-                  <button type="button" href="#" class="btn rounded-pill btn-icon btn-secondary btn-sm btn-view"
-                        data-id="">
-                        <i class="mdi mdi-account-eye"></i></a>
-                  </button>
-
-                  <button type="button" href="#" class="btn rounded-pill btn-icon btn-primary btn-sm btn-edit"
-                        data-id="{{ Crypt::encryptstring($org->organization_id)}}">
-                        <i class="mdi mdi-text-box-edit-outline"></i>
-                  </button>
-
-                  <button type="button" href="#" class="btn rounded-pill btn-icon btn-danger btn-sm btn-delete"
-                          data-url="">
-                          <i class=" mdi mdi-delete-forever"></i>
-                  </button>
+                  <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>
+                  <div class="dropdown-menu">
+                      <a class="dropdown-item text-warning btn-edit" href="javascript:void(0);" data-id="{{ Crypt::encryptstring($org->organization_id)}}"><i class="mdi  mdi-text-box-edit-outline me-1"></i>Edit</a>
+                      <a class="text-primary dropdown-item" href="#" ><span class="mdi mdi-eye-settings-outline me-1"></span>View</a>
+                      <hr>
+                      <a  class="dropdown-item text-danger" href="javascript:void(0);"><i class=" mdi mdi-trash-can-outline me-1"></i>Delete</a>
+                  </div>
+                </div>
               </td>
           </tr>
       @empty
@@ -65,6 +63,4 @@
 </table>
 
 
-@section('page-script')
-    @include("admin.organizations.orgjs")
-@endsection
+
