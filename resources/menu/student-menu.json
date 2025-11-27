@@ -1,7 +1,7 @@
 {
   "menu": [
     {
-      "menuHeader": "Dashboard"
+      "menuHeader": ""
     },
     {
       "url": "/student/dashboard",

@@ -2,13 +2,15 @@
 
   <!-- ! Hide app brand if navbar-full -->
   <div class="app-brand demo">
-    <a href="{{url('admin/dashboard')}}" class="app-brand-link">
+    {{-- <a href="{{ route(auth()->user()->account_role . '.dashboard') }}" class="app-brand-link"> --}}
       <span class="app-brand-logo demo me-1">
-        @include('_partials.macros',["height"=>80])
+        @include('_partials.macros',["height"=>40])
       </span>
-     <span class="app-brand-text demo menu-text fw-semibold ms-2">
+  <span class="app-brand-text demo menu-text ms-2"
+      style="color: #0c1cad; font-size: 21px; ">
     {{ str_replace('_', ' ', Auth::user()->account_role) }}
-    </span>
+</span>
+
 
 
     </a>

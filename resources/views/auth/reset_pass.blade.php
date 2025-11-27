@@ -25,7 +25,7 @@
 
     <h2 class="info-title">Password Reset Assistance</h2>
     <p class="info-text">
-      <strong class="highlight">Please visit the Student Development Office</strong><br>
+      <strong class="highlight">Please visit the Student Development Services Office (SDSO)</strong><br>
       for assistance of forgotten password.
     </p>
     <p class="text-muted" style="font-size: 0.95rem;">

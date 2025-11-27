@@ -1,14 +1,15 @@
 {
   "menu": [
     {
+           "menuHeader": " ",
       "url": "/sdso/dashboard",
-      "name": "dashboard",
+      "name": "Dshboard",
       "icon": "menu-icon tf-icons mdi mdi-view-dashboard-outline",
       "slug": "sdso-dashboard"
     },
 
-       {
-       "url": "/sdso/calendar",
+    {
+        "url": "/sdso/calendar",
       "name": "Calendar",
       "icon": "menu-icon tf-icons mdi mdi-calendar-month-outline",
       "slug": "sdso-calendar"
