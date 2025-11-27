@@ -6,9 +6,10 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PermitController;
-use App\Http\Controllers\StudentEventController;
+
 use App\Http\Controllers\FacultyAdviserController;
-use App\Http\Controllers\StudentDashboardController;
+// use App\Http\Controllers\StudentEventController;
+// use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\BargoController;
 use App\Http\Controllers\UserLogController;
@@ -72,7 +73,7 @@ Route::middleware(['auth', 'role:admin'])
 
     // DASHBOARD
     Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
-    Route::get('users/profile',[UserController::class, 'profile'])->name('admin.users.profile');
+
     // ======================
     // USER MANAGEMENT
     // ======================
@@ -86,8 +87,14 @@ Route::middleware(['auth', 'role:admin'])
     Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::get('users/profile',[UserController::class, 'profile'])->name('admin.users.profile');
+    Route::post('/users/signature/', [UserController::class, 'uploadSignature'])->name('admin.uploadSignature');
+    Route::delete('/users/signature/', [UserController::class, 'removeSignature'])->name('admin.removeSignature');
 
 
+   Route::delete('/admin/logs/bulk-delete',
+        [UserLogController::class, 'bulkDelete']
+    )->name('logs.bulk-delete');
 
     // Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
 
@@ -125,6 +132,8 @@ Route::middleware(['auth', 'role:admin'])
     // E-SIGNATURES
     Route::view('/esignatures/pending', 'admin.ESignature.pending');
     Route::view('/esignatures/completed', 'admin.ESignature.completed');
+
+
 
     // ======================
     // ORGANIZATIONS
@@ -182,8 +191,8 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
   Route::get('/profile', function () {
     return view('student.profile');
   })->name('user.profile');
-  Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('user.uploadSignature');
-  Route::delete('/profile/signature/', [UserController::class, 'removeSignature'])->name('user.removeSignature');
+  Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('student.uploadSignature');
+  Route::delete('/profile/signature/', [UserController::class, 'removeSignature'])->name('student.removeSignature');
   // contact update Routeer')->group(function () {
 
 

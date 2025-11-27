@@ -10,11 +10,10 @@ class UserLog extends Model
 {
   use HasFactory;
 
-  protected $fillable = ['user_id', 'action', 'ip_address'];
+protected $fillable = ['user_id', 'username', 'action', 'ip_address', 'user_agent'];
 
   public function user()
   {
-    // 👇 link using user_id (not id)
     return $this->belongsTo(User::class, 'user_id', 'user_id');
   }
 }

@@ -65,7 +65,7 @@ Swal.fire({
         @endif
 
         <!-- Upload Signature -->
-        <form action="{{ route('user.uploadSignature') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.uploadSignature') }}" method="POST" enctype="multipart/form-data">
           @csrf
           <input type="file" name="signature" accept="image/*" class="form-control mb-2" required>
           <button class="btn btn-primary w-100 btn-sm">Upload Signature</button>
@@ -73,7 +73,7 @@ Swal.fire({
 
         @if(Auth::user()->signature)
         <!-- Remove Signature -->
-        <form action="{{ route('user.removeSignature') }}" method="POST" class="mt-2">
+        <form action="{{ route('admin.removeSignature') }}" method="POST" class="mt-2" >
           @csrf
           @method('DELETE')
           <button class="btn btn-outline-danger w-100 btn-sm">Remove Signature</button>

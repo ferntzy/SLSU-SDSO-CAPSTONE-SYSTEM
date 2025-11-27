@@ -1,6 +1,8 @@
 
+
+
 <table class="table table-hover">
-  <thead>
+  <thead class="text-center">
     <tr>
       <th>Username</th>
       <th>Last Name</th>
@@ -16,13 +18,13 @@
   <tbody class="table-border-bottom-0">
     @forelse ($user_accounts as $user_account)
       <tr>
-        <td>{{ $user_account->username  ?? ''}}</td>
-        <td>{{ $user_account->profile->last_name ?? '' }}</td>
-        <td>{{ $user_account->profile->first_name  ?? '' }}</td>
-        <td><span class="badge bg-label-info">{{ $user_account->account_role }}</span></td>
-        <td>{{ $user_account->profile->type  ?? ''}}</td>
-        <td>{{ $user_account->created_at->format('Y-m-d') }}</td>
-        <td>{{ $user_account->created_at->format('H:i:s') }}</td>
+        <td class="text-center">{{ $user_account->username  ?? ''}}</td>
+        <td class="text-center">{{ $user_account->profile->last_name ?? '' }}</td>
+        <td class="text-center">{{ $user_account->profile->first_name  ?? '' }}</td>
+        <td class="text-center"><span class="badge bg-label-info">{{ $user_account->account_role }}</span></td>
+        <td class="text-center">{{ $user_account->profile->type  ?? ''}}</td>
+        <td class="text-center">{{ $user_account->created_at->format('Y-m-d') }}</td>
+        <td class="text-center">{{ $user_account->created_at->format('H:i:s') }}</td>
         <td class="text-center">
           <button type="button" href="#" class="btn rounded-pill btn-icon btn-secondary btn-sm btn-view"
             data-id="{{ Crypt::encryptstring($user_account->user_id)}}">
@@ -43,11 +45,11 @@
         </td>
       </tr>
 
-    @empty
+
+  @empty
       <tr>
-        <td colspan="6" class="text-center text-muted">No Profiles found.</td>
+        <td colspan="6" class="text-center text-muted">No accounts found.</td>
       </tr>
-    @endforelse
-  </tbody>
+    @endforelse  </tbody>
 </table>
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Models\UserLog;
 use Exception;
 use Crypt;
 use Illuminate\Support\Facades\Hash;
@@ -27,8 +28,8 @@ class UserController extends Controller
 
 
 
- public function index(Request $request)
-    {
+  public function index(Request $request)
+  {
       $user_accounts = User::with('profile');
 
       if (!empty($request->str)) {
@@ -47,14 +48,29 @@ class UserController extends Controller
 
       $user_accounts = $user_accounts->get();
 
-      $user_profiles_student = UserProfile::where('type','student')->orderby('last_name')->orderby('first_name')->get();  // <-- ADD THIS
-      $user_profiles_employee = UserProfile::where('type','employee')->orderby('last_name')->orderby('first_name')->get();
+      // Get profile IDs already assigned to users
+      $assigned_profiles = User::pluck('profile_id')->toArray();
+
+      // Only show unassigned student profiles
+      $user_profiles_student = UserProfile::where('type','student')
+          ->whereNotIn('profile_id', $assigned_profiles)
+          ->orderBy('last_name')
+          ->orderBy('first_name')
+          ->get();
+
+      // Only show unassigned employee profiles
+      $user_profiles_employee = UserProfile::where('type','employee')
+          ->whereNotIn('profile_id', $assigned_profiles)
+          ->orderBy('last_name')
+          ->orderBy('first_name')
+          ->get();
+
       if ($request->ajax()){
-        return view('admin.users.index-list', compact('user_accounts'));
+          return view('admin.users.index-list', compact('user_accounts'));
       }
 
-    return view('admin.users.index', compact('user_accounts', 'user_profiles_student','user_profiles_employee'));
-    }
+      return view('admin.users.index', compact('user_accounts', 'user_profiles_student','user_profiles_employee'));
+  }
 
 
 public function create()
@@ -97,27 +113,6 @@ public function store(Request $request)
   }
 
 
-    // public function checkUsername(Request $request)
-    //   {
-    //       $exists = User::where('username', $request->username)->exists();
-
-    //       return response()->json(['exists' => $exists]);
-    //   }
-
-
-
-public function checkPassword(Request $request)
-{
-    $user = User::findOrFail($request->user_id);
-
-    $match = Hash::check($request->password, $user->password);
-
-    return response()->json(['match' => $match]);
-}
-
-
-
-
 
 public function update(Request $request, User $user)
 {
@@ -133,6 +128,10 @@ public function update(Request $request, User $user)
         // Fetch the user
         $user_account = User::where('user_id', $id)->firstOrFail();
 
+        // Store old values for logging
+        $oldUsername = $user_account->username;
+        $oldRole     = $user_account->account_role;
+
         // Update username and account_role
         $user_account->username = $validated['username'];
         $user_account->account_role = $validated['account_role'];
@@ -141,28 +140,102 @@ public function update(Request $request, User $user)
         if (!empty($validated['password'])) {
             $user_account->password = bcrypt($validated['password']);
         }
-        // If password is empty, it stays the same
 
         $user_account->save();
+
+        // ===================== LOG ACTION =====================
+        UserLog::create([
+            'user_id'    => auth()->id(), // logged-in user who made the change
+            'username'   => $user_account->username, // the account being edited
+            'action'     => "Updated Account (Username: $oldUsername, Role: $oldRole → New Username: {$validated['username']}, New Role: {$validated['account_role']})",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
         return response()->json(['success' => 'User updated successfully.']);
 
     } catch (Exception $e) {
-        return response()->json(['errors' => '<div class="alert alert-danger">' . $e->getMessage() . '</div>'], 400);
+        return response()->json([
+            'errors' => '<div class="alert alert-danger">' . $e->getMessage() . '</div>'
+        ], 400);
     }
 }
 
 
-  public function edit(Request $request)
-  {
-    try{
-      $id = Crypt::decryptstring($request->id);
-      $user_account = User::with('profile')->findOrFail($id);
-      return response()->json($user_account);
-    }catch(Exception $e){
-      return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
+
+
+ public function edit(Request $request)
+{
+    try {
+        $id = Crypt::decryptString($request->id);
+
+        // =========================================================
+        // GET USER + PROFILE
+        // =========================================================
+        $user_account = User::with('profile')->findOrFail($id);
+
+        // Profiles assigned to OTHER users only
+        $assigned_profiles = User::where('user_id', '!=', $id)
+            ->pluck('profile_id')
+            ->toArray();
+
+        // STUDENT LIST (unassigned)
+        $student_profiles = UserProfile::where('type', 'student')
+            ->whereNotIn('profile_id', $assigned_profiles)
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+
+        // EMPLOYEE LIST (unassigned)
+        $employee_profiles = UserProfile::where('type', 'employee')
+            ->whereNotIn('profile_id', $assigned_profiles)
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+
+        // =========================================================
+        // FIX: ADD CURRENT PROFILE TO DROPDOWN EVEN IF ASSIGNED
+        // =========================================================
+
+        if ($user_account->profile->type === 'student') {
+            if (!$student_profiles->contains('profile_id', $user_account->profile_id)) {
+                $student_profiles->push($user_account->profile);
+            }
+        } else {
+            if (!$employee_profiles->contains('profile_id', $user_account->profile_id)) {
+                $employee_profiles->push($user_account->profile);
+            }
+        }
+
+        return response()->json([
+            'user_id'      => $user_account->user_id,
+            'username'     => $user_account->username,
+            'account_role' => $user_account->account_role,
+            'profile_id'   => $user_account->profile_id,
+            'profile'      => $user_account->profile,
+
+            // Updated dropdown lists
+            'student_profiles'  => $student_profiles->sortBy('last_name')->values(),
+            'employee_profiles' => $employee_profiles->sortBy('last_name')->values(),
+        ]);
+
+    } catch (Exception $e) {
+        return response()->json([
+            'errors' => '<div class="alert alert-danger">' . $e->getMessage() . '</div>'
+        ], 400);
     }
-  }
+}
+
+
+
+  public function checkPassword(Request $request)
+{
+    $user = User::findOrFail($request->user_id);
+
+    $match = Hash::check($request->password, $user->password);
+
+    return response()->json(['match' => $match]);
+}
 
 
  public function view(Request $request)
@@ -188,14 +261,27 @@ public function destroy($user_id)
     try {
         $user_id = Crypt::decryptString(urldecode($user_id));
         $user_account = User::findOrFail($user_id);
+
+        // Log the deletion before deleting
+        \App\Models\UserLog::create([
+            'user_id'    => $user_account->user_id,
+            'username'   => $user_account->username ?? 'Unknown',
+            'action'     => 'Deleted Account',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        // Delete the user
         $user_account->delete();
+
         return response()->json(['success' => true, 'id' => $user_id]);
     } catch (Exception $e) {
         return response()->json([
             'errors' => '<div class="alert alert-danger">' . $e->getMessage() . '</div>'
-        ]);
+        ], 400);
     }
 }
+
 
 
 

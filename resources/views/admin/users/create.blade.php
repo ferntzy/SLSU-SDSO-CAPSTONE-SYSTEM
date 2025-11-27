@@ -32,14 +32,14 @@
             <div class="col-md-4 txt">
               <label class="form-label ">Select Profile</label>
               <select name = "profile_id" id="dropdownList-student" class="form-select txt" style="display:none;" >
-                <option value="0" >Please select from the list</option>
+                <option value="" >Please select from the list</option>
                 @foreach ($user_profiles_student as $user_profile)
                   <option value="{{ $user_profile->profile_id }}">{{ $user_profile->last_name }}, {{ $user_profile->first_name }}</option>
                 @endforeach
               </select>
 
               <select name = "profile_id" id="dropdownList-employee" class="form-select txt" style="display:none;">
-                <option value="0">Please select from the list</option>
+                <option value="">Please select from the list</option>
                 @foreach ($user_profiles_employee as $user_profile)
                   <option value="{{ $user_profile->profile_id }}">{{ $user_profile->last_name }}, {{ $user_profile->first_name }}</option>
                 @endforeach
@@ -50,7 +50,7 @@
             <div class="col-md-4">
               <label class="form-label">Select Account Role</label>
               <select name="account_role" id="account_role_employee" class="form-select txt" style="display:none;" required>
-                <option value="">Select Account Role</option>
+                <option value="" >Select Account Role</option>
                 <option value="SDSO_Head">SDSO Head</option>
                 <option value="Faculty_Adviser">Faculty Adviser</option>
                 <option value="VP_SAS">VP SAS</option>
@@ -60,7 +60,6 @@
               </select>
 
               <select name="account_role" id="account_role_student" class="form-select txt" style="display:none;" required>
-
                 <option value="Student_Organization">Student Organization</option>
               </select>
             </div>
