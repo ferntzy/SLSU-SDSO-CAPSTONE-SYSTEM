@@ -14,14 +14,7 @@ class Member extends Model
 
     public $timestamps = true; // uses created_at and updated_at
 
-    protected $fillable = [
-        'organization_id',
-        'member_name',
-        'contact_email',
-        'contact_number',
-        'membership_status',
-        'joined_at',
-    ];
+   protected $fillable = ['organization_id', 'profile_id',];
 
     /**
      * Each member belongs to an organization
@@ -29,6 +22,10 @@ class Member extends Model
     public function organization()
     {
         return $this->belongsTo(Organization::class, 'organization_id', 'organization_id');
+    }
+    public function profile()
+    {
+      return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
     }
 
     /**

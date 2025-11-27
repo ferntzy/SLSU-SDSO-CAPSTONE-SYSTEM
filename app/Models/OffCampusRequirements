@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OffCampusRequirement extends Model
 {
@@ -38,7 +39,7 @@ class OffCampusRequirement extends Model
             'lgu_ngo' => 'LGU/NGO',
             'orientation_briefing' => 'Orientation/Briefing',
             'learning_journals' => 'Learning Journals',
-            'emergency_preparedness_plan' => 'Emergency Preparedness Plan',
+            'emergency_preparedness_plan' => 'Emergency Preparedness Plan'
         ][$this->requirement_type] ?? $this->requirement_type;
     }
-} -->
+}

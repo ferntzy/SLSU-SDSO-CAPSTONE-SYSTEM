@@ -8,32 +8,37 @@ use App\Models\Officer;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Exception;
+use Crypt;
+use DB;
 
 class OrganizationController extends Controller
 {
-   public function index(Request $request)
+    public function index(Request $request)
     {
-        $query = Organization::with(['adviser.profile', 'members'])
-                            ->withCount('members');
+        // Load organizations with members + adviser detection
+        $organizations = Organization::with(['adviser.profile', 'members'])
+                                     ->withCount('members')
+                                     ->get();
 
-        if ($request->ajax() && $request->filled('str')) {
-            $search = $request->str;
-            $query->where('organization_name', 'like', "%{$search}%")
-                  ->orWhere('organization_type', 'like', "%{$search}%");
-        }
+        // Advisers list (for dropdown if needed)
+        $advisers = User::where('account_role', 'Faculty_Adviser')
+                        ->with('profile')
+                        ->get();
 
-        $organizations = $query->get();
+        // Student organization officers
+        $officers = User::where('account_role', 'Student_Organization')
+                        ->with('profile')
+                        ->get();
 
-        $advisers = User::where('account_role', 'Faculty_Adviser')->with('profile')->get();
-        $officers = User::where('account_role', 'Student_Organization')->with('profile')->get();
+         $students = UserProfile::where('type', 'student')->get();
 
         if ($request->ajax()) {
             return view('admin.organizations.list-organization', compact('organizations'));
         }
-
-        return view('admin.organizations.organizations', compact('organizations', 'advisers', 'officers'));
+        return view('admin.organizations.organizations', compact(
+            'organizations', 'advisers', 'officers' ,'students'
+        ));
     }
-
     public function create()
     {
         return view ('admin.organizations.create-organization');
@@ -48,7 +53,6 @@ class OrganizationController extends Controller
                 'organization_type' => 'required|string',
                 'description' => 'nullable|string',
                 'adviser_id' => 'required|exists:users,user_id',  // adviser is required
-                'officer_id' => 'required|exists:users,user_id',  // officer is required
                 'organization_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
@@ -63,15 +67,6 @@ class OrganizationController extends Controller
             if (!$organization->organization_id) {
                 throw new Exception('Unable to save organization.');
             }
-
-            // ===== CREATE OFFICER =====
-            $officerUser = User::findOrFail($request->officer_id);
-            Officer::create([
-                'organization_id' => $organization->organization_id,
-                'user_id' => $officerUser->user_id,
-                'profile_id' => $officerUser->profile_id,
-                'role' => 'officer',
-            ]);
 
             return response()->json([
                 'success' => '<div class="alert alert-success">Organization and officer created successfully.</div>'
@@ -92,7 +87,23 @@ class OrganizationController extends Controller
       try{
         $id = Crypt::decryptString($request->id);
         $org = Organization::findOrFail($id);
-        return response()->json($org);
+
+        $adviser = User::where('account_role', 'faculty_adviser')->first();
+
+        $advisers = User::where('account_role', 'faculty_adviser')
+                        ->with('profile')
+                        ->get();
+          return response()->json([
+          'organization_name' => $org->organization_name,
+          'organization_type' => $org->organization_type,
+          'description'       => $org->description,
+          'adviser_id'        => $adviser?->user_id,
+
+            'advisers' => $advisers->map(fn($a) => [
+                'id' => $a->user_id,
+                'name' => ($a->profile->first_name ?? '') . ' ' . ($a->profile->last_name ?? ''),
+            ]),
+      ]);
       }catch(Exception $e){
         return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
       }
@@ -116,4 +127,48 @@ class OrganizationController extends Controller
             'message' => 'Organization deleted successfully'
         ]);
     }
+
+
+
+
+    public function add(Request $request)
+    {
+        try {
+            $request->validate([
+                'organization_id' => 'required|string', // encrypted
+                'students' => 'required|array',
+                'students.*' => 'exists:user_profiles,profile_id',
+            ]);
+
+            // Decrypt org ID
+            $orgId = Crypt::decryptString($request->organization_id);
+
+            DB::transaction(function () use ($orgId, $request) {
+                foreach ($request->students as $profileId) {
+                    \App\Models\Member::firstOrCreate([
+                        'organization_id' => $orgId,
+                        'profile_id' => $profileId
+                    ]);
+                }
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Members successfully added!'
+            ]);
+
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid organization ID.'
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An unexpected error occurred: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
 }

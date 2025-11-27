@@ -73,7 +73,6 @@ Route::middleware(['auth', 'role:admin'])
 
     // DASHBOARD
     Route::view('/dashboard', 'admin.dashboard')->name('admin.dashboard');
-
     // ======================
     // USER MANAGEMENT
     // ======================
@@ -101,8 +100,56 @@ Route::middleware(['auth', 'role:admin'])
 
 
 
-    // LOGS
-    Route::get('/logs-list', [UserLogController::class, 'index'])->name('users.logs-list');
+        // LOGS
+     Route::get('/logs-list', [UserLogController::class, 'index'])->name('users.logs-list');
+    Route::get('/logs', [UserLogController::class, 'index'])->name('admin.logs');
+        // // ======================
+        // // PROFILE (ADMIN ACCOUNT)
+        // // ======================
+        // Route::get('/profile', [AdminProfileController::class, 'show'])->name('admin.profile.show');
+        // Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+
+        // ======================
+        // EVENT REQUEST VIEWS
+        // ======================
+        Route::view('/event-requests', 'admin.EventRequest.AllRequest');
+        Route::view('/event-requests/pending', 'admin.EventRequest.PendingApproval');
+        Route::view('/event-requests/approved-events', 'admin.EventRequest.ApprovedEvents');
+
+        // APPROVALS
+        Route::view('/approvals/pending', 'admin.approvals.pending');
+        Route::view('/approvals/history', 'admin.approvals.history');
+
+        // E-SIGNATURES
+        Route::view('/esignatures/pending', 'admin.ESignature.pending');
+        Route::view('/esignatures/completed', 'admin.ESignature.completed');
+
+        // ======================
+        // ORGANIZATIONS
+        // ======================
+        Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
+        Route::get('/organizations/create', [OrganizationController::class, 'create'])->name('organizations.create');
+        Route::post('/organizations/store', [OrganizationController::class, 'store'])->name('organizations.store');
+        Route::put('/organizations/update', [OrganizationController::class, 'update'])->name('organizations.update');
+        Route::post('/organizations/list', [OrganizationController::class, 'index'])->name('organizations.list');
+        Route::post('/organizations/edit', [OrganizationController::class, 'edit'])->name('organizations.edit');
+        Route::post('/organizations/add', [OrganizationController:: class, 'add'])->name('organizations.add-members');
+
+
+        // Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
+        // Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
+
+        // ======================
+        // PROFILES (USER PROFILES)
+        // ======================
+        Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
+        Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
+        Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
+        Route::post('/profiles/update', [ProfileController::class, 'update'])->name('profiles.update');
+        Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
+        Route::post('/profiles/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
+        Route::post('/profiles/view', [ProfileController::class, 'view'])->name('profiles.view');
+        Route::delete('profiles/{profile_id}', [ProfileController::class, 'destroy'])->name('profiles.destroy');
 
 
     // Route::post('user/check-username', [UserController::class, 'checkUsername']);
@@ -113,8 +160,6 @@ Route::middleware(['auth', 'role:admin'])
     // Route::post('/users/check-availability', [UserController::class, 'checkAvailability'])
     //   ->name('users.checkAvailability');
 
-    // LOGS
-    Route::get('/logs', [UserLogController::class, 'index'])->name('admin.logs');
 
 
 
@@ -181,7 +226,17 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
   Route::get('/permit/tracking', [PermitController::class, 'track'])->name('student.permit.tracking');
 
   // Calendar view route (the main page) - This is now just a helper view route.
-  Route::view('/calendar', 'student.calendardisplay');
+  // Display the calendar page
+  Route::get('/calendar', function () {return view('student.calendardisplay');})->name('calendar.index');
+
+  // API endpoint to fetch calendar events (permits)
+  Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
+
+  // Get the permit form (if you have a separate view for the form)
+  Route::get('/calendar/permit-form', function () {return view('calendar.permit-form');})->name('student.permit.form');
+
+  // Store new permit
+  Route::post('/calendar/store', [CalendarController::class, 'store'])->name('calendar.store');
 
   Route::get('/permit/view/{hashed_id}', [PermitController::class, 'view'])->name('student.permit.view');
 
@@ -288,7 +343,7 @@ Route::middleware(['auth', 'role:BARGO'])->group(function () {
 
 
   //Profile
-  Route::get('bargo/profile',[BargoController::class, 'show'])->name('bargo.profile');
+  Route::get('bargo/profile', [BargoController::class, 'show'])->name('bargo.profile');
 });
 
 
@@ -302,11 +357,10 @@ Route::middleware(['auth', 'role:BARGO'])->group(function () {
 
 Route::middleware(['auth', 'role:SDSO_Head'])->group(function () {
   Route::view('/sdso/dashboard', 'sdso.dashboard')->name('sdso.dashboard');
-  Route::get('sdso/profile',[SdsoheadController::class, 'profile'])->name('sdso.profile');
+  Route::get('sdso/profile', [SdsoheadController::class, 'profile'])->name('sdso.profile');
   Route::get('/sdso/events/pending', [SdsoheadController::class, 'pending'])->name('sdso.events.pending');
   Route::get('/sdso/events/approved', [SdsoheadController::class, 'approved'])->name('sdso.events.approved');
   Route::get('/sdso/events/history', [SdsoheadController::class, 'history'])->name('sdso.events.history');
-
 });
 
 
@@ -314,14 +368,14 @@ Route::middleware(['auth', 'role:SDSO_Head'])->group(function () {
 //VPSAS
 Route::middleware(['auth', 'role:VP_SAS'])->group(function () {
   Route::view('/vpsas/dashboard', 'vp_sas.dashboard')->name('vpsas.dashboard');
-  Route::get('vpsas/profile',[Vp_sasController::class, 'profile'])->name('vpsas.profile');
+  Route::get('vpsas/profile', [Vp_sasController::class, 'profile'])->name('vpsas.profile');
 });
 
 
 //SASDIRECTOR
 Route::middleware(['auth', 'role:SAS_Director'])->group(function () {
   Route::view('/sas/dashboard', 'sas.dashboard')->name('sas.dashboard');
-  Route::get('sas/profile',[SasController::class, 'profile'])->name('sas.profile');
+  Route::get('sas/profile', [SasController::class, 'profile'])->name('sas.profile');
 });
 
 

@@ -23,13 +23,7 @@ class UserProfile extends Model
         'birthdate',
         'sex',
         'type',
-        'profile_picture_path',
         'email',
-        'organization_id',
-    ];
-
-    protected $casts = [
-        'birthdate' => 'date',
     ];
 
     // Relationship to user
@@ -42,5 +36,9 @@ class UserProfile extends Model
     public function organization()
     {
         return $this->belongsTo(Organization::class, 'organization_id', 'organization_id');
+    }
+     public function members()
+    {
+        return $this->hasMany(Member::class, 'profile_id', 'profile_id');
     }
 }

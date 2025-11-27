@@ -39,6 +39,7 @@
       "icon": "menu-icon tf-icons mdi mdi-check-circle-outline",
       "slug": "student-approved-permits"
     },
+
     {
       "url": "/student/page/rejected-permits",
       "name": "Rejected Permits",
