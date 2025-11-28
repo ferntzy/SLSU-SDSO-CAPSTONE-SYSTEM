@@ -22,9 +22,6 @@ use App\Http\Controllers\Vp_sasController;
 // ============================
 // AUTH ROUTES
 // ============================
-Route::get('/', function () {
-  return redirect()->route('login');
-});
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
