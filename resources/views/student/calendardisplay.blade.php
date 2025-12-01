@@ -9,47 +9,264 @@
 @section('vendor-style')
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <style>
+        /* Materio-themed Calendar Customizations */
+        .fc {
+            font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        /* Calendar header styling */
+        .fc .fc-toolbar {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.75rem 0;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #5f61e6;
+        }
+
+        .fc .fc-button {
+            background-color: #fff;
+            border: 1px solid #d9dee3;
+            color: #697a8d;
+            padding: 0.4375rem 1rem;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .fc .fc-button:hover {
+            background-color: #5f61e6;
+            border-color: #5f61e6;
+            color: #fff;
+        }
+
+        .fc .fc-button-active {
+            background-color: #5f61e6 !important;
+            border-color: #5f61e6 !important;
+            color: #fff !important;
+        }
+
+        /* Day cells */
+        .fc .fc-daygrid-day {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .fc .fc-daygrid-day:hover {
+            background-color: rgba(95, 97, 230, 0.04);
+        }
+
+        .fc .fc-daygrid-day-frame {
+            min-height: 100px;
+        }
+
+        .fc .fc-daygrid-day-top {
+            padding: 0.5rem;
+        }
+
+        .fc .fc-daygrid-day-number {
+            padding: 0.25rem 0.5rem;
+            font-weight: 500;
+            color: #697a8d;
+        }
+
+        .fc .fc-day-today {
+            background-color: rgba(95, 97, 230, 0.08) !important;
+        }
+
+        .fc .fc-day-today .fc-daygrid-day-number {
+            background-color: #5f61e6;
+            color: #fff;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* Events styling */
+        .fc-event {
+            font-size: 0.75rem;
+            padding: 2px 4px;
+            margin-bottom: 2px;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .fc-event:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .fc-event-title {
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* More link */
+        .fc .fc-daygrid-more-link {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #5f61e6;
+            padding: 2px 4px;
+            background: rgba(95, 97, 230, 0.1);
+            border-radius: 0.25rem;
+            margin-top: 2px;
+        }
+
+        .fc .fc-daygrid-more-link:hover {
+            background: rgba(95, 97, 230, 0.2);
+            text-decoration: none;
+        }
+
+        /* Popover for more events */
+        .fc .fc-popover {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.45);
+            border: none;
+        }
+
+        .fc .fc-popover-header {
+            background-color: #5f61e6;
+            color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .fc .fc-toolbar {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+
+            .fc .fc-toolbar-chunk {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .fc .fc-toolbar-title {
+                font-size: 1.1rem;
+                text-align: center;
+                margin: 0.5rem 0;
+            }
+
+            .fc .fc-button {
+                font-size: 0.8125rem;
+                padding: 0.375rem 0.75rem;
+            }
+
+            .fc .fc-daygrid-day-frame {
+                min-height: 60px;
+            }
+
+            .fc-event {
+                font-size: 0.7rem;
+                padding: 1px 3px;
+            }
+
+            /* Hide day names on very small screens */
+            @media (max-width: 576px) {
+                .fc .fc-col-header-cell-cushion {
+                    font-size: 0.75rem;
+                }
+            }
+        }
+
+        /* SweetAlert2 Materio styling */
+        .swal2-popup {
+            border-radius: 0.5rem;
+            font-family: 'Public Sans', sans-serif;
+        }
+
+        .swal2-title {
+            color: #5f61e6;
+            font-weight: 600;
+        }
+
+        .swal2-confirm {
+            background-color: #5f61e6 !important;
+            border-radius: 0.375rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .swal2-cancel {
+            border-radius: 0.375rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+
+        /* Event cards in summary */
+        .event-summary-card {
+            border-left: 4px solid #5f61e6;
+            transition: all 0.2s ease;
+        }
+
+        .event-summary-card:hover {
+            box-shadow: 0 0.25rem 0.5rem rgba(161, 172, 184, 0.3);
+            transform: translateX(4px);
+        }
+    </style>
 @endsection
 
 @section('vendor-script')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 @endsection
 
 @section('content')
-    <div class="{{ $container }} py-4">
+    <div class="{{ $container }} flex-grow-1 container-p-y">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h4 class="mb-1">📅 Event Calendar</h4>
+                        <p class="text-muted mb-0">View all approved events and create new permit requests</p>
+                    </div>
+                    <div>
+                        <a href="{{ route('permit.form') }}" class="btn btn-primary">
+                            <i class="ti ti-plus me-1"></i>
+                            <span class="d-none d-sm-inline">New Permit</span>
+                            <span class="d-inline d-sm-none">New</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Card -->
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Event Calendar</h5>
-                <small class="text-muted">Click on a date or drag to select multiple dates to create an event</small>
+            <div class="card-header border-bottom">
+                <h5 class="card-title mb-0">All Approved Events</h5>
+                <small class="text-muted">Click on a date to view events or create a new permit</small>
             </div>
             <div class="card-body">
                 <div id="calendar"></div>
             </div>
         </div>
-    </div>
 
-    <!-- Event Permit Form Modal -->
-    <div class="modal fade" id="permitModal" tabindex="-1" aria-labelledby="permitModalLabel" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="permitModalLabel">SDSO Organization Activity Permit</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                    <div class="text-center p-5 form-loading-state">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Loading Permit Form...</p>
+        <!-- Legend Card (Mobile-friendly) -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-3 justify-content-center">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-label-success me-2">●</span>
+                        <small class="text-muted">Approved Events</small>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-label-primary me-2">📍</span>
+                        <small class="text-muted">Click date to view/create</small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -58,12 +275,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
-            const permitModalEl = document.getElementById('permitModal');
-            const permitModal = new bootstrap.Modal(permitModalEl);
-            const modalBody = permitModalEl.querySelector('.modal-body');
-            const modalFooter = permitModalEl.querySelector('.modal-footer');
             let selectedDates = null;
-            let signaturePadInstance = null;
 
             function formatDate(dateObj, includeTime = false) {
                 if (!dateObj) return 'N/A';
@@ -92,20 +304,33 @@
                     start: event.start,
                     end: event.end,
                     props: event.extendedProps,
-                    color: event.backgroundColor || event.color || '#3788d8',
+                    color: event.backgroundColor || event.color || '#28a745',
                     allDay: event.allDay
                 }));
             }
 
             const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
                 selectable: true,
                 selectMirror: true,
                 editable: false,
+                dayMaxEvents: 3, // Show max 3 events per day
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
+                buttonText: {
+                    today: 'Today',
+                    month: 'Month',
+                    week: 'Week',
+                    day: 'Day'
+                },
+                height: 'auto',
+                contentHeight: 'auto',
+                aspectRatio: 1.8,
+
+                // Fetch ALL approved events from database
                 events: function(fetchInfo, successCallback, failureCallback) {
                     fetch('{{ route('calendar.events') }}')
                         .then(response => response.json())
@@ -114,10 +339,17 @@
                         })
                         .catch(error => {
                             console.error('Error fetching events:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error Loading Events',
+                                text: 'Could not load calendar events. Please refresh the page.',
+                                confirmButtonColor: '#5f61e6'
+                            });
                             failureCallback(error);
                         });
                 },
 
+                // Handle date selection (drag to select range)
                 select: function(info) {
                     const actualEnd = info.end ? new Date(info.end.getTime() - 86400000).toISOString().split('T')[0] : info.startStr.split('T')[0];
 
@@ -130,6 +362,7 @@
                     calendar.unselect();
                 },
 
+                // Handle single date click
                 dateClick: function(info) {
                     if (info.dayEl && info.dateStr) {
                         selectedDates = {
@@ -140,6 +373,7 @@
                     }
                 },
 
+                // Handle event click (view details)
                 eventClick: function (info) {
                     const event = info.event;
                     const props = event.extendedProps;
@@ -164,30 +398,30 @@
                         icon: 'info',
                         title: event.title,
                         html: `
-                            <div class="text-start p-3 bg-light rounded shadow-sm">
-                                <p class="mb-1"><i class="ti ti-calendar me-2"></i><b>Date(s):</b> ${dateDisplay}</p>
-                                <p class="mb-1"><i class="ti ti-clock me-2"></i><b>Time:</b> ${timeDisplay}</p>
-                                <p class="mb-1"><i class="ti ti-building me-2"></i><b>Venue:</b> ${props.venue || 'N/A'}</p>
+                            <div class="text-start p-3 bg-light rounded">
+                                <p class="mb-2"><i class="ti ti-calendar me-2 text-primary"></i><strong>Date(s):</strong> ${dateDisplay}</p>
+                                <p class="mb-2"><i class="ti ti-clock me-2 text-primary"></i><strong>Time:</strong> ${timeDisplay}</p>
+                                <p class="mb-2"><i class="ti ti-map-pin me-2 text-primary"></i><strong>Venue:</strong> ${props.venue || 'N/A'}</p>
                                 <hr class="my-2">
-                                <p class="mb-1"><i class="ti ti-users me-2"></i><b>Organization:</b> ${props.organization_name || 'N/A'}</p>
-                                <p class="mb-1"><i class="ti ti-clipboard-text me-2"></i><b>Purpose:</b> ${props.purpose || 'N/A'}</p>
-                                <span class="badge rounded-pill bg-${props.status === 'Approved' ? 'success' : props.status === 'Pending' ? 'warning' : 'danger'} mt-2">${props.status || 'Status N/A'}</span>
+                                <p class="mb-2"><i class="ti ti-users me-2 text-primary"></i><strong>Organization:</strong> ${props.organization_name || 'N/A'}</p>
+                                <p class="mb-2"><i class="ti ti-clipboard-text me-2 text-primary"></i><strong>Purpose:</strong> ${props.purpose || 'N/A'}</p>
+                                <p class="mb-2"><i class="ti ti-info-circle me-2 text-primary"></i><strong>Type:</strong> ${props.type || 'N/A'}</p>
+                                <div class="mt-3">
+                                    <span class="badge bg-success">✓ Approved</span>
+                                </div>
                             </div>
                         `,
                         showCloseButton: true,
                         showConfirmButton: false,
-                        customClass: {
-                            container: 'swal2-container--material',
-                            popup: 'swal2-popup--material',
-                            title: 'swal2-title--material',
-                            htmlContainer: 'swal2-html-container--material'
-                        }
+                        width: window.innerWidth < 768 ? '95%' : '600px',
+                        confirmButtonColor: '#5f61e6'
                     });
                 }
             });
 
             calendar.render();
 
+            // Show date selection summary with events
             function showDateSelectionSummary(startDateStr, endDateStr) {
                 const eventsInSelection = getEventsForRange(startDateStr, endDateStr);
 
@@ -196,6 +430,7 @@
                     dateRangeText = `${formatDate(startDateStr)} to ${formatDate(endDateStr)}`;
                 }
 
+                // Group events by venue
                 const eventsByVenue = eventsInSelection.reduce((groups, event) => {
                     const venue = event.props.venue || 'Venue N/A';
                     if (!groups[venue]) {
@@ -221,314 +456,71 @@
                                 : `${eventStart.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} - ${eventEnd ? eventEnd.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}`;
 
                             return `
-                                <li class="list-group-item d-flex justify-content-between align-items-center" style="border-left: 5px solid ${event.color};">
-                                    <div>
-                                        <h6 class="mb-0 text-dark">${event.title}</h6>
-                                        <small class="text-muted"><i class="ti ti-clock me-1"></i>${timeStr} | Org: ${event.props.organization_name || 'N/A'}</small>
-                                    </div>
-                                    <span class="badge bg-label-${event.props.status === 'Approved' ? 'success' : event.props.status === 'Pending' ? 'warning' : 'danger'}">${event.props.status || 'N/A'}</span>
-                                </li>
+                                <div class="mb-2 p-2 border-start border-4 border-success bg-light rounded event-summary-card">
+                                    <h6 class="mb-1 fw-semibold">${event.title}</h6>
+                                    <small class="text-muted d-block">
+                                        <i class="ti ti-clock me-1"></i>${timeStr}
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="ti ti-users me-1"></i>${event.props.organization_name || 'N/A'}
+                                    </small>
+                                    <span class="badge bg-label-success mt-1">Approved</span>
+                                </div>
                             `;
                         }).join('');
 
                         return `
-                            <div class="card mb-3 shadow-sm border-primary">
-                                <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0"><i class="ti ti-map-pin me-2"></i>${group.venue}</h6>
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="ti ti-map-pin me-2 text-primary"></i>
+                                    <h6 class="mb-0 fw-bold text-primary">${group.venue}</h6>
                                 </div>
-                                <ul class="list-group list-group-flush">
-                                    ${itemsHtml}
-                                </ul>
+                                ${itemsHtml}
                             </div>
                         `;
                     }).join('');
 
                 } else {
-                    eventListHtml = '<div class="alert alert-info mb-0">No events scheduled on these date(s).</div>';
+                    eventListHtml = '<div class="alert alert-info mb-0"><i class="ti ti-info-circle me-2"></i>No events scheduled on these date(s).</div>';
                 }
+
+                const isMobile = window.innerWidth < 768;
 
                 Swal.fire({
                     icon: 'calendar',
-                    title: 'Selected Date(s) Schedule',
+                    title: 'Events on Selected Date(s)',
                     html: `
-                        <h5 class="text-primary mb-3">${dateRangeText}</h5>
-                        <div style="max-height: 400px; overflow-y: auto;">
+                        <div class="mb-3">
+                            <div class="badge bg-label-primary p-2">
+                                <i class="ti ti-calendar me-1"></i>${dateRangeText}
+                            </div>
+                        </div>
+                        <div style="max-height: ${isMobile ? '300px' : '400px'}; overflow-y: auto; text-align: left;">
                             ${eventListHtml}
                         </div>
                     `,
-                    width: 700,
+                    width: isMobile ? '95%' : '700px',
                     showCancelButton: true,
-                    confirmButtonText: '<i class="ti ti-file-text me-1"></i> Apply for Permit',
+                    confirmButtonText: '<i class="ti ti-file-text me-1"></i> Create Permit',
                     cancelButtonText: 'Close',
-                    customClass: {
-                        container: 'swal2-container--material',
-                        popup: 'swal2-popup--material',
-                        title: 'swal2-title--material',
-                        htmlContainer: 'swal2-html-container--material'
-                    }
+                    confirmButtonColor: '#5f61e6',
+                    cancelButtonColor: '#8592a3'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        openPermitForm();
-                    }
-                });
-            }
-
-            function openPermitForm() {
-                modalBody.innerHTML = `
-                    <div class="text-center p-5 form-loading-state">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Loading Permit Form...</p>
-                    </div>
-                `;
-                modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>`;
-
-                fetch('{{ route('permit.form') }}')
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.text();
-                    })
-                    .then(html => {
-                        modalBody.innerHTML = html;
-
-                        modalFooter.innerHTML = `
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" id="submitPermitBtn" class="btn btn-primary">Submit Permit</button>
-                        `;
-
-                        initializeFormComponents();
-
-                        const formDateStart = document.getElementById('date_start');
-                        const formDateEnd = document.getElementById('date_end');
-
-                        if(formDateStart) formDateStart.value = selectedDates.start;
-                        if(formDateEnd) formDateEnd.value = selectedDates.end !== selectedDates.start ? selectedDates.end : '';
-
-                        document.getElementById('submitPermitBtn')?.addEventListener('click', submitPermitForm);
-
-                        permitModal.show();
-                    })
-                    .catch(error => {
-                        console.error('Error fetching form:', error);
-                        modalBody.innerHTML = `<div class="alert alert-danger">Error loading form. Please ensure the 'permit.form' route is working and returning the form HTML.</div>`;
-                        modalFooter.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>`;
-                        permitModal.show();
-                    });
-            }
-
-            function initializeFormComponents() {
-                flatpickr("#time_start", {
-                    enableTime: true, noCalendar: true, dateFormat: "h:i K", time_24hr: false
-                });
-                flatpickr("#time_end", {
-                    enableTime: true, noCalendar: true, dateFormat: "h:i K", time_24hr: false
-                });
-
-                flatpickr("#date_start", {
-                    dateFormat: "Y-m-d",
-                    minDate: "today",
-                    onChange: function(selectedDates, dateStr, instance) {
-                        const endDateInput = document.getElementById('date_end');
-                        if (endDateInput && endDateInput._flatpickr) {
-                            endDateInput._flatpickr.set('minDate', dateStr);
-                        }
-                    }
-                });
-                flatpickr("#date_end", {
-                    dateFormat: "Y-m-d",
-                    minDate: "today"
-                });
-
-                toggleOtherField('nature', 'nature_other_text');
-                toggleOtherField('participants', 'participants_other_text');
-
-                const typeRadios = document.querySelectorAll('input[name="type"]');
-                const inCampusGroup = document.getElementById('inCampusVenueGroup');
-                const offCampusGroup = document.getElementById('offCampusVenueGroup');
-
-                const updateVenueVisibility = () => {
-                    const selectedType = document.querySelector('input[name="type"]:checked')?.value;
-                    if (inCampusGroup) {
-                        inCampusGroup.style.display = selectedType === 'In-Campus' ? 'block' : 'none';
-                        inCampusGroup.querySelector('select').required = selectedType === 'In-Campus';
-                    }
-                    if (offCampusGroup) {
-                        offCampusGroup.style.display = selectedType === 'Off-Campus' ? 'block' : 'none';
-                        offCampusGroup.querySelector('input').required = selectedType === 'Off-Campus';
-                    }
-                };
-
-                typeRadios.forEach(radio => radio.addEventListener('change', updateVenueVisibility));
-                updateVenueVisibility();
-
-                const canvas = document.getElementById('signature-pad');
-                if (canvas) {
-                    signaturePadInstance = new SignaturePad(canvas, {
-                        backgroundColor: 'rgba(255, 255, 255, 0)',
-                        penColor: 'black',
-                        minWidth: 1,
-                        maxWidth: 3,
-                    });
-
-                    const resizeObserver = new ResizeObserver(entries => {
-                        for (let entry of entries) {
-                            resizeCanvas(entry.target, signaturePadInstance);
-                        }
-                    });
-                    resizeObserver.observe(canvas.parentElement);
-
-                    document.getElementById('clear-signature')?.addEventListener('click', function () {
-                        signaturePadInstance.clear();
-                    });
-                }
-            }
-
-            function resizeCanvas(container, signaturePad) {
-                const canvas = container.querySelector('canvas');
-                if (!canvas) return;
-
-                const data = signaturePad.toDataURL();
-
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                canvas.width = canvas.offsetWidth * ratio;
-                canvas.height = canvas.offsetHeight * ratio;
-                canvas.getContext('2d').scale(ratio, ratio);
-
-                if (data && data !== 'data:image/png;base64,') {
-                    signaturePad.fromDataURL(data, { ratio });
-                } else {
-                    signaturePad.clear();
-                }
-            }
-
-            function toggleOtherField(radioName, textFieldId) {
-                const radios = document.querySelectorAll(`input[name="${radioName}"]`);
-                const textField = document.getElementById(textFieldId);
-                radios.forEach(radio => {
-                    radio.addEventListener('change', function () {
-                        textField.disabled = this.value !== 'Other';
-                        textField.required = this.value === 'Other';
-                        if (this.value !== 'Other') textField.value = '';
-                    });
-                });
-            }
-
-            function submitPermitForm() {
-                const form = document.getElementById('permitForm');
-
-                if (!form.checkValidity()) {
-                    form.reportValidity();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Validation Error',
-                        text: 'Please fill out all required fields.',
-                        customClass: { container: 'swal2-container--material', popup: 'swal2-popup--material', title: 'swal2-title--material' }
-                    });
-                    return;
-                }
-
-                const formData = new FormData(form);
-
-                let natureValue = formData.get('nature');
-                if (natureValue === 'Other') {
-                    natureValue = formData.get('nature_other') || 'Other';
-                    formData.set('nature', natureValue);
-                }
-
-                let participantsValue = formData.get('participants');
-                if (participantsValue === 'Other') {
-                    participantsValue = formData.get('participants_other') || 'Other';
-                    formData.set('participants', participantsValue);
-                }
-
-                const type = formData.get('type');
-                if (type === 'In-Campus') {
-                    if (!formData.get('venue_id')) {
-                        Swal.fire('Validation Error', 'Please select a campus venue.', 'warning');
-                        return;
-                    }
-                    formData.delete('venue_other');
-                } else if (type === 'Off-Campus') {
-                    if (!formData.get('venue_other')) {
-                        Swal.fire('Validation Error', 'Please specify the off-campus venue.', 'warning');
-                        return;
-                    }
-                    formData.delete('venue_id');
-                }
-
-                const signatureUploadInput = document.getElementById('signature_upload');
-                let signatureRequired = true;
-
-                if (signaturePadInstance && !signaturePadInstance.isEmpty()) {
-                    const dataURL = signaturePadInstance.toDataURL('image/png');
-                    formData.set('signature_data', dataURL);
-                    signatureRequired = false;
-                } else if (signatureUploadInput.files.length > 0) {
-                    signatureRequired = false;
-                }
-
-                if (signatureRequired) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Validation Error',
-                        text: 'A signature is required (draw or upload).',
-                        customClass: { container: 'swal2-container--material', popup: 'swal2-popup--material', title: 'swal2-title--material' }
-                    });
-                    return;
-                }
-
-                const submitBtn = document.getElementById('submitPermitBtn');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
-
-                fetch('{{ route('calendar.store') }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                        'Accept': 'application/json',
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(err => { throw new Error(err.message || 'Server error'); });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        permitModal.hide();
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: data.message,
-                            customClass: { container: 'swal2-container--material', popup: 'swal2-popup--material', title: 'swal2-title--material' }
+                        // Redirect to permit form with selected dates
+                        const params = new URLSearchParams({
+                            date_start: selectedDates.start,
+                            date_end: selectedDates.end !== selectedDates.start ? selectedDates.end : ''
                         });
-                        calendar.refetchEvents();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: data.message || 'Failed to submit permit. Please check your form.',
-                            customClass: { container: 'swal2-container--material', popup: 'swal2-popup--material', title: 'swal2-title--material' }
-                        });
+                        window.location.href = '{{ route('permit.form') }}?' + params.toString();
                     }
-                })
-                .catch(error => {
-                    console.error('Submission Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: `An unexpected error occurred: ${error.message || 'Unknown Error'}`,
-                        customClass: { container: 'swal2-container--material', popup: 'swal2-popup--material', title: 'swal2-title--material' }
-                    });
-                })
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Submit Permit';
                 });
             }
+
+            // Make calendar responsive
+            window.addEventListener('resize', function() {
+                calendar.updateSize();
+            });
         });
     </script>
 @endsection

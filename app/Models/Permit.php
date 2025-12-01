@@ -37,7 +37,11 @@
     // public function getHashedIdAttribute()
     // {
     //   return Hashids::encode($this->permit_id);
-    // }
+    // }// In app/Models/Permit.php
+public function offCampusDocuments()
+{
+    return $this->hasMany(OffCampusRequirement::class, 'permit_id');
+}
 
     // approvals relation (event_approval_flow rows tied to this permit)
     public function approvals()

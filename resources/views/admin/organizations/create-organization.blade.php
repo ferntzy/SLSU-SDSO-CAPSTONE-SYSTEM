@@ -51,7 +51,7 @@
                       <option value="">Select Adviser</option>
                       @foreach($advisers as $adviser)
                           <option value="{{ $adviser->user_id }}">
-                              {{ $adviser->profile->first_name }} {{ $adviser->profile->last_name }}
+                              {{ $adviser->profile->first_name ?? " " }} {{ $adviser->profile->last_name ?? " "}}
                           </option>
                       @endforeach
                   </select>
