@@ -11,24 +11,43 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use setasign\Fpdi\Fpdi;
 use Vinkla\Hashids\Facades\Hashids;
-
+use App\Models\Venue;
+use App\Models\OffCampusRequirement;
 
 class PermitController extends Controller
 {
-  public function showForm()
+  public function showForm(Request $request)
   {
-    $user = auth()->user();
-    $organizations = Organization::where('user_id', $user->user_id)->get();
-    return view('student.permit.form', compact('organizations'));
+    // Get dates from calendar (URL parameters)
+    $dateStart = $request->query('date_start');
+    $dateEnd   = $request->query('date_end');
+
+    // If only one date is clicked, make end date same as start
+    if ($dateStart && !$dateEnd) {
+      $dateEnd = $dateStart;
+    }
+
+    // Load all venues
+    $venues = Venue::orderBy('venue_name', 'asc')->get();
+
+    // VERY IMPORTANT: pass the variables!
+    return view('student.permit.form', compact(
+      'venues',
+      'dateStart',
+      'dateEnd'
+    ));
   }
 
   public function showCalendar()
-{
-      $user = auth()->user();
+  {
+    $user = auth()->user();
     $organizations = Organization::where('user_id', $user->user_id)->get();
     return view('student.calendardisplay', compact('organizations'));
-}
-
+  }
+  public function offCampusDocuments()
+  {
+    return $this->hasMany(OffCampusRequirement::class, 'permit_id');
+  }
 
   public function generate(Request $request)
   {
@@ -46,9 +65,8 @@ class PermitController extends Controller
       'type' => 'nullable|string',
       'nature' => 'nullable|string',
       'participants' => 'nullable|string',
-      'participants_other' => 'nullable|string',
-      'signature_upload' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
-      'signature_data' => 'nullable|string'
+      'participants_other_text' => 'nullable|string',
+      'nature_other_text' => 'nullable|string',
     ]);
 
     $timeStart = date('H:i:s', strtotime($request->time_start));
@@ -56,28 +74,22 @@ class PermitController extends Controller
 
     $permit = Permit::create([
       'organization_id' => $request->organization_id,
-      'title_activity' => $request->title_activity,
-      'purpose' => $request->purpose,
-      'type' => $request->type,
-      'nature' => $request->nature,
-      'venue' => $request->venue,
-      'date_start' => $request->date_start,
-      'date_end' => $request->date_end,
-      'time_start' => $timeStart,
-      'time_end' => $timeEnd,
-      'participants' => $request->participants,
-      'number' => $request->number,
-      'signature_data' => $request->signature_data ?? null,
+      'title_activity'  => $request->title_activity,
+      'purpose'         => $request->purpose,
+      'type'            => $request->type,
+      'nature'          => $request->nature === 'Other' ? ($request->nature_other_text ?? $request->nature) : $request->nature,
+      'venue'           => $request->venue,
+      'date_start'      => $request->date_start,
+      'date_end'        => $request->date_end,
+      'time_start'      => $timeStart,
+      'time_end'        => $timeEnd,
+      'participants'    => $request->participants === 'Other' ? ($request->participants_other_text ?? $request->participants) : $request->participants,
+      'number'          => $request->number,
+      'user_id'         => Auth::id(),
     ]);
 
-    $stages = [
-      'Faculty_Adviser',
-      'BARGO',
-      'SDSO_Head',
-      'SAS_Director',
-      'VP_SAS'
-    ];
-
+    // Create approval flow (unchanged)
+    $stages = ['Faculty_Adviser', 'BARGO', 'SDSO_Head', 'SAS_Director', 'VP_SAS'];
     foreach ($stages as $stage) {
       EventApprovalFlow::create([
         'permit_id' => $permit->permit_id,
@@ -85,6 +97,7 @@ class PermitController extends Controller
         'status' => 'pending',
       ]);
     }
+
     $event = Event::create([
       'organization_id' => $request->organization_id,
       'event_title' => $request->title_activity,
@@ -92,8 +105,7 @@ class PermitController extends Controller
       'proposal_status' => 'pending',
     ]);
 
-    $roles = ['Faculty_Adviser', 'BARGO', 'SDSO_Head', 'SAS_Director', 'VP_SAS'];
-    foreach ($roles as $role) {
+    foreach ($stages as $role) {
       EventApproval::create([
         'event_id' => $event->event_id,
         'approver_role' => $role,
@@ -117,9 +129,9 @@ class PermitController extends Controller
     $pdf->SetFont('Helvetica', '', 10);
     $pdf->SetTextColor(0, 0, 0);
 
-    // 🖋 Basic Info (only name centered)
+    // BASIC INFO (your original positions)
     $pdf->SetXY(73.5, 41);
-    $pdf->Write(0, $request->name);  // Centered
+    $pdf->Write(0, $request->name);
     $pdf->SetXY(73.5, 45);
     $pdf->Write(0, $organizationName);
     $pdf->SetXY(73.5, 49);
@@ -130,19 +142,13 @@ class PermitController extends Controller
     $pdf->MultiCell(140, 5, $request->purpose);
     $pdf->SetFont('Helvetica', '', 10);
 
-    // 🖋 Type Checkboxes
+    // TYPE CHECKBOXES (original positions)
     $pdf->SetFont('ZapfDingbats', '', 12);
-    $typePositions = [
-      'In-Campus'  => [75, 62],
-      'Off-Campus' => [124.3, 62],
-    ];
-    if ($request->type && isset($typePositions[$request->type])) {
-      [$x, $y] = $typePositions[$request->type];
-      $pdf->SetXY($x, $y);
-      $pdf->Write(0, chr(52));
-    }
+    $typeX = $request->type === 'Off-Campus' ? 124.3 : 75;
+    $pdf->SetXY($typeX, 62);
+    $pdf->Write(0, chr(52));
 
-    // 🖋 Nature Checkboxes
+    // NATURE CHECKBOXES (original positions)
     $naturePositions = [
       'Training/Seminar'   => [75, 70],
       'Conference/Summit'  => [124.3, 70],
@@ -157,19 +163,21 @@ class PermitController extends Controller
       'Competition'        => [75, 91.2],
       'Other'              => [124.3, 91.2],
     ];
-    if ($request->nature && isset($naturePositions[$request->nature])) {
-      [$x, $y] = $naturePositions[$request->nature];
+
+    $natureKey = $request->nature === 'Other' ? 'Other' : $request->nature;
+    if (isset($naturePositions[$natureKey])) {
+      [$x, $y] = $naturePositions[$natureKey];
       $pdf->SetXY($x, $y);
       $pdf->Write(0, chr(52));
     }
 
-    if ($request->filled('nature_other')) {
+    if ($request->nature === 'Other' && $request->filled('nature_other_text')) {
       $pdf->SetFont('Helvetica', '', 12);
       $pdf->SetXY(138, 91.2);
-      $pdf->Write(0, $request->nature_other);
+      $pdf->Write(0, $request->nature_other_text);
     }
 
-    //Dates & Times
+    // DATE & TIME (original formatting & positions)
     $startDate = strtotime($request->date_start);
     $endDate = $request->date_end ? strtotime($request->date_end) : null;
     if ($endDate && $endDate !== $startDate) {
@@ -194,7 +202,7 @@ class PermitController extends Controller
     $pdf->SetXY(142, 99.6);
     $pdf->Write(0, $timeDisplay);
 
-    // 🖋 Participants
+    // PARTICIPANTS CHECKBOXES (original positions)
     $pdf->SetFont('ZapfDingbats', '', 12);
     $participantPositions = [
       'Members'      => [75, 103.5],
@@ -202,93 +210,126 @@ class PermitController extends Controller
       'All Students' => [75, 111.8],
       'Other'        => [75, 116],
     ];
-    if ($request->participants && isset($participantPositions[$request->participants])) {
-      [$x, $y] = $participantPositions[$request->participants];
+
+    $partKey = $request->participants === 'Other' ? 'Other' : $request->participants;
+    if (isset($participantPositions[$partKey])) {
+      [$x, $y] = $participantPositions[$partKey];
       $pdf->SetXY($x, $y);
       $pdf->Write(0, chr(52));
     }
 
-    if ($request->filled('participants_other')) {
+    if ($request->participants === 'Other' && $request->filled('participants_other_text')) {
       $pdf->SetFont('Helvetica', '', 11);
       $pdf->SetXY(90, 116);
-      $pdf->Write(0, $request->participants_other);
+      $pdf->Write(0, $request->participants_other_text);
     }
 
-    // 🖋 Number of Participants
+    // NUMBER OF PARTICIPANTS (original position)
     $pdf->SetFont('Helvetica', '', 11);
     $pdf->SetXY(142, 110);
     $pdf->Write(0, $request->number);
 
-    //prepared by (centered)
+    // PREPARED BY NAME (original centered logic)
     $pdf->SetFont('Helvetica', '', 10);
     $text = strtoupper($request->name);
     $textWidth = $pdf->GetStringWidth($text);
     $centeredX = 47 - ($textWidth / 2);
     $pdf->SetXY($centeredX, 138);
     $pdf->Write(0, $text);
-    // ✅ Signature (centered at same X as bottom name, 128)
+
+    // SIGNATURE — FIXED & USING YOUR EXACT ORIGINAL COORDINATES
     $signaturePath = null;
-    if ($request->hasFile('signature_upload')) {
+
+    // Priority 1: Use saved signature from user profile (this is what shows in the form!)
+    if (Auth::user()->signature) {
+      $path = storage_path('app/public/' . Auth::user()->signature);
+      if (file_exists($path)) {
+        $signaturePath = $path;
+      }
+    }
+    // Priority 2: Canvas signature from form
+    elseif ($request->filled('signature_data')) {
+      $imgData = str_replace(['data:image/png;base64,', ' '], ['', '+'], $request->signature_data);
+      $signaturePath = storage_path('app/temp_signature_' . Auth::id() . '.png');
+      file_put_contents($signaturePath, base64_decode($imgData));
+    }
+    // Priority 3: Uploaded file
+    elseif ($request->hasFile('signature_upload')) {
       $signaturePath = $request->file('signature_upload')->getPathName();
-    } elseif ($request->filled('signature_data')) {
-      $imgData = str_replace('data:image/png;base64,', '', $request->input('signature_data'));
-      $img = str_replace(' ', '+', $imgData);
-      $signaturePath = storage_path('app/temp_signature.png');
-      file_put_contents($signaturePath, base64_decode($img));
     }
 
+    // Place signature in BOTH original positions
     if ($signaturePath && file_exists($signaturePath)) {
-      $imageWidth = 40; // As per your code
-      $centeredX = 47 - ($imageWidth / 2); // Center at 128
-      $pdf->Image($signaturePath, $centeredX, 120, 40, 20);
+      // Top signature — YOUR ORIGINAL COORDINATES
+      $pdf->Image($signaturePath, 27, 120, 40, 20);
+
+      // Bottom signature — YOUR ORIGINAL COORDINATES
+      $pdf->Image($signaturePath, 133, 207, 40, 20);
     }
 
-
-    // ✅ Signature (centered at same X as bottom name, 128)
-    $signaturePath = null;
-    if ($request->hasFile('signature_upload')) {
-      $signaturePath = $request->file('signature_upload')->getPathName();
-    } elseif ($request->filled('signature_data')) {
-      $imgData = str_replace('data:image/png;base64,', '', $request->input('signature_data'));
-      $img = str_replace(' ', '+', $imgData);
-      $signaturePath = storage_path('app/temp_signature.png');
-      file_put_contents($signaturePath, base64_decode($img));
+    // Cleanup temp file
+    if ($signaturePath && str_contains($signaturePath, 'temp_signature_')) {
+      @unlink($signaturePath);
     }
 
-    if ($signaturePath && file_exists($signaturePath)) {
-      $imageWidth = 40; // As per your code
-      $centeredX = 153 - ($imageWidth / 2); // Center at 128
-      $pdf->Image($signaturePath, $centeredX, 207, 40, 20);
-    }
-
-    // 🖋 Name at the bottom (centered)
-    $text = strtoupper($request->name);
+    // FINAL NAME AT BOTTOM (original centered logic)
     $textWidth = $pdf->GetStringWidth($text);
     $centeredX = 153 - ($textWidth / 2);
     $pdf->SetXY($centeredX, 223);
     $pdf->Write(0, $text);
 
-    // Save PDF data in DB
+    // Save PDF to database
     $pdfData = $pdf->Output('S');
     $permit->update(['pdf_data' => $pdfData]);
 
+    if ($request->type === 'Off-Campus' && $request->has('requirements') && is_array($request->requirements)) {
+
+      foreach ($request->requirements as $requirementKey) {
+
+        $fileInputName = "requirement_files.{$requirementKey}";
+
+        if ($request->hasFile($fileInputName)) {
+          $file = $request->file($fileInputName);
+
+          if ($file->isValid()) {
+            // Generate safe filename
+            $originalName = $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
+            $fileName = $requirementKey . '_' . $permit->permit_id . '_' . time() . '.' . $extension;
+
+            // Store in: storage/app/public/permits/offcampus/{permit_id}/
+            $path = $file->storeAs("permits/offcampus/{$permit->permit_id}", $fileName, 'public');
+
+            // Save to your existing table
+            OffCampusRequirement::create([
+              'permit_id'         => $permit->permit_id,
+              'requirement_type'  => $requirementKey,
+              'file_path'         => $path,
+              'original_filename' => $originalName,
+              'file_size'         => $file->getSize(),
+              'mime_type'         => $file->getMimeType(),
+            ]);
+          }
+        }
+      }
+    }
+
     return response($pdfData)
       ->header('Content-Type', 'application/pdf')
-      ->header('Content-Disposition', 'inline; filename="sdso_permit_filled.pdf"');
+      ->header('Content-Disposition', 'inline; filename="sdso_permit_' . $permit->permit_id . '.pdf"');
   }
-
   public function view($hashed_id)
-{
+  {
     $permit = Permit::where('hashed_id', $hashed_id)->firstOrFail();
 
     if (!$permit->pdf_data) {
-        abort(404, 'PDF not available.');
+      abort(404, 'PDF not available.');
     }
 
     return response($permit->pdf_data)
-        ->header('Content-Type', 'application/pdf')
-        ->header('Content-Disposition', 'attachment; filename="Permit-'.$hashed_id.'.pdf"');
-}
+      ->header('Content-Type', 'application/pdf')
+      ->header('Content-Disposition', 'attachment; filename="Permit-' . $hashed_id . '.pdf"');
+  }
 
   public function status($id)
   {

@@ -5,7 +5,8 @@
                 <h5 class="modal-title w-100 text-center">Add Officer</h5>
                 <button type="button" class="btn-close position-absolute end-0 me-2" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-0">
+              <div class="overflow-auto p-3" style="max-height: 70vh;">
                 <div class="text-center mb-3">
                     <h5 id="organizationName">
                         {{ $organization->organization_name ?? 'Organization Name' }}
@@ -308,6 +309,7 @@
                     <table class="table table-hover"></table>
                 </div>
 
+              </div>
             </div>
 
             <!-- ====================== FOOTER ====================== -->

@@ -6,7 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PermitController;
-
+use App\Http\Controllers\VenueController;
 use App\Http\Controllers\FacultyAdviserController;
 // use App\Http\Controllers\StudentEventController;
 // use App\Http\Controllers\StudentDashboardController;
@@ -22,9 +22,8 @@ use App\Http\Controllers\Vp_sasController;
 // ============================
 // AUTH ROUTES
 // ============================
-Route::get('/', function () {
-  return redirect()->route('login');
-});
+
+ Route::get('/', function () {return redirect('/login');});
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 
@@ -259,6 +258,7 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
 
   Route::get('page/rejected-permits', [PermitTrackingController::class, 'rejectedPage'])
     ->name('student.page.rejected');
+
 
 
 

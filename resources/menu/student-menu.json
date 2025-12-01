@@ -10,12 +10,7 @@
       "slug": "student-dashboard"
     },
 
-    {
-      "url": "/student/permit/form",
-      "name": "Apply for Activity Permit",
-      "icon": "menu-icon tf-icons mdi mdi-file-document-edit-outline",
-      "slug": "student-activity-permit"
-    },
+
 
     {
       "url": "/student/calendar",
@@ -47,27 +42,6 @@
       "slug": "student-rejected-permits"
     },
 
-    {
-      "menuHeader": "EVENT STATUS"
-    },
-    {
-      "url": "/student/permit/ongoing-events",
-      "name": "Ongoing Events",
-      "icon": "menu-icon tf-icons mdi mdi-play-circle-outline",
-      "slug": "student-ongoing-events"
-    },
-    {
-      "url": "/student/permit/successful-events",
-      "name": "Successful Events",
-      "icon": "menu-icon tf-icons mdi mdi-trophy-outline",
-      "slug": "student-successful-events"
-    },
-    {
-      "url": "/student/permit/canceled-events",
-      "name": "Canceled Events",
-      "icon": "menu-icon tf-icons mdi mdi-cancel",
-      "slug": "student-canceled-events"
-    },
 
     {
       "menuHeader": "ACCOUNT"
