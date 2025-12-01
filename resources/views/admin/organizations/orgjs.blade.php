@@ -218,6 +218,134 @@
 
 
 
+// OPEN ADD OFFICER MODAL
+$(document).on("click", ".btn-add-officers", function() {
+
+    let encryptedId = $(this).data("id");
+
+    $.ajax({
+        url: "{{ route('organizations.edit') }}",
+        type: "POST",
+        data: { id: encryptedId },
+        beforeSend: function() {
+            $("#officerOrgName").text("Loading...");
+            $("#officerAdviser").text("Adviser: Loading...");
+
+            // Set temporary title
+            $("#officerModalTitle").text("Add Officer in ...");
+        },
+        success: function(data) {
+
+            // Fill modal fields
+            $("#officerOrgName").text(data.organization_name);
+
+            // Set modal title: Add Officer in {Org Name}
+            $("#officerModalTitle").text(
+                "Add Officer in " + data.organization_name
+            );
+
+            let adviser = data.adviser?.profile?.first_name
+                        + " " +
+                        data.adviser?.profile?.last_name;
+
+            $("#officerAdviser").text("Adviser: " + (adviser || "N/A"));
+        },
+        error: function(xhr) {
+            console.error(xhr.responseText);
+            $("#officerOrgName").text("Error loading data");
+            $("#officerAdviser").text("Adviser: Error");
+            $("#officerModalTitle").text("Add Officer");
+        }
+    });
+
+});
+
+
+
+
+//add officer to hide if one profile_id exists on the other RoleNmae
+  document.addEventListener("DOMContentLoaded", function () {
+      const selects = document.querySelectorAll('.officer-select');
+
+      function updateDropdowns() {
+          // Get all selected profile_ids
+          let selectedValues = Array.from(selects)
+              .map(s => s.value)
+              .filter(v => v !== ""); // remove empty
+
+          selects.forEach(select => {
+              let currentValue = select.value;
+
+              // Loop through options
+              Array.from(select.options).forEach(option => {
+                  if (option.value === "") return; // skip "Select"
+
+                  // Hide option if already chosen in another select
+                  if (selectedValues.includes(option.value) && option.value !== currentValue) {
+                      option.hidden = true;
+                  } else {
+                      option.hidden = false;
+                  }
+              });
+          });
+      }
+
+      // Run filtering every time a select changes
+      selects.forEach(select => {
+          select.addEventListener("change", updateDropdowns);
+      });
+
+      // Initial run
+      updateDropdowns();
+  });
+
+
+      // ===== Save Officers =====
+    $(document).on("click", "#btnSaveOfficers", function(e) {
+        e.preventDefault();
+
+        let orgId = $("#officerOrgID").val();
+
+        let officersData = {};
+        $(".officer-select").each(function() {
+            let role = $(this).data("role"); // original role name
+            officersData[role] = $(this).val() || null;
+        });
+
+        $.ajax({
+            url: "{{ route('organizations.save-officers') }}",
+            method: "POST",
+            data: {
+                org_id: orgId,
+                officers: officersData,
+                _token: "{{ csrf_token() }}"
+            },
+            beforeSend: function() {
+                $("#btnSaveOfficers").prop("disabled", true);
+            },
+            success: function(response) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Officers saved!",
+                    timer: 1000,
+                    showConfirmButton: false
+                });
+                $("#btnSaveOfficers").prop("disabled", false);
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                Swal.fire({
+                    icon: "error",
+                    title: "Error saving officers"
+                });
+                $("#btnSaveOfficers").prop("disabled", false);
+            }
+        });
+    });
+
+
+
+
 
 
 </script>

@@ -97,57 +97,10 @@ Route::middleware(['auth', 'role:admin'])
 
 
 
-        // LOGS
-     Route::get('/logs-list', [UserLogController::class, 'index'])->name('users.logs-list');
-    Route::get('/logs', [UserLogController::class, 'index'])->name('admin.logs');
-        // // ======================
-        // // PROFILE (ADMIN ACCOUNT)
-        // // ======================
-        // Route::get('/profile', [AdminProfileController::class, 'show'])->name('admin.profile.show');
-        // Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+    // LOGS
 
-        // ======================
-        // EVENT REQUEST VIEWS
-        // ======================
-        Route::view('/event-requests', 'admin.EventRequest.AllRequest');
-        Route::view('/event-requests/pending', 'admin.EventRequest.PendingApproval');
-        Route::view('/event-requests/approved-events', 'admin.EventRequest.ApprovedEvents');
-
-        // APPROVALS
-        Route::view('/approvals/pending', 'admin.approvals.pending');
-        Route::view('/approvals/history', 'admin.approvals.history');
-
-        // E-SIGNATURES
-        Route::view('/esignatures/pending', 'admin.ESignature.pending');
-        Route::view('/esignatures/completed', 'admin.ESignature.completed');
-
-        // ======================
-        // ORGANIZATIONS
-        // ======================
-        Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
-        Route::get('/organizations/create', [OrganizationController::class, 'create'])->name('organizations.create');
-        Route::post('/organizations/store', [OrganizationController::class, 'store'])->name('organizations.store');
-        Route::put('/organizations/update', [OrganizationController::class, 'update'])->name('organizations.update');
-        Route::post('/organizations/list', [OrganizationController::class, 'index'])->name('organizations.list');
-        Route::post('/organizations/edit', [OrganizationController::class, 'edit'])->name('organizations.edit');
-        Route::post('/organizations/add', [OrganizationController:: class, 'add'])->name('organizations.add-members');
-
-
-        // Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
-        // Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
-
-        // ======================
-        // PROFILES (USER PROFILES)
-        // ======================
-        Route::get('/profiles', [ProfileController::class, 'index'])->name('profiles.index');
-        Route::get('/profiles/create', [ProfileController::class, 'create'])->name('profiles.create');
-        Route::post('/profiles/store', [ProfileController::class, 'store'])->name('profiles.store');
-        Route::post('/profiles/update', [ProfileController::class, 'update'])->name('profiles.update');
-        Route::post('/profiles/list', [ProfileController::class, 'index'])->name('profiles.list');
-        Route::post('/profiles/edit', [ProfileController::class, 'edit'])->name('profiles.edit');
-        Route::post('/profiles/view', [ProfileController::class, 'view'])->name('profiles.view');
-        Route::delete('profiles/{profile_id}', [ProfileController::class, 'destroy'])->name('profiles.destroy');
-
+   Route::get('/logs-list', [UserLogController::class, 'index'])->name('admin.users.logs-list');
+  Route::get('/logs', [UserLogController::class, 'index'])->name('admin.logs');
 
     // Route::post('user/check-username', [UserController::class, 'checkUsername']);
 
@@ -186,6 +139,13 @@ Route::middleware(['auth', 'role:admin'])
     Route::put('/organizations/update', [OrganizationController::class, 'update'])->name('organizations.update');
     Route::post('/organizations/list', [OrganizationController::class, 'index'])->name('organizations.list');
     Route::post('/organizations/edit', [OrganizationController::class, 'edit'])->name('organizations.edit');
+    Route::post('/organizations/add', [OrganizationController:: class, 'add'])->name('organizations.add-members');
+    Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
+    Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
+    // Load add officer page
+    Route::get('/organizations/{id}/add-officers', [OrganizationController::class, 'addOfficers'])->name('organizations.add.officers');
+    Route::post('/organizations/save-officers', [OrganizationController::class, 'saveOfficers'])
+     ->name('organizations.save-officers');
 
     // ======================
     // PROFILES (USER PROFILES)

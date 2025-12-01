@@ -40,7 +40,7 @@
                   </a>
                   <a href="#" class=" text-secondary btn-add-officers"
                       data-bs-toggle="modal"
-                      data-bs-target="#addOfficersModal">
+                      data-bs-target="#addOfficersModal" data-id="{{ Crypt::encryptstring($org->organization_id) }}">
                       <i class="mdi mdi-account-plus-outline"></i>
                   </a>
 

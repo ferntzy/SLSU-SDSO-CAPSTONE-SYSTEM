@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\Officer;
+
 use App\Models\UserProfile;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Exception;
 use Crypt;
@@ -32,11 +34,13 @@ class OrganizationController extends Controller
 
          $students = UserProfile::where('type', 'student')->get();
 
+         $roles = Role::orderby('order')->get();
+
         if ($request->ajax()) {
             return view('admin.organizations.list-organization', compact('organizations'));
         }
         return view('admin.organizations.organizations', compact(
-            'organizations', 'advisers', 'officers' ,'students'
+            'organizations', 'advisers', 'officers' ,'students','roles'
         ));
     }
     public function create()
@@ -169,6 +173,61 @@ class OrganizationController extends Controller
             ], 500);
         }
     }
+
+
+      public function addOfficers($organizationId)
+      {
+          // Fetch organization
+          $org = Organization::findOrFail($organizationId);
+
+          // Fetch ALL student profiles to choose as officers
+          $students = UserProfile::where('type', 'student')
+              ->orderBy('last_name')
+              ->orderBy('first_name')
+              ->get()
+              ->map(function ($s) {
+                  return [
+                      'id' => $s->profile_id,
+                      'full_name' => "{$s->last_name}, {$s->first_name}"
+                  ];
+              });
+
+
+
+          return view('organizations.add_officer',compact('roles'),[
+              'org' => $org,
+              'students' => $students,  // <-- fixed
+              'tabs' => $tabs
+          ]);
+      }
+
+
+    public function saveOfficers(Request $request)
+      {
+          $orgId = $request->org_id; // plain numeric, no decryption
+         $roleId = Role::where('RoleName', $role)->value('id');
+         
+          foreach ($request->officers as $role => $profileId) {
+              // Skip empty selections
+              if (!$profileId) continue;
+
+              Officer::updateOrCreate(
+                  [
+                      'organization_id' => $orgId,
+                      'role_id' => $role
+                  ],
+                  [
+                      'profile_id' => $profileId
+                  ]
+              );
+          }
+
+          return response()->json(['success' => true]);
+      }
+
+
+
+
 
 
 }

@@ -33,12 +33,31 @@ class UserProfile extends Model
     }
 
     // Relationship to organization
-    public function organization()
-    {
-        return $this->belongsTo(Organization::class, 'organization_id', 'organization_id');
-    }
+    // public function organization()   STUDENT PROFILE can belong to many organizations (but through members)
+    // {
+    //     return $this->belongsTo(Organization::class, 'organization_id', 'organization_id');
+    // }
      public function members()
     {
         return $this->hasMany(Member::class, 'profile_id', 'profile_id');
     }
+
+
+    public function organizations()
+    {
+        return $this->belongsToMany(
+            Organization::class,
+            'members',
+            'profile_id',
+            'organization_id'
+        );
+    }
+
+
+    public function advisedOrganizations()
+    {
+        return $this->hasMany(Organization::class, 'adviser_profile_id', 'profile_id');
+    }
+
+
 }

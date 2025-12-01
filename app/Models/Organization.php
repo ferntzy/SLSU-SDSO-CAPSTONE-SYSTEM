@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Organization extends Model
 {
     use HasFactory;
@@ -14,8 +15,6 @@ class Organization extends Model
     public $timestamps = true;
 
     protected $fillable = [
-
-        'user_id',
         'organization_name',
         'organization_type',
         'status',
@@ -29,24 +28,23 @@ class Organization extends Model
     */
 
     // 🔗 The user account who created the organization
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
-    }
+    // public function user()
+    // {
+    //     return $this->belongsTo(User::class, 'user_id', 'user_id');
+    // }
 
     // New
-    public function adviser()
+     public function adviser()
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id')
-                    ->where('account_role', 'Faculty_Adviser');
+        return $this->belongsTo(UserProfile::class, 'adviser_profile_id', 'profile_id');
     }
 
 
     // 🔗 The profile connected to the organization (Employee or Student)
-    public function profile()
-    {
-        return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
-    }
+    // public function profile()
+    // {
+    //     return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
+    // }
 
     // 🔗 Officers of this organization
     public function officers()

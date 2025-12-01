@@ -22,6 +22,7 @@ class User extends Authenticatable
         'password',
         'account_role',
         'profile_id',
+        'officers_id',
         'signature',
     ];
 
@@ -35,10 +36,10 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function organization()
-    {
-        return $this->belongsTo(Organization::class, 'user_id', 'user_id');
-    }
+    // public function organization()
+    // {
+    //     return $this->belongsTo(Organization::class, 'user_id', 'user_id');
+    // }
 
     public function approvalTasks()
     {
@@ -53,8 +54,17 @@ class User extends Authenticatable
     {
         return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
     }
-    public function events()
+
+
+
+    public function officer()
     {
-        return $this->hasMany(Event::class, 'organization_id', 'user_id');
+        return $this->belongsTo(Officer::class, 'officers_id', 'officer_id');
     }
+
+
+    // public function events()
+    // {
+    //     return $this->hasMany(Event::class, 'organization_id', 'user_id');
+    // }
 }

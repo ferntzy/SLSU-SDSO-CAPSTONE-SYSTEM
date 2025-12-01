@@ -634,7 +634,7 @@ function loadLogs(page = 1){
     let str = $('#searchAccountLogs').val();
 
     $.ajax({
-        url: "{{ route('users.logs-list') }}?page=" + page,
+        url: "{{ route('admin.users.logs-list') }}?page=" + page,
         type: "GET",
         data: { str: str },
         beforeSend: function(){
