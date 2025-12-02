@@ -241,7 +241,7 @@ $(document).on("click", ".btn-add-officers", function () {
             $("#officerModalTitle").text("Add Officer in " + data.organization_name);
 
             let adviserName = data.adviser
-                ? `${data.adviser.first_name} ${data.adviser.last_name}`
+                ? ${data.adviser.first_name} ${data.adviser.last_name}
                 : "N/A";
             $("#officerAdviser").text("Adviser: " + adviserName);
 

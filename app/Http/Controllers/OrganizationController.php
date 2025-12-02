@@ -255,11 +255,4 @@ class OrganizationController extends Controller
               ], 500);
           }
       }
-
-
-
-
-
-
-
 }

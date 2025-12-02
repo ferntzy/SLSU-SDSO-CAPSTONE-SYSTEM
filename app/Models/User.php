@@ -41,15 +41,15 @@ class User extends Authenticatable
   //     return $this->belongsTo(Organization::class, 'user_id', 'user_id');
   // }
 
-    public function approvalTasks()
-    {
-        return $this->hasMany(EventApprovalFlow::class, 'approver_id', 'user_id');
-    }
+  public function approvalTasks()
+  {
+    return $this->hasMany(EventApprovalFlow::class, 'approver_id', 'user_id');
+  }
 
-    public function profile()
-    {
-        return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
-    }
+  public function profile()
+  {
+    return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
+  }
 
   // public function getProfileIdAttribute()
   // {
@@ -60,33 +60,43 @@ class User extends Authenticatable
     return $this->belongsTo(Officer::class, 'officers_id', 'officer_id');
   }
 
-  public function advisedOrganization()
+  public function advisedOrganizations()
+  {
+    return $this->hasMany(\App\Models\Organization::class, 'adviser_id');
+  }
+
+  public function advisedOrganization() // optional, for backward compatibility
   {
     return $this->hasOne(\App\Models\Organization::class, 'adviser_id');
   }
 
+public function user_profile()
+  {
+    return $this->belongsTo(\App\Models\UserProfile::class, 'profile_id', 'profile_id');
+  }
+
   public function notifications()
-    {
-        return $this->hasMany(\App\Models\CustomNotification::class, 'user_id', 'user_id');
-    }
+  {
+    return $this->hasMany(\App\Models\CustomNotification::class, 'user_id', 'user_id');
+  }
 
-    public function unreadNotifications()
-    {
-        return $this->notifications()->where('status', 'unread');
-    }
+  public function unreadNotifications()
+  {
+    return $this->notifications()->where('status', 'unread');
+  }
 
-    public function readNotifications()
-    {
-        return $this->notifications()->where('status', 'read');
-    }
-    public function getPendingPermitCountAttribute()
-{
+  public function readNotifications()
+  {
+    return $this->notifications()->where('status', 'read');
+  }
+  public function getPendingPermitCountAttribute()
+  {
     return \DB::table('notifications')
-        ->where('user_id', $this->user_id)
-        ->where('status', 'unread')
-        ->where('notification_type', 'event_approval') // or 'permit_request', etc.
-        ->count();
-}
+      ->where('user_id', $this->user_id)
+      ->where('status', 'unread')
+      ->where('notification_type', 'event_approval') // or 'permit_request', etc.
+      ->count();
+  }
   // public function events()
   // {
   //     return $this->hasMany(Event::class, 'organization_id', 'user_id');
