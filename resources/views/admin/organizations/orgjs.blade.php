@@ -305,11 +305,7 @@ $(document).on("click", "#btnSaveOfficers", function () {
     $.ajax({
         url: "{{ route('organizations.save-officers') }}",
         method: "POST",
-        data: {
-            org_id: orgId,
-            officers: officersData,
-            _token: "{{ csrf_token() }}"
-        },
+        data: $("#frmAddOfficer").serialize(),
         success: function (res) {
             if (res.success) {
                 Swal.fire({
