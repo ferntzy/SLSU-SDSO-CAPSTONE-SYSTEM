@@ -199,59 +199,51 @@ class OrganizationController extends Controller
 
     public function saveOfficers(Request $request)
       {
-          $request->validate([
-              'org_id'    => 'required|exists:organizations,organization_id',
+
+          try {
+             $request->validate([
+              'officerOrgID'    => 'required|exists:organizations,organization_id',
               'officers'  => 'required|array',
               'officers.*' => 'nullable|exists:user_profiles,profile_id'
-          ]);
+            ],[
+              'officerOrgID.required' => "Invalid Organization selected"
+            ]);
 
-          $orgId = $request->org_id;
+            $orgId = $request->officerOrgID;
+            $naapili = false;
+            foreach($request->officers as $off){
+                if (!empty($off)){
+                  $naapili = true;
+                }
+            }
 
-          DB::beginTransaction();
-          try {
-              foreach ($request->officers as $roleName => $profileId) {
+            if (!$naapili){
+              throw new Exception("No officer selected");
+            }
 
-                  $role = Role::where('RoleName', $roleName)->first();
-                  if (!$role) continue;
+            $data = [];
+            foreach($request->officers as $off){
+              if (!empty($off)){
+                $tmp = explode("|", $off);
 
-                  // If role cleared → remove officer
-                  if (empty($profileId)) {
-                      Officer::where('organization_id', $orgId)
-                            ->where('role_id', $role->id)
-                            ->delete();
-                      continue;
-                  }
-
-                  // 1. Make sure student is a member
-                  $member = \App\Models\Member::where('organization_id', $orgId)
-                              ->where('profile_id', $profileId)
-                              ->first();
-
-                  if (!$member) {
-                      return response()->json([
-                          'success' => false,
-                          'message' => 'Student must be a member before being an officer.'
-                      ], 422);
-                  }
-
-                  // 2. Save officer using member_id (NOT profile_id)
-                  Officer::updateOrCreate(
-                      [
-                          'organization_id' => $orgId,
-                          'role_id'         => $role->id,
-                      ],
-                      [
-                          'member_ids' => $member->members_id
-                      ]
-                  );
+                $data[] = [
+                  'organization_id' => $request->officerOrgID,
+                  'members_id' => $tmp[0],
+                  'role_id' => $tmp[1]
+                ];
               }
+            }
 
-              DB::commit();
+            $save = Officer::insert($data);
 
-              return response()->json([
-                  'success' => true,
-                  'message' => 'Officers saved successfully!'
-              ]);
+            if (!$save){
+              throw new Exception("Officers not save.");
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Officers saved successfully!'
+            ]);
 
           } catch (\Exception $e) {
               DB::rollBack();
