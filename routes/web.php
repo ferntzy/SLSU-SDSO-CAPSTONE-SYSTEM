@@ -202,13 +202,11 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
 
   //profiles
   Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
-  Route::get('/profile', function () {
-    return view('student.profile');
-  })->name('user.profile');
+  Route::get('/profile', function () {return view('student.profile');})->name('user.profile');
   Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('student.uploadSignature');
   Route::delete('/profile/signature/', [UserController::class, 'removeSignature'])->name('student.removeSignature');
   // contact update Routeer')->group(function () {
-
+// routes/web.php
 
   Route::get('page/pending-permits', [PermitTrackingController::class, 'pendingPage'])
     ->name('student.page.pending');
@@ -270,6 +268,16 @@ Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(fu
     ->name('faculty.approve');
   Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
     ->name('faculty.reject');
+
+
+
+
+  //profiles
+  Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
+  Route::get('/profile', function () {return view('adviser.profile');})->name('user.profile');
+  Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('adviser.uploadSignature');
+  Route::delete('/profile/signature/', [UserController::class, 'removeSignature'])->name('adviser.removeSignature');
+
 });
 
 

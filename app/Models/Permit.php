@@ -38,6 +38,11 @@
     // {
     //   return Hashids::encode($this->permit_id);
     // }// In app/Models/Permit.php
+
+    public function approvalFlow()
+{
+    return $this->hasMany(\App\Models\EventApprovalFlow::class, 'permit_id');
+}
 public function offCampusDocuments()
 {
     return $this->hasMany(OffCampusRequirement::class, 'permit_id');

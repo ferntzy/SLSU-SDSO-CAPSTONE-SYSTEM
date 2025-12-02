@@ -9,62 +9,72 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+  use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'users';
-    protected $primaryKey = 'user_id';   // custom PK
-    public $incrementing = true;          // <--- ADD THIS
-    protected $keyType   = 'int';         // <--- ADD THIS
-    public $timestamps   = true;
+  protected $table = 'users';
+  protected $primaryKey = 'user_id';   // custom PK
+  public $incrementing = true;          // <--- ADD THIS
+  protected $keyType   = 'int';         // <--- ADD THIS
+  public $timestamps   = true;
 
-    protected $fillable = [
-        'username',
-        'password',
-        'account_role',
-        'profile_id',
-        'officers_id',
-        'signature',
-    ];
+  protected $fillable = [
+    'username',
+    'password',
+    'account_role',
+    'profile_id',
+    'officers_id',
+    'signature',
+  ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+  protected $hidden = [
+    'password',
+    'remember_token',
+  ];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+  protected $casts = [
+    'email_verified_at' => 'datetime',
+    'password' => 'hashed',
+  ];
 
-    // public function organization()
-    // {
-    //     return $this->belongsTo(Organization::class, 'user_id', 'user_id');
-    // }
+  // public function organization()
+  // {
+  //     return $this->belongsTo(Organization::class, 'user_id', 'user_id');
+  // }
 
-    public function approvalTasks()
-    {
-        return $this->hasMany(EventApprovalFlow::class, 'approver_id', 'user_id');
-    }
+  public function approvalTasks()
+  {
+    return $this->hasMany(EventApprovalFlow::class, 'approver_id', 'user_id');
+  }
 
-    public function user_profile()
-    {
-        return $this->belongsTo(UserProfile::class, 'profile_id');
-    }
-    public function profile()
-    {
-        return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
-    }
+  public function user_profile()
+  {
+    return $this->belongsTo(\App\Models\UserProfile::class, 'profile_id', 'profile_id');
+  }
+  public function advisedOrganizations()
+  {
+    return $this->hasMany(\App\Models\Organization::class, 'adviser_id');
+  }
+  public function profile()
+  {
+    return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
+  }
 
+  // public function getProfileIdAttribute()
+  // {
+  //   return $this->profile_id;
+  // }
+  public function officer()
+  {
+    return $this->belongsTo(Officer::class, 'officers_id', 'officer_id');
+  }
 
+  public function advisedOrganization()
+  {
+    return $this->hasOne(\App\Models\Organization::class, 'adviser_id');
+  }
 
-    public function officer()
-    {
-        return $this->belongsTo(Officer::class, 'officers_id', 'officer_id');
-    }
-
-
-    // public function events()
-    // {
-    //     return $this->hasMany(Event::class, 'organization_id', 'user_id');
-    // }
+  // public function events()
+  // {
+  //     return $this->hasMany(Event::class, 'organization_id', 'user_id');
+  // }
 }

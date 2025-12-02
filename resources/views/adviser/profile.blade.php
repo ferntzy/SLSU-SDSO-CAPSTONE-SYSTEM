@@ -1,7 +1,7 @@
-{{-- resources/views/student/profile.blade.php --}}
+{{-- resources/views/adviser/profile.blade.php --}}
 @extends('layouts.contentNavbarLayout')
 
-@section('title', 'My Profile')
+@section('title', 'My Profile - Faculty Adviser')
 
 @section('vendor-style')
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}">
@@ -17,6 +17,16 @@
         border: none;
         color: white;
     }
+    .hover-shadow {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.hover-shadow:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+.transition-all {
+    transition: all 0.3s ease;
+}
 </style>
 @endsection
 
@@ -54,10 +64,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // Clear canvas
     document.getElementById('clear-signature').onclick = () => signaturePad.clear();
 
-    // Save drawn signature
     document.getElementById('save-draw').onclick = function () {
         if (signaturePad.isEmpty()) {
             return Swal.fire('Oops!', 'Please draw your signature first.', 'warning');
@@ -67,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let currentImageData = null;
 
-    // File upload
     document.getElementById('upload-signature').onchange = function (e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -79,11 +86,11 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('save-original-btn').style.display = 'block';
 
             Swal.fire({
-                title: 'Image Ready!',
+                title: 'Image Uploaded!',
                 imageUrl: currentImageData,
-                imageAlt: 'Uploaded signature',
-                imageWidth: 300,
-                text: 'Choose: Remove background (recommended) or keep original',
+                imageAlt: 'Your signature',
+                imageWidth: 320,
+                text: 'Remove background for best results (recommended)',
                 showCancelButton: true,
                 confirmButtonText: 'Remove Background',
                 cancelButtonText: 'Keep Original',
@@ -99,13 +106,12 @@ document.addEventListener('DOMContentLoaded', function () {
         reader.readAsDataURL(file);
     };
 
-    // Remove background using Clipdrop (free, no key needed)
     function removeBackgroundAndSave() {
         if (!currentImageData) return;
 
         Swal.fire({
             title: 'Removing background...',
-            text: 'Making your signature clean and transparent',
+            text: 'Making your signature transparent and clean',
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading()
         });
@@ -125,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 try {
                     const response = await fetch('https://clipdrop-api.co/cleanup/v1', {
                         method: 'POST',
-                        headers: { 'x-api-key': '' }, // Leave empty = free tier
+                        headers: { 'x-api-key': '' },
                         body: formData
                     });
 
@@ -134,11 +140,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     const cleanBlob = await response.blob();
                     const cleanUrl = URL.createObjectURL(cleanBlob);
                     uploadSignature(cleanUrl);
-                    Swal.fire('Perfect!', 'Background removed successfully!', 'success');
+                    Swal.fire('Perfect!', 'Background removed!', 'success');
                 } catch (err) {
-                    console.warn('Background removal failed, using original');
+                    console.warn('Clipdrop failed, using original');
                     uploadSignature(currentImageData);
-                    Swal.fire('Note', 'Background removal unavailable. Using original image.', 'info');
+                    Swal.fire('Note', 'Background removal unavailable. Using original.', 'info');
                 }
             }, 'image/png');
         };
@@ -148,27 +154,26 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('remove-bg-btn').onclick = removeBackgroundAndSave;
     document.getElementById('save-original-btn').onclick = () => uploadSignature(currentImageData);
 
-    // Universal upload function
     function uploadSignature(dataUrl) {
         const formData = new FormData();
         formData.append('signature_data', dataUrl);
         formData.append('_token', '{{ csrf_token() }}');
 
-        fetch('{{ route('student.uploadSignature') }}', {
+        fetch('{{ route('adviser.uploadSignature') }}', {
             method: 'POST',
             body: formData
         })
         .then(r => r.json())
         .then(data => {
             if (data.success) {
-                Swal.fire('Success!', 'Signature saved perfectly!', 'success')
+                Swal.fire('Success!', 'Your signature has been saved.', 'success')
                     .then(() => location.reload());
             } else {
-                throw new Error(data.message || 'Failed');
+                Swal.fire('Error', data.message || 'Upload failed', 'error');
             }
         })
         .catch(() => {
-            Swal.fire('Error', 'Upload failed. Please try again.', 'error');
+            Swal.fire('Error', 'Failed to save signature. Try again.', 'error');
         });
     }
 });
@@ -184,7 +189,6 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="card-body text-center">
                 <h5 class="card-title mb-4">Your Signature</h5>
 
-                <!-- Current Signature -->
                 @if(Auth::user()->signature)
                     <div class="mb-4 p-4 bg-light rounded-3 shadow-sm">
                         <img src="{{ asset('storage/' . Auth::user()->signature) }}"
@@ -193,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 @else
                     <div class="alert alert-info small mb-4">
-                        No signature yet. Add one below to generate permits.
+                        No signature yet. Add one to sign permits automatically.
                     </div>
                 @endif
 
@@ -225,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <!-- Remove Signature -->
                 @if(Auth::user()->signature)
                     <hr class="my-4">
-                    <form action="{{ route('student.removeSignature') }}" method="POST">
+                    <form action="{{ route('adviser.removeSignature') }}" method="POST" onsubmit="return confirm('Remove your signature permanently?')">
                         @csrf @method('DELETE')
                         <button type="submit" class="btn btn-outline-danger w-100 btn-sm">
                             Remove Signature
@@ -236,58 +240,82 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 
-    <!-- RIGHT: Profile Info (with correct organization from new DB) -->
+    <!-- RIGHT: Profile Info -->
     <div class="col-lg-8">
 
-        <!-- Organization -->
+                <!-- Advised Organizations (Supports Multiple) -->
         <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title mb-3">Organization</h5>
-                @php
-                    $profileId = \DB::table('users')->where('user_id', Auth::id())->value('profile_id');
-                    $member = \DB::table('members')->where('profile_id', $profileId)->first();
-                    $org = $member ? \App\Models\Organization::find($member->organization_id) : null;
-                @endphp
+                <h5 class="card-title mb-3">Advised Organization(s)</h5>
+                <span class="badge bg-light text-primary">
+                    {{ Auth::user()->advisedOrganizations->count() }} Active
+                </span>
+            </div>
+            <div class="card-body">
+                @forelse(Auth::user()->advisedOrganizations as $org)
+                    <div class="border rounded-3 p-4 mb-3 hover-shadow transition-all" style="transition: all 0.2s;">
+                        <div class="d-flex align-items-start gap-4">
+                            <!-- Organization Logo -->
 
-                @if($org)
-                    <div class="row g-3">
-                        <div class="col-md-6"><strong>Name</strong><p class="mb-0 text-primary fw-bold">{{ $org->organization_name }}</p></div>
-                        <div class="col-md-6"><strong>Type</strong><p class="mb-0">{{ $org->organization_type ?? 'N/A' }}</p></div>
-                        <div class="col-12"><strong>Description</strong><p class="mb-0 text-muted">{{ $org->description ?? 'No description' }}</p></div>
-                        <div class="col-md-6"><strong>Status</strong><span class="badge bg-success">{{ ucfirst($org->status) }}</span></div>
-                        <div class="col-md-6"><strong>Member Since</strong><p class="mb-0">{{ $member->joined_at ? \Carbon\Carbon::parse($member->joined_at)->format('F Y') : 'N/A' }}</p></div>
+
+                            <!-- Organization Details -->
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1 text-primary fw-bold">{{ $org->organization_name }}</h5>
+                                <div class="d-flex flex-wrap gap-3 text-sm text-muted mb-2">
+                                    <span><strong>Type:</strong> {{ $org->organization_type ?? 'Not specified' }}</span>
+                                    @if($org->status)
+                                        <span>• <span class="badge bg-{{ $org->status === 'active' ? 'success' : 'warning' }} text-white">
+                                            {{ ucfirst($org->status) }}
+                                        </span></span>
+                                    @endif
+                                </div>
+
+                                @if($org->description)
+                                    <p class="text-muted small mb-0 mt-2">
+                                        {{ Str::limit($org->description, 150) }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                @else
-                    <div class="alert alert-warning">You are not assigned to any organization yet.</div>
-                @endif
+                @empty
+                    <div class="alert alert-warning mb-0 text-center py-4">
+                        <i class="ti ti-alert-circle me-2"></i>
+                        You are not currently assigned as Faculty Adviser to any organization.
+                    </div>
+                @endforelse
             </div>
         </div>
 
-        <!-- Account & Personal Info (unchanged) -->
+        <!-- Account Details -->
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title mb-3">Account Details</h5>
                 <div class="row g-4">
                     <div class="col-md-6"><strong>Username</strong><p>{{ Auth::user()->username }}</p></div>
-                    <div class="col-md-6"><strong>Role</strong><p>{{ ucfirst(str_replace('_', ' ', Auth::user()->account_role)) }}</p></div>
-                    <div class="col-12"><strong>Joined</strong><p>{{ Auth::user()->created_at->format('F d, Y') }}</p></div>
+                    <div class="col-md-6"><strong>Role</strong><p>Faculty Adviser</p></div>
+                    <div class="col-12"><strong>Member Since</strong><p>{{ Auth::user()->created_at->format('F d, Y') }}</p></div>
                 </div>
             </div>
         </div>
 
+        <!-- Personal Information -->
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title mb-3">Personal Information</h5>
                 @php $p = Auth::user()->user_profile; @endphp
                 <div class="row g-4">
-                    <div class="col-md-6"><strong>Full Name</strong><p>{{ trim($p?->first_name . ' ' . ($p?->middle_name ? substr($p->middle_name,0,1).'.' : '') . ' ' . $p?->last_name . ' ' . ($p?->suffix ?? '')) }}</p></div>
-                    <div class="col-md-3"><strong>Sex</strong><p>{{ $p?->sex }}</p></div>
-                    <div class="col-md-3"><strong>Type</strong><p>{{ ucfirst($p?->type ?? '') }}</p></div>
-                    <div class="col-12"><strong>Address</strong><p class="text-muted">{{ $p?->address ?? 'Not set' }}</p></div>
+                    <div class="col-md-8">
+                        <strong>Full Name</strong>
+                        <p class="fw-bold">
+                            {{ trim($p?->first_name . ' ' . ($p?->middle_name ? substr($p->middle_name,0,1).'.' : '') . ' ' . $p?->last_name . ' ' . ($p?->suffix ?? '')) }}
+                        </p>
+                    </div>
+                    <div class="col-md-4"><strong>Sex</strong><p>{{ $p?->sex ?? 'Not set' }}</p></div>
+                    <div class="col-12"><strong>Address</strong><p class="text-muted">{{ $p?->address ?? 'Not provided' }}</p></div>
                 </div>
 
                 <hr class="my-4">
-               <hr class="my-4">
                 <h6>Contact Information</h6>
                 <div class="row g-3 mt-3">
                     <div class="col-md-6">

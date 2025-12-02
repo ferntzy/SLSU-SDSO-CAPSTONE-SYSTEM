@@ -1,22 +1,24 @@
 {
   "menu": [
     {
-      "menuHeader": "Dashboard"
+      "menuHeader":""
     },
     {
       "url": "/adviser/dashboard",
-      "name": "Overview",
+      "name": "Dashboard",
+      "icon": "menu-icon tf-icons mdi mdi-view-dashboard-outline",
       "slug": "adviser-dashboard"
+    },
+    {
+      "url": "/adviser/calendar",
+      "name": "Calendar",
+      "icon": "menu-icon tf-icons mdi mdi-calendar-month-outline",
+      "slug": "adviser-calendar"
     },
     {
       "url": "/adviser/approvals",
       "name": "Event Approvals",
       "slug": "adviser-approvals"
-    },
-    {
-      "url": "/adviser/calendar",
-      "name": "Calendar",
-      "slug": "adviser-calendar"
     },
     {
       "menuHeader": "Reports"

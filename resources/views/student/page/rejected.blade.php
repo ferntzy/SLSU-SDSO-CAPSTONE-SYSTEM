@@ -200,9 +200,9 @@
                 <i class="bx bx-check-circle bx-lg text-success opacity-30"></i>
                 <h5 class="mt-4 text-muted">No rejected permits</h5>
                 <p class="text-muted">All your submitted permits are either pending or approved.</p>
-                <a href="{{ route('student.permit.create') }}" class="btn btn-outline-primary mt-3">
+
                     Submit New Permit
-                </a>
+
             </div>
         @endforelse
     </div>

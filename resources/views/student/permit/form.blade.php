@@ -1,7 +1,10 @@
 {{-- resources/views/student/permit/form.blade.php --}}
 @php
     use Carbon\Carbon;
-
+$user = Auth::user();
+    $profileId = \DB::table('users')->where('user_id', $user->user_id)->value('profile_id');
+    $member = \DB::table('members')->where('profile_id', $profileId)->first();
+    $organization = $member ? \App\Models\Organization::find($member->organization_id) : null;
     $fullName = trim(
         Auth::user()->profile?->first_name . ' ' .
         (Auth::user()->profile?->middle_name ? strtoupper(substr(Auth::user()->profile->middle_name, 0, 1)) . '. ' : '') .
@@ -65,6 +68,14 @@
         </a>
     </div>
 
+    @if(!$organization)
+                <div class="alert alert-danger">
+                    <strong>Warning:</strong> You are not a member of any student organization.
+                    Please contact admin to be added.
+                </div>
+                @php return; @endphp
+            @endif
+
     <div class="row justify-content-center">
         <div class="col-xl-10 col-lg-11">
 
@@ -115,9 +126,8 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">Organization</label>
                                 <input type="text" class="form-control form-control-lg"
-                                       value="{{ Auth::user()->organization->organization_name ?? 'Not Assigned' }}" disabled>
-                                <input type="hidden" name="organization_id"
-                                       value="{{ Auth::user()->organization->organization_id ?? '' }}">
+                                       value="{{ $organization->organization_name ?? 'Not Assigned' }}" disabled>
+                                <input type="hidden" name="organization_id" value="{{ $organization->organization_id }}">
                             </div>
                         </div>
 
@@ -277,7 +287,7 @@
                                     <p class="text-success mt-3">Ready for permit generation</p>
                                 @else
                                     <div class="alert alert-warning d-inline-block px-5">
-                                        Please <a href="{{ route('profile.edit') }}" class="alert-link">upload your signature</a> first.
+                                        Please <a href="{{ route('profile.update') }}" class="alert-link">upload your signature</a> first.
                                     </div>
                                 @endif
                             </div>
@@ -411,8 +421,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.open(pdfUrl, '_blank');
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
                     const a = document.createElement('a');
-                    a.href = pdfUrl;
-                    a.download = `Activity_Permit_{{ date('Ymd') }}.pdf`;
+
                     document.body.appendChild(a);
                     a.click();
                     a.remove();

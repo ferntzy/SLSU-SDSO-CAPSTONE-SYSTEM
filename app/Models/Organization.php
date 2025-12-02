@@ -8,97 +8,100 @@ use Illuminate\Database\Eloquent\Model;
 
 class Organization extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $table = 'organizations';
-    protected $primaryKey = 'organization_id';
-    public $timestamps = true;
+  protected $table = 'organizations';
+  protected $primaryKey = 'organization_id';
+  public $timestamps = true;
 
-    protected $fillable = [
-        'organization_name',
-        'organization_type',
-        'status',
-        'description',
-    ];
+  protected $fillable = [
+    'organization_name',
+    'organization_type',
+    'status',
+    'description',
+  ];
 
-    /*
+  /*
     |--------------------------------------------------------------------------
     | RELATIONSHIPS
     |--------------------------------------------------------------------------
     */
 
-    // 🔗 The user account who created the organization
-    // public function user()
-    // {
-    //     return $this->belongsTo(User::class, 'user_id', 'user_id');
-    // }
+  // 🔗 The user account who created the organization
+  // public function user()
+  // {
+  //     return $this->belongsTo(User::class, 'user_id', 'user_id');
+  // }
 
-    // New
-     public function adviser()
-    {
-        return $this->belongsTo(UserProfile::class, 'adviser_profile_id', 'profile_id');
-    }
+  // New
+  public function adviser()
+  {
+    return $this->belongsTo(\App\Models\User::class, 'adviser_id');
+  }
+
+  public function adviserProfile()
+  {
+    return $this->belongsTo(\App\Models\UserProfile::class, 'adviser_id', 'user_id');
+  }
+
+  // 🔗 The profile connected to the organization (Employee or Student)
+  // public function profile()
+  // {
+  //     return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
+  // }
+
+  // 🔗 Officers of this organization
+  public function officers()
+  {
+    return $this->hasMany(Officer::class, 'organization_id', 'organization_id');
+  }
+
+  // 🔗 Members of this organization
+  public function members()
+  {
+    return $this->hasMany(Member::class, 'organization_id', 'organization_id');
+  }
+
+  // 🔗 Events created by this organization
+  public function events()
+  {
+    return $this->hasMany(Event::class, 'organization_id', 'organization_id');
+  }
 
 
-    // 🔗 The profile connected to the organization (Employee or Student)
-    // public function profile()
-    // {
-    //     return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
-    // }
-
-    // 🔗 Officers of this organization
-    public function officers()
-    {
-        return $this->hasMany(Officer::class, 'organization_id', 'organization_id');
-    }
-
-    // 🔗 Members of this organization
-    public function members()
-    {
-        return $this->hasMany(Member::class, 'organization_id', 'organization_id');
-    }
-
-    // 🔗 Events created by this organization
-    public function events()
-    {
-        return $this->hasMany(Event::class, 'organization_id', 'organization_id');
-    }
-
-
-    /*
+  /*
     |--------------------------------------------------------------------------
     | ACCESSORS / HELPERS
     |--------------------------------------------------------------------------
     */
 
-    // Count members without extra queries in Blade
-    public function getMembersCountAttribute()
-    {
-        return $this->members()->count();
-    }
+  // Count members without extra queries in Blade
+  public function getMembersCountAttribute()
+  {
+    return $this->members()->count();
+  }
 
-    // Default status if empty
-    public function getStatusAttribute($value)
-    {
-        return $value ?: 'Active';
-    }
+  // Default status if empty
+  public function getStatusAttribute($value)
+  {
+    return $value ?: 'Active';
+  }
 
-    // Return empty string if no description
-    public function getDescriptionAttribute($value)
-    {
-        return $value ?: '';
-    }
+  // Return empty string if no description
+  public function getDescriptionAttribute($value)
+  {
+    return $value ?: '';
+  }
 
-    // Shortcut accessor for organization name
-    public function getNameAttribute()
-    {
-        return $this->organization_name;
-    }
+  // Shortcut accessor for organization name
+  public function getNameAttribute()
+  {
+    return $this->organization_name;
+  }
 
-    // Shortcut accessor for type
-    public function getTypeAttribute()
-    {
-        return $this->organization_type;
-    }
-
+  // Shortcut accessor for type
+  public function getTypeAttribute()
+  {
+    return $this->organization_type;
+  }
 }
