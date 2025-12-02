@@ -18,15 +18,16 @@ use App\Http\Controllers\PermitTrackingController;
 use App\Http\Controllers\SdsoheadController;
 use App\Http\Controllers\SasController;
 use App\Http\Controllers\Vp_sasController;
+use App\Http\Controllers\AdviserCalendarController;
 
 // ============================
 // AUTH ROUTES
 // ============================
 
- Route::get('/', function () {return redirect('/login');});
+Route::get('/', function () {return redirect('/login');});
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-
+Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile');
 Route::get('/forgot-password', [LoginController::class, 'showForgotPasswordForm'])->name('password.request');
 Route::post('/forgot-password', [LoginController::class, 'sendResetLink'])->name('password.forgot');
 Route::get('/reset-password/{token}', [LoginController::class, 'showResetPasswordForm'])->name('password.reset');
@@ -85,13 +86,14 @@ Route::middleware(['auth', 'role:admin'])
     Route::post('/users/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
-    Route::get('users/profile',[UserController::class, 'profile'])->name('admin.users.profile');
+    Route::get('users/profile', [UserController::class, 'profile'])->name('admin.users.profile');
     Route::post('/users/signature/', [UserController::class, 'uploadSignature'])->name('admin.uploadSignature');
     Route::delete('/users/signature/', [UserController::class, 'removeSignature'])->name('admin.removeSignature');
 
 
-   Route::delete('/admin/logs/bulk-delete',
-        [UserLogController::class, 'bulkDelete']
+    Route::delete(
+      '/admin/logs/bulk-delete',
+      [UserLogController::class, 'bulkDelete']
     )->name('logs.bulk-delete');
 
     // Route::get('/admin/users/search', [UserController::class, 'search'])->name('users.search');
@@ -101,8 +103,8 @@ Route::middleware(['auth', 'role:admin'])
 
     // LOGS
 
-   Route::get('/logs-list', [UserLogController::class, 'index'])->name('admin.users.logs-list');
-  Route::get('/logs', [UserLogController::class, 'index'])->name('admin.logs');
+    Route::get('/logs-list', [UserLogController::class, 'index'])->name('admin.users.logs-list');
+    Route::get('/logs', [UserLogController::class, 'index'])->name('admin.logs');
 
     // Route::post('user/check-username', [UserController::class, 'checkUsername']);
 
@@ -141,13 +143,13 @@ Route::middleware(['auth', 'role:admin'])
     Route::put('/organizations/update', [OrganizationController::class, 'update'])->name('organizations.update');
     Route::post('/organizations/list', [OrganizationController::class, 'index'])->name('organizations.list');
     Route::post('/organizations/edit', [OrganizationController::class, 'edit'])->name('organizations.edit');
-    Route::post('/organizations/add', [OrganizationController:: class, 'add'])->name('organizations.add-members');
+    Route::post('/organizations/add', [OrganizationController::class, 'add'])->name('organizations.add-members');
     Route::delete('/organizations/{organization_id}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
     Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
     // Load add officer page
     Route::get('/organizations/{id}/add-officers', [OrganizationController::class, 'addOfficers'])->name('organizations.add.officers');
     Route::post('/organizations/save-officers', [OrganizationController::class, 'saveOfficers'])
-     ->name('organizations.save-officers');
+      ->name('organizations.save-officers');
 
     // ======================
     // PROFILES (USER PROFILES)
@@ -186,13 +188,17 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
 
   // Calendar view route (the main page) - This is now just a helper view route.
   // Display the calendar page
-  Route::get('/calendar', function () {return view('student.calendardisplay');})->name('calendar.index');
+  Route::get('/calendar', function () {
+    return view('student.calendardisplay');
+  })->name('calendar.index');
 
   // API endpoint to fetch calendar events (permits)
   Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
 
   // Get the permit form (if you have a separate view for the form)
-  Route::get('/calendar/permit-form', function () {return view('calendar.permit-form');})->name('student.permit.form');
+  Route::get('/calendar/permit-form', function () {
+    return view('calendar.permit-form');
+  })->name('student.permit.form');
 
   // Store new permit
   Route::post('/calendar/store', [CalendarController::class, 'store'])->name('calendar.store');
@@ -202,11 +208,13 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
 
   //profiles
   Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
-  Route::get('/profile', function () {return view('student.profile');})->name('user.profile');
+  Route::get('/profile', function () {
+    return view('student.profile');
+  })->name('user.profile');
   Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('student.uploadSignature');
   Route::delete('/profile/signature/', [UserController::class, 'removeSignature'])->name('student.removeSignature');
   // contact update Routeer')->group(function () {
-// routes/web.php
+  // routes/web.php
 
   Route::get('page/pending-permits', [PermitTrackingController::class, 'pendingPage'])
     ->name('student.page.pending');
@@ -252,8 +260,11 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
 // ============================
 Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(function () {
 
-  Route::get('/dashboard', [FacultyAdviserController::class, 'dashboard'])
-    ->name('adviser.dashboard');
+  Route::middleware(['auth', 'role:Faculty_Adviser'])->group(function () {
+    Route::get('/dashboard', function () {
+      return view('adviser.dashboard');
+    })->name('adviser.dashboard');
+  });
 
   Route::get('/approvals', [FacultyAdviserController::class, 'approvals'])
     ->name('adviser.approvals');
@@ -274,10 +285,28 @@ Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(fu
 
   //profiles
   Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
-  Route::get('/profile', function () {return view('adviser.profile');})->name('user.profile');
+  Route::get('/profile', function () {
+    return view('adviser.profile');
+  })->name('user.profile');
   Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('adviser.uploadSignature');
   Route::delete('/profile/signature/', [UserController::class, 'removeSignature'])->name('adviser.removeSignature');
 
+
+
+  Route::get('/calendar', [App\Http\Controllers\AdviserCalendarController::class, 'index'])
+    ->name('adviser.calendar');
+
+  Route::get('/calendar/events', [App\Http\Controllers\AdviserCalendarController::class, 'getEvents'])->name('adviser.calendar.events');
+
+
+
+  //notifications
+
+Route::get('/notifications/data', [App\Http\Controllers\Adviser\PermitController::class, 'notificationsData'])->name('adviser.notifications.data');
+Route::get('/permits', [App\Http\Controllers\Adviser\PermitController::class, 'index'])->name('adviser.permits.index');
+  Route::get('/notifications/unread', [App\Http\Controllers\Adviser\NotificationController::class, 'unread'])->name('notifications.unread');
+  Route::get('/notifications', [App\Http\Controllers\Adviser\NotificationController::class, 'index'])->name('notifications');
+  Route::post('/notifications/mark-read', [App\Http\Controllers\Adviser\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
 });
 
 

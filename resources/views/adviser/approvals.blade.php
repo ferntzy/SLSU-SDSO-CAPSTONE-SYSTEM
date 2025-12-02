@@ -1,5 +1,5 @@
 @php $container = 'container-xxl'; @endphp
-@extends('layouts/contentNavbarLayout')
+@extends('layouts.adviserLayout')
 @section('title', 'Pending Permit Reviews')
 
 @section('content')

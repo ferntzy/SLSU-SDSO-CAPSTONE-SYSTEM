@@ -65,6 +65,28 @@ class User extends Authenticatable
     return $this->hasOne(\App\Models\Organization::class, 'adviser_id');
   }
 
+  public function notifications()
+    {
+        return $this->hasMany(\App\Models\CustomNotification::class, 'user_id', 'user_id');
+    }
+
+    public function unreadNotifications()
+    {
+        return $this->notifications()->where('status', 'unread');
+    }
+
+    public function readNotifications()
+    {
+        return $this->notifications()->where('status', 'read');
+    }
+    public function getPendingPermitCountAttribute()
+{
+    return \DB::table('notifications')
+        ->where('user_id', $this->user_id)
+        ->where('status', 'unread')
+        ->where('notification_type', 'event_approval') // or 'permit_request', etc.
+        ->count();
+}
   // public function events()
   // {
   //     return $this->hasMany(Event::class, 'organization_id', 'user_id');

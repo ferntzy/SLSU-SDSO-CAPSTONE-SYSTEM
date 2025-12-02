@@ -47,19 +47,19 @@ class PermitController extends Controller
     $organization = Organization::findOrFail($orgId);
 
     $request->validate([
-      'title_activity' => 'required|string|max:255',
-      'purpose' => 'required|string',
-      'type' => 'required|in:In-Campus,Off-Campus',
-      'nature' => 'required|string',
-      'nature_other_text' => 'nullable|required_if:nature,Other',
-      'venue' => 'required|string|max:255',
-      'date_start' => 'required|date',
-      'date_end' => 'nullable|date|after_or_equal:date_start',
-      'time_start' => 'required',
-      'time_end' => 'required',
-      'participants' => 'required|string',
-      'participants_other_text' => 'nullable|required_if:participants,Other',
-      'number' => 'required|integer|min:1',
+        'title_activity' => 'required|string|max:255',
+        'purpose' => 'required|string',
+        'type' => 'required|in:In-Campus,Off-Campus',
+        'nature' => 'required|string',
+        'nature_other_text' => 'nullable|required_if:nature,Other',
+        'venue' => 'required|string|max:255',
+        'date_start' => 'required|date',
+        'date_end' => 'nullable|date|after_or_equal:date_start',
+        'time_start' => 'required',
+        'time_end' => 'required',
+        'participants' => 'required|string',
+        'participants_other_text' => 'nullable|required_if:participants,Other',
+        'number' => 'required|integer|min:1',
     ]);
 
     // Create Permit
@@ -106,6 +106,20 @@ $permit = Permit::create([
         'approver_role' => $role,
         'status' => 'pending',
       ]);
+    }
+
+    // NOTIFICATION TO FACULTY ADVISER (THIS IS THE ONLY NEW PART)
+    $adviserUserId = $organization->adviser?->user_id;
+
+    if ($adviserUserId) {
+        DB::table('notifications')->insert([
+            'user_id'           => $adviserUserId,
+            'message'           => $organization->organization_name . ' submitted a new permit: ' . $permit->title_activity,
+            'notification_type' => 'event_approval',
+            'status'            => 'unread',
+            'created_at'        => now(),
+            'updated_at'        => now(),
+        ]);
     }
 
     // PDF Generation — YOUR EXACT COORDINATES PRESERVED

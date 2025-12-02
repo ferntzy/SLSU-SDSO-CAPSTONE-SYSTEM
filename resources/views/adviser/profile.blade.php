@@ -1,6 +1,5 @@
 {{-- resources/views/adviser/profile.blade.php --}}
-@extends('layouts.contentNavbarLayout')
-
+@extends('layouts.adviserLayout')
 @section('title', 'My Profile - Faculty Adviser')
 
 @section('vendor-style')
