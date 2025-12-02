@@ -13,6 +13,13 @@ class Role extends Model
   protected $fillable = [
     'RoleName',
     'Frequency',
+    'order',
   ];
+
+
+  public function officers()
+    {
+        return $this->hasMany(Officer::class, 'role_id', 'id');
+    }
 
 }

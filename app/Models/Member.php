@@ -28,9 +28,13 @@ class Member extends Model
       return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
     }
 
-    /**
-     * Optional: Scope for active members
-     */
+   public function officer()
+    {
+        return $this->hasOne(Officer::class, 'members_id', 'member_id');
+    }
+
+
+
     public function scopeActive($query)
     {
         return $query->where('membership_status', 'active');

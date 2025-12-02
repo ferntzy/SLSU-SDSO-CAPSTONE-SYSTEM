@@ -16,6 +16,8 @@
               <div class="overflow-auto p-3" style="max-height: 70vh;">
                 <div class="row g-3">
 
+                  <input type="hidden" id="officerOrgID" value="">
+
                     @foreach($roles as $position)
                       <div class="col-md-12">
                           <label class="form-label">{{ $position->RoleName }}</label>
@@ -59,7 +61,7 @@
                         <div class="card-header p-0">
                             <ul class="nav nav-tabs" role="tablist">
 
-                                <li class="nav-item">
+                                {{-- <li class="nav-item">
                                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-representatives">Representatives</button>
                                 </li>
 
@@ -69,19 +71,19 @@
 
                                 <li class="nav-item">
                                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-engineering">Engineering</button>
-                                </li>
+                                </li> --}}
 
                                 <li class="nav-item">
                                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ssc">SSC</button>
                                 </li>
 
-                                <li class="nav-item">
+                                {{-- <li class="nav-item">
                                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-ambassador">Ambassador</button>
                                 </li>
 
                                 <li class="nav-item">
                                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-rotary">Rotary</button>
-                                </li>
+                                </li> --}}
 
                             </ul>
                         </div>
@@ -92,7 +94,7 @@
 
                                <!-- REPRESENTATIVES TAB -->
                             <div class="tab-pane fade show active" id="tab-representatives">
-                                <div class="row g-2">
+                                {{-- <div class="row g-2">
                                     @for($i = 1; $i <= 4; $i++)
                                         <div class="col-md-6 mt-2">
                                             <label class="form-label">
@@ -125,7 +127,7 @@
                                         </div>
                                     </div>
 
-                                </div>
+                                </div> --}}
                             </div>
 
 

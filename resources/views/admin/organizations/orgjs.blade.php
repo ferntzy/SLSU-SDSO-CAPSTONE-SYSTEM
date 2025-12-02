@@ -217,135 +217,122 @@
 
 
 
-
-// OPEN ADD OFFICER MODAL
-$(document).on("click", ".btn-add-officers", function() {
-
+// Open Modal + Load Org Data
+$(document).on("click", ".btn-add-officers", function () {
     let encryptedId = $(this).data("id");
+
+    $("#officerOrgID").val(""); // reset
 
     $.ajax({
         url: "{{ route('organizations.edit') }}",
-        type: "POST",
-        data: { id: encryptedId },
-        beforeSend: function() {
+        method: "POST",
+        data: {
+            id: encryptedId,
+            _token: "{{ csrf_token() }}"
+        },
+        beforeSend: function () {
             $("#officerOrgName").text("Loading...");
             $("#officerAdviser").text("Adviser: Loading...");
-
-            // Set temporary title
-            $("#officerModalTitle").text("Add Officer in ...");
-        },
-        success: function(data) {
-
-            // Fill modal fields
-            $("#officerOrgName").text(data.organization_name);
-
-            // Set modal title: Add Officer in {Org Name}
-            $("#officerModalTitle").text(
-                "Add Officer in " + data.organization_name
-            );
-
-            let adviser = data.adviser?.profile?.first_name
-                        + " " +
-                        data.adviser?.profile?.last_name;
-
-            $("#officerAdviser").text("Adviser: " + (adviser || "N/A"));
-        },
-        error: function(xhr) {
-            console.error(xhr.responseText);
-            $("#officerOrgName").text("Error loading data");
-            $("#officerAdviser").text("Adviser: Error");
             $("#officerModalTitle").text("Add Officer");
+        },
+        success: function (data) {
+            $("#officerOrgID").val(data.organization_id); // Plain ID
+            $("#officerOrgName").text(data.organization_name);
+            $("#officerModalTitle").text("Add Officer in " + data.organization_name);
+
+            let adviserName = data.adviser
+                ? `${data.adviser.first_name} ${data.adviser.last_name}`
+                : "N/A";
+            $("#officerAdviser").text("Adviser: " + adviserName);
+
+            // Show modal
+            $("#addOfficersModal").modal("show");
+        },
+        error: function () {
+            Swal.fire("Error", "Failed to load organization data", "error");
         }
     });
-
 });
 
+// Prevent same student from being selected twice
+document.addEventListener("DOMContentLoaded", function () {
+    const selects = document.querySelectorAll('.officer-select');
 
+    function updateOptions() {
+        let selected = Array.from(selects)
+            .map(s => s.value)
+            .filter(v => v !== "");
 
-
-//add officer to hide if one profile_id exists on the other RoleNmae
-  document.addEventListener("DOMContentLoaded", function () {
-      const selects = document.querySelectorAll('.officer-select');
-
-      function updateDropdowns() {
-          // Get all selected profile_ids
-          let selectedValues = Array.from(selects)
-              .map(s => s.value)
-              .filter(v => v !== ""); // remove empty
-
-          selects.forEach(select => {
-              let currentValue = select.value;
-
-              // Loop through options
-              Array.from(select.options).forEach(option => {
-                  if (option.value === "") return; // skip "Select"
-
-                  // Hide option if already chosen in another select
-                  if (selectedValues.includes(option.value) && option.value !== currentValue) {
-                      option.hidden = true;
-                  } else {
-                      option.hidden = false;
-                  }
-              });
-          });
-      }
-
-      // Run filtering every time a select changes
-      selects.forEach(select => {
-          select.addEventListener("change", updateDropdowns);
-      });
-
-      // Initial run
-      updateDropdowns();
-  });
-
-
-      // ===== Save Officers =====
-    $(document).on("click", "#btnSaveOfficers", function(e) {
-        e.preventDefault();
-
-        let orgId = $("#officerOrgID").val();
-
-        let officersData = {};
-        $(".officer-select").each(function() {
-            let role = $(this).data("role"); // original role name
-            officersData[role] = $(this).val() || null;
+        selects.forEach(select => {
+            let current = select.value;
+            Array.from(select.options).forEach(opt => {
+                if (opt.value === "" || opt.value === current) {
+                    opt.hidden = false;
+                    opt.disabled = false;
+                } else {
+                    opt.hidden = selected.includes(opt.value);
+                    opt.disabled = selected.includes(opt.value);
+                }
+            });
         });
+    }
 
-        $.ajax({
-            url: "{{ route('organizations.save-officers') }}",
-            method: "POST",
-            data: {
-                org_id: orgId,
-                officers: officersData,
-                _token: "{{ csrf_token() }}"
-            },
-            beforeSend: function() {
-                $("#btnSaveOfficers").prop("disabled", true);
-            },
-            success: function(response) {
-                Swal.fire({
-                    icon: "success",
-                    title: "Officers saved!",
-                    timer: 1000,
-                    showConfirmButton: false
-                });
-                $("#btnSaveOfficers").prop("disabled", false);
-            },
-            error: function(xhr) {
-                console.error(xhr.responseText);
-                Swal.fire({
-                    icon: "error",
-                    title: "Error saving officers"
-                });
-                $("#btnSaveOfficers").prop("disabled", false);
-            }
-        });
+    selects.forEach(s => s.addEventListener("change", updateOptions));
+    updateOptions();
+});
+
+// Save Officers
+$(document).on("click", "#btnSaveOfficers", function () {
+    let btn = $(this);
+    let spinner = btn.find(".spinner-border");
+    let orgId = $("#officerOrgID").val();
+
+    if (!orgId) {
+        Swal.fire("Error", "Organization not loaded", "error");
+        return;
+    }
+
+    let officersData = {};
+    $(".officer-select").each(function () {
+        let roleName = $(this).data("role");
+        let profileId = $(this).val();
+        officersData[roleName] = profileId || null;
     });
 
+    btn.prop("disabled", true);
+    spinner.removeClass("d-none");
 
-
-
+    $.ajax({
+        url: "{{ route('organizations.save-officers') }}",
+        method: "POST",
+        data: {
+            org_id: orgId,
+            officers: officersData,
+            _token: "{{ csrf_token() }}"
+        },
+        success: function (res) {
+            if (res.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: res.message || "Officers saved successfully",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                $("#addOfficersModal").modal("hide");
+                // Optional: reload table or trigger refresh
+            }
+        },
+        error: function (xhr) {
+            let msg = xhr.responseJSON?.message || "Failed to save officers";
+            Swal.fire("Error", msg, "error");
+        },
+        complete: function () {
+            btn.prop("disabled", false);
+            spinner.addClass("d-none");
+        }
+    });
+});
 
 
 </script>

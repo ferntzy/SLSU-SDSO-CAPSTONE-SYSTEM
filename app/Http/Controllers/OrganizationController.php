@@ -17,17 +17,14 @@ class OrganizationController extends Controller
 {
     public function index(Request $request)
     {
-        // Load organizations with members + adviser detection
         $organizations = Organization::with(['adviser.profile', 'members'])
                                      ->withCount('members')
                                      ->get();
 
-        // Advisers list (for dropdown if needed)
         $advisers = User::where('account_role', 'Faculty_Adviser')
                         ->with('profile')
                         ->get();
 
-        // Student organization officers
         $officers = User::where('account_role', 'Student_Organization')
                         ->with('profile')
                         ->get();
@@ -87,31 +84,32 @@ class OrganizationController extends Controller
 
     }
     public function edit(Request $request)
-    {
-      try{
+{
+    try {
         $id = Crypt::decryptString($request->id);
-        $org = Organization::findOrFail($id);
-
-        $adviser = User::where('account_role', 'faculty_adviser')->first();
+        $org = Organization::with('adviser.profile')->findOrFail($id);
 
         $advisers = User::where('account_role', 'faculty_adviser')
                         ->with('profile')
                         ->get();
-          return response()->json([
-          'organization_name' => $org->organization_name,
-          'organization_type' => $org->organization_type,
-          'description'       => $org->description,
-          'adviser_id'        => $adviser?->user_id,
 
-            'advisers' => $advisers->map(fn($a) => [
-                'id' => $a->user_id,
-                'name' => ($a->profile->first_name ?? '') . ' ' . ($a->profile->last_name ?? ''),
+        return response()->json([
+            'organization_id'   => $org->organization_id,
+            'organization_name' => $org->organization_name,
+            'organization_type' => $org->organization_type,
+            'description'       => $org->description,
+            'adviser'           => $org->adviser?->profile ?? null,
+            'advisers'          => $advisers->map(fn($a) => [
+                'id'   => $a->user_id,
+                'name' => trim(($a->profile->first_name ?? '') . ' ' . ($a->profile->last_name ?? ''))
             ]),
-      ]);
-      }catch(Exception $e){
-        return response()->json(['errors' => '<div class = "alert alert-danger">'.$e->getMessage().'</div>'],400);
-      }
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'errors' => '<div class="alert alert-danger">' . $e->getMessage() . '</div>'
+        ], 400);
     }
+}
 
     public function destroy($organization_id)
     {
@@ -177,53 +175,95 @@ class OrganizationController extends Controller
 
       public function addOfficers($organizationId)
       {
-          // Fetch organization
           $org = Organization::findOrFail($organizationId);
 
-          // Fetch ALL student profiles to choose as officers
-          $students = UserProfile::where('type', 'student')
-              ->orderBy('last_name')
-              ->orderBy('first_name')
-              ->get()
-              ->map(function ($s) {
-                  return [
-                      'id' => $s->profile_id,
-                      'full_name' => "{$s->last_name}, {$s->first_name}"
-                  ];
-              });
+          $students = Member::with('profile')
+                      ->where('organization_id', $organizationId)
+                      ->get()
+                      ->map(function($m){
+                          return [
+                              'id' => $m->profile_id,
+                              'full_name' => "{$m->profile->last_name}, {$m->profile->first_name}"
+                          ];
+                      });
 
+          $roles = Role::orderBy('order')->get();
 
-
-          return view('organizations.add_officer',compact('roles'),[
+          return view('organizations.add_officer', [
               'org' => $org,
-              'students' => $students,  // <-- fixed
-              'tabs' => $tabs
+              'roles' => $roles,
+              'students' => $students,
           ]);
       }
 
 
     public function saveOfficers(Request $request)
       {
-          $orgId = $request->org_id; // plain numeric, no decryption
-         $roleId = Role::where('RoleName', $role)->value('id');
-         
-          foreach ($request->officers as $role => $profileId) {
-              // Skip empty selections
-              if (!$profileId) continue;
+          $request->validate([
+              'org_id'    => 'required|exists:organizations,organization_id',
+              'officers'  => 'required|array',
+              'officers.*' => 'nullable|exists:user_profiles,profile_id'
+          ]);
 
-              Officer::updateOrCreate(
-                  [
-                      'organization_id' => $orgId,
-                      'role_id' => $role
-                  ],
-                  [
-                      'profile_id' => $profileId
-                  ]
-              );
+          $orgId = $request->org_id;
+
+          DB::beginTransaction();
+          try {
+              foreach ($request->officers as $roleName => $profileId) {
+
+                  $role = Role::where('RoleName', $roleName)->first();
+                  if (!$role) continue;
+
+                  // If role cleared → remove officer
+                  if (empty($profileId)) {
+                      Officer::where('organization_id', $orgId)
+                            ->where('role_id', $role->id)
+                            ->delete();
+                      continue;
+                  }
+
+                  // 1. Make sure student is a member
+                  $member = \App\Models\Member::where('organization_id', $orgId)
+                              ->where('profile_id', $profileId)
+                              ->first();
+
+                  if (!$member) {
+                      return response()->json([
+                          'success' => false,
+                          'message' => 'Student must be a member before being an officer.'
+                      ], 422);
+                  }
+
+                  // 2. Save officer using member_id (NOT profile_id)
+                  Officer::updateOrCreate(
+                      [
+                          'organization_id' => $orgId,
+                          'role_id'         => $role->id,
+                      ],
+                      [
+                          'member_ids' => $member->members_id
+                      ]
+                  );
+              }
+
+              DB::commit();
+
+              return response()->json([
+                  'success' => true,
+                  'message' => 'Officers saved successfully!'
+              ]);
+
+          } catch (\Exception $e) {
+              DB::rollBack();
+              \Log::error('Save Officers Error: ' . $e->getMessage());
+
+              return response()->json([
+                  'success' => false,
+                  'message' => 'Failed to save: ' . $e->getMessage()
+              ], 500);
           }
-
-          return response()->json(['success' => true]);
       }
+
 
 
 

@@ -43,15 +43,15 @@ class UserProfile extends Model
     }
 
 
-    public function organizations()
-    {
-        return $this->belongsToMany(
-            Organization::class,
-            'members',
-            'profile_id',
-            'organization_id'
-        );
-    }
+    // public function organizations()
+    // {
+    //     return $this->belongsToMany(
+    //         Organization::class,
+    //         'members',
+    //         'profile_id',
+    //         'organization_id'
+    //     );
+    // }
 
 
     public function advisedOrganizations()

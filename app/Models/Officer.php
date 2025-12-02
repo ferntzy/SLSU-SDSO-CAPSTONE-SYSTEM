@@ -7,31 +7,38 @@ use Illuminate\Database\Eloquent\Model;
 
 class Officer extends Model
 {
-    use HasFactory;
-
+    protected $table = 'officers';
     protected $primaryKey = 'officer_id';
+
     protected $fillable = [
-        'user_id',
-        'profile_id',
         'organization_id',
-        'role',
+        'member_id',     // FIXED
+        'role_id',        // FIXED
     ];
 
-    // Link back to the organization
     public function organization()
     {
         return $this->belongsTo(Organization::class, 'organization_id', 'organization_id');
     }
 
-    // Link to user (optional)
-    public function user()
+      public function member()
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(Member::class, 'members_id', 'member_id');
     }
 
-    // Link to profile
     public function profile()
     {
         return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
     }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'id');
+    }
+
+      public function userAccount()
+    {
+        return $this->hasOne(User::class, 'officers_id', 'officer_id');
+    }
 }
+
