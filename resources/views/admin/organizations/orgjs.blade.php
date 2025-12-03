@@ -11,52 +11,81 @@
   $(document).on('change', '.select-student', function() {
       selectedStudents = [];
       $('.select-student:checked').each(function() {
-          selectedStudents.push($(this).val()); // get the value of checked checkbox
+          selectedStudents.push($(this).val());
       });
   });
 
-  $("#addMembersModal").on("shown.bs.modal", function(e){
-      var encryptedId = $(e.relatedTarget).data('id'); // encrypted
-      $("#hiddenOrgID").val(encryptedId);
-  });
+  $(document).on("click", ".btn-add-members", function(e){
+      e.preventDefault();
+      var id = $(this).attr("data-id");
+      $.ajax({
+          url: "{{route('organizations.available-students')}}",
+          method: "POST",
+          data: {id},
+          beforeSend: function() {
+            $("#addMembersModal").modal("toggle");
+          },
+          success: function(response) {
+            $("#addmembermsg").html(response);
+          },
+          error: function(xhr) {
+              console.log(xhr.responseText);
+
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error saving members'
+              });
+
+              $("#btnaddmembers").prop("disabled", false);
+          }
+      });
+  })
+
 
 
   // SAVE BUTTON
   $('#btnaddmembers').on('click', function (e) {
       e.preventDefault();
-      let flag = $("hiddenOrgID").val();
+
+      // Prevent AJAX if no students selected
+      if(selectedStudents.length === 0){
+          $("#addmembermsg").html("<div class='alert alert-warning'>Please select students</div>");
+          return;
+      }
+
       $.ajax({
           url: "{{route('organizations.add-members')}}",
           type: "POST",
           data: $("#frmMemberData").serialize(),
-          beforeSend:function(){
-            if(selectedStudents.length === 0){
-              $("#addmembermsg").html("<div class = 'alert alert-warning'>please select students</div>");
-              return;
-            }
-            $("#addmembermsg").html("<div class = 'alert alert-warning'><i class = 'spinner-grow spinner-grow-sm'></i> Saving, please wait...</div>");
-            $("#btnaddmembers").prop("disabled", true);
+          beforeSend: function() {
+              $("#addmembermsg").html("<div class='alert alert-warning'><i class='spinner-grow spinner-grow-sm'></i> Saving, please wait...</div>");
+              $("#btnaddmembers").prop("disabled", true);
           },
           success: function(response) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Members successfully added!',
-                showConfirmButton: false,
-                timer: 600
-            });
+              $("#addmembermsg").html(response.success);
+              $("#btnaddmembers").prop("disabled", false);
 
+              // Clear checkboxes
+              $('.select-student').prop('checked', false);
+              selectedStudents = [];
+
+              // Optionally close modal after success
+              // $("#addMembersModal").modal('hide');
           },
-           error: function(xhr) {
-            console.log(xhr.responseText);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error saving members'
-            });
-            $("#btnaddmembers").prop("disabled", false);
+          error: function(xhr) {
+              console.log(xhr.responseText);
+
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error saving members'
+              });
+
+              $("#btnaddmembers").prop("disabled", false);
           }
       });
-
   });
+
+
 
 
   // add
@@ -217,118 +246,7 @@
 
 
 
-// Open Modal + Load Org Data
-$(document).on("click", ".btn-add-officers", function () {
-    let encryptedId = $(this).data("id");
 
-    $("#officerOrgID").val(""); // reset
-
-    $.ajax({
-        url: "{{ route('organizations.edit') }}",
-        method: "POST",
-        data: {
-            id: encryptedId,
-            _token: "{{ csrf_token() }}"
-        },
-        beforeSend: function () {
-            $("#officerOrgName").text("Loading...");
-            $("#officerAdviser").text("Adviser: Loading...");
-            $("#officerModalTitle").text("Add Officer");
-        },
-        success: function (data) {
-            $("#officerOrgID").val(data.organization_id); // Plain ID
-            $("#officerOrgName").text(data.organization_name);
-            $("#officerModalTitle").text("Add Officer in " + data.organization_name);
-
-            let adviserName = data.adviser
-                ? ${data.adviser.first_name} ${data.adviser.last_name}
-                : "N/A";
-            $("#officerAdviser").text("Adviser: " + adviserName);
-
-            // Show modal
-            $("#addOfficersModal").modal("show");
-        },
-        error: function () {
-            Swal.fire("Error", "Failed to load organization data", "error");
-        }
-    });
-});
-
-// Prevent same student from being selected twice
-document.addEventListener("DOMContentLoaded", function () {
-    const selects = document.querySelectorAll('.officer-select');
-
-    function updateOptions() {
-        let selected = Array.from(selects)
-            .map(s => s.value)
-            .filter(v => v !== "");
-
-        selects.forEach(select => {
-            let current = select.value;
-            Array.from(select.options).forEach(opt => {
-                if (opt.value === "" || opt.value === current) {
-                    opt.hidden = false;
-                    opt.disabled = false;
-                } else {
-                    opt.hidden = selected.includes(opt.value);
-                    opt.disabled = selected.includes(opt.value);
-                }
-            });
-        });
-    }
-
-    selects.forEach(s => s.addEventListener("change", updateOptions));
-    updateOptions();
-});
-
-// Save Officers
-$(document).on("click", "#btnSaveOfficers", function () {
-    let btn = $(this);
-    let spinner = btn.find(".spinner-border");
-    let orgId = $("#officerOrgID").val();
-
-    if (!orgId) {
-        Swal.fire("Error", "Organization not loaded", "error");
-        return;
-    }
-
-    let officersData = {};
-    $(".officer-select").each(function () {
-        let roleName = $(this).data("role");
-        let profileId = $(this).val();
-        officersData[roleName] = profileId || null;
-    });
-
-    btn.prop("disabled", true);
-    spinner.removeClass("d-none");
-
-    $.ajax({
-        url: "{{ route('organizations.save-officers') }}",
-        method: "POST",
-        data: $("#frmAddOfficer").serialize(),
-        success: function (res) {
-            if (res.success) {
-                Swal.fire({
-                    icon: "success",
-                    title: "Success!",
-                    text: res.message || "Officers saved successfully",
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                $("#addOfficersModal").modal("hide");
-                // Optional: reload table or trigger refresh
-            }
-        },
-        error: function (xhr) {
-            let msg = xhr.responseJSON?.message || "Failed to save officers";
-            Swal.fire("Error", msg, "error");
-        },
-        complete: function () {
-            btn.prop("disabled", false);
-            spinner.addClass("d-none");
-        }
-    });
-});
 
 
 </script>

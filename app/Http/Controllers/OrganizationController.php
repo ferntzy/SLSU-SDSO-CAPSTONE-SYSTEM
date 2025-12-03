@@ -6,6 +6,7 @@ use App\Models\Organization;
 use App\Models\User;
 use App\Models\Officer;
 
+use App\Models\Member;
 use App\Models\UserProfile;
 use App\Models\Role;
 use Illuminate\Http\Request;
@@ -53,7 +54,7 @@ class OrganizationController extends Controller
                 'organization_name' => 'required|string|max:255',
                 'organization_type' => 'required|string',
                 'description' => 'nullable|string',
-                'adviser_id' => 'required|exists:users,user_id',  // adviser is required
+                'adviser_id' => 'required|exists:users,user_id',
                 'organization_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
@@ -135,6 +136,7 @@ class OrganizationController extends Controller
 
     public function add(Request $request)
     {
+
         try {
             $request->validate([
                 'organization_id' => 'required|string', // encrypted
@@ -142,12 +144,11 @@ class OrganizationController extends Controller
                 'students.*' => 'exists:user_profiles,profile_id',
             ]);
 
-            // Decrypt org ID
             $orgId = Crypt::decryptString($request->organization_id);
 
             DB::transaction(function () use ($orgId, $request) {
                 foreach ($request->students as $profileId) {
-                    \App\Models\Member::firstOrCreate([
+                        Member::firstOrCreate([
                         'organization_id' => $orgId,
                         'profile_id' => $profileId
                     ]);
@@ -155,9 +156,8 @@ class OrganizationController extends Controller
             });
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Members successfully added!'
-            ]);
+                'success' => '<div class="alert alert-success">Organization members added successfully.</div>'
+            ], 200);
 
         } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
             return response()->json([
@@ -172,87 +172,109 @@ class OrganizationController extends Controller
         }
     }
 
+    public function availableStudents(Request $request)
+    {
+        try {
+            $orgId = Crypt::decryptString($request->id);
 
-      public function addOfficers($organizationId)
-      {
-          $org = Organization::findOrFail($organizationId);
+            $existingMembers = Member::where('organization_id', $orgId)
+                                    ->pluck('profile_id')
+                                    ->toArray();
 
-          $students = Member::with('profile')
-                      ->where('organization_id', $organizationId)
-                      ->get()
-                      ->map(function($m){
-                          return [
-                              'id' => $m->profile_id,
-                              'full_name' => "{$m->profile->last_name}, {$m->profile->first_name}"
-                          ];
-                      });
+            $students = UserProfile::select('profile_id','first_name','middle_name','last_name')
+                        ->whereNotIn('profile_id', $existingMembers)
+                        ->where('type', 'student')
+                        ->get();
 
-          $roles = Role::orderBy('order')->get();
+            return view('admin.organizations.addmember', compact('students','orgId'));
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unable to fetch students.'
+            ]);
+        }
+    }
 
-          return view('organizations.add_officer', [
-              'org' => $org,
-              'roles' => $roles,
-              'students' => $students,
-          ]);
-      }
+    public function addOfficers($organizationId)
+    {
+        $org = Organization::findOrFail($organizationId);
+
+        $students = Member::with('profile')
+                    ->where('organization_id', $organizationId)
+                    ->get()
+                    ->map(function($m){
+                        return [
+                            'id' => $m->profile_id,
+                            'full_name' => "{$m->profile->last_name}, {$m->profile->first_name}"
+                        ];
+                    });
+
+        $roles = Role::orderBy('order')->get();
+
+        return view('organizations.add_officer', [
+            'org' => $org,
+            'roles' => $roles,
+            'students' => $students,
+        ]);
+    }
 
 
     public function saveOfficers(Request $request)
-      {
+    {
 
-          try {
-             $request->validate([
-              'officerOrgID'    => 'required|exists:organizations,organization_id',
-              'officers'  => 'required|array',
-              'officers.*' => 'nullable|exists:user_profiles,profile_id'
-            ],[
-              'officerOrgID.required' => "Invalid Organization selected"
-            ]);
+        try {
+            $request->validate([
+            'officerOrgID'    => 'required|exists:organizations,organization_id',
+            'officers'  => 'required|array',
+            'officers.*' => 'nullable|exists:user_profiles,profile_id'
+          ],[
+            'officerOrgID.required' => "Invalid Organization selected"
+          ]);
 
-            $orgId = $request->officerOrgID;
-            $naapili = false;
-            foreach($request->officers as $off){
-                if (!empty($off)){
-                  $naapili = true;
-                }
-            }
-
-            if (!$naapili){
-              throw new Exception("No officer selected");
-            }
-
-            $data = [];
-            foreach($request->officers as $off){
+          $orgId = $request->officerOrgID;
+          $naapili = false;
+          foreach($request->officers as $off){
               if (!empty($off)){
-                $tmp = explode("|", $off);
-
-                $data[] = [
-                  'organization_id' => $request->officerOrgID,
-                  'members_id' => $tmp[0],
-                  'role_id' => $tmp[1]
-                ];
+                $naapili = true;
               }
-            }
+          }
 
-            $save = Officer::insert($data);
+          if (!$naapili){
+            throw new Exception("No officer selected");
+          }
 
-            if (!$save){
-              throw new Exception("Officers not save.");
+          $data = [];
+          foreach($request->officers as $off){
+            if (!empty($off)){
+              $tmp = explode("|", $off);
+
+              $data[] = [
+                'organization_id' => $request->officerOrgID,
+                'members_id' => $tmp[0],
+                'role_id' => $tmp[1]
+              ];
             }
+          }
+
+          $save = Officer::insert($data);
+
+          if (!$save){
+            throw new Exception("Officers not save.");
+          }
+
+          return response()->json([
+              'success' => true,
+              'message' => 'Officers saved successfully!'
+          ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Save Officers Error: ' . $e->getMessage());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Officers saved successfully!'
-            ]);
-
-          } catch (\Exception $e) {
-              DB::rollBack();
-              \Log::error('Save Officers Error: ' . $e->getMessage());
-
-              return response()->json([
-                  'success' => false,
-                  'message' => 'Failed to save: ' . $e->getMessage()
-              ], 500);
-          }
-      }
+                'success' => false,
+                'message' => 'Failed to save: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

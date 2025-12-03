@@ -71,7 +71,7 @@
   // Trigger list() on button click
   $(document).on("click", "#btnSearchProfile", function(e) {
       e.preventDefault();
-      profilelist();                 // Call your AJAX list function
+      profilelist();              
   });
 
   // profile list

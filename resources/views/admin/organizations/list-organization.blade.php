@@ -23,24 +23,18 @@
               </td>
 
               <td>
-                  @if($org->officers->count())
-                      {{ $org->officers->first()->profile->first_name ?? '' }}
-                      {{ $org->officers->first()->profile->last_name ?? '' }}
-                  @else
-                      N/A
-                  @endif
+
               </td>
 
               <td class = "text-center">
                 <div class="dropdown">
                   <a  href="#" class="text-primary btn-add-members"
-                        data-bs-toggle="modal"
-                        data-bs-target="#addMembersModal" data-id="{{Crypt::encryptstring($org->organization_id)}}" >
+                        data-id="{{Crypt::encryptstring($org->organization_id)}}" >
                         <i class="mdi mdi-account-multiple-plus-outline"></i>
                   </a>
                   <a href="#" class=" text-secondary btn-add-officers"
                       data-bs-toggle="modal"
-                      data-bs-target="#addOfficersModal" data-id="{{ Crypt::encryptstring($org->organization_id) }}">
+                      data-bs-target="#addOfficersModal">
                       <i class="mdi mdi-account-plus-outline"></i>
                   </a>
 

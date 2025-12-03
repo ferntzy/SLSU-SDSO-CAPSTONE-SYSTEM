@@ -27,23 +27,6 @@
                         <option>Non-Academic Organization</option>
                     </select>
                 </div>
-
-                 <!-- Radio Buttons Below -->
-                <div class="mt-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="org_category" id="sscRadio" value="Academic">
-                        <label class="form-check-label" for="sscRadio">
-                            SSC
-                        </label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="org_category" id="representativeRadio" value="Non-Academic">
-                        <label class="form-check-label" for="representativeRadio">
-                            Representative
-                        </label>
-                    </div>
-                </div>
                 <!-- Adviser -->
                 <div class="mb-3">
                   <label class="form-label">Organization Adviser</label>
@@ -51,7 +34,7 @@
                       <option value="">Select Adviser</option>
                       @foreach($advisers as $adviser)
                           <option value="{{ $adviser->user_id }}">
-                              {{ $adviser->profile->first_name ?? " " }} {{ $adviser->profile->last_name ?? " "}}
+                              {{ $adviser->profile->first_name }} {{ $adviser->profile->last_name }}
                           </option>
                       @endforeach
                   </select>
