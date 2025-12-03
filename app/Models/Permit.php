@@ -28,6 +28,8 @@
       'signature_upload',
       'pdf_data',
       'hashed_id',
+      'is_completed',      // ← ADD THIS
+        'completed_at',
     ];
     protected $casts = [
       'date_start' => 'date',
@@ -49,16 +51,16 @@ public function offCampusDocuments()
 }
 
     // approvals relation (event_approval_flow rows tied to this permit)
-    public function approvals()
-  {
-      return $this->hasMany(EventApprovalFlow::class, 'permit_id');
-  }
+   public function approvals()
+    {
+        return $this->hasMany(EventApprovalFlow::class, 'permit_id', 'permit_id');
+    }
 
     // organization relation
-    public function organization()
-  {
-      return $this->belongsTo(Organization::class, 'organization_id');
-  }
+   public function organization()
+    {
+        return $this->belongsTo(Organization::class, 'organization_id', 'organization_id');
+    }
     // public function offCampusRequirements()
     // {
     //   // return $this->hasMany(OffCampusRequirement::class, 'permit_id', 'permit_id');
@@ -127,4 +129,26 @@ public function offCampusDocuments()
 
       return 'approved';
     }
+    public function reports()
+{
+    return $this->hasMany(Report::class, 'event_id');
+}
+ public function isFullyApproved()
+    {
+        $requiredApprovers = ['Faculty_Adviser', 'BARGO', 'SDSO_Head', 'SAS_Director', 'VP_SAS'];
+
+        foreach ($requiredApprovers as $role) {
+            $approval = $this->approvals()
+                ->where('approver_role', $role)
+                ->where('status', 'approved')
+                ->exists();
+
+            if (!$approval) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
   }

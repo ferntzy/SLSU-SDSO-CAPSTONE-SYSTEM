@@ -10,8 +10,6 @@
       "slug": "student-dashboard"
     },
 
-
-
     {
       "url": "/student/calendar",
       "name": "Calendar",
@@ -40,6 +38,22 @@
       "name": "Rejected Permits",
       "icon": "menu-icon tf-icons mdi mdi-close-circle-outline",
       "slug": "student-rejected-permits"
+    },
+
+    {
+      "menuHeader": "EVENT STATUS"
+    },
+    {
+      "url": "/student/ongoing",
+      "name": "Ongoing Events",
+      "icon": "menu-icon tf-icons mdi mdi-play-circle-outline",
+      "slug": "student-ongoing-events"
+    },
+    {
+      "url": "/student/successful",
+      "name": "Successful Events",
+      "icon": "menu-icon tf-icons mdi mdi-trophy-outline",
+      "slug": "student-successful-events"
     },
 
 

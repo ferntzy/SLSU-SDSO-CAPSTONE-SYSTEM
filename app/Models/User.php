@@ -97,8 +97,18 @@ public function user_profile()
       ->where('notification_type', 'event_approval') // or 'permit_request', etc.
       ->count();
   }
+  public function permits()
+{
+    return $this->hasMany(Permit::class, 'student_id'); // adjust foreign key as needed
+    // Or if permit belongs to a profile/user via user_id:
+    // return $this->hasMany(Permit::class, 'user_id');
+}
   // public function events()
   // {
   //     return $this->hasMany(Event::class, 'organization_id', 'user_id');
   // }
+  public function organization()
+{
+    return $this->belongsTo(Organization::class);
+}
 }

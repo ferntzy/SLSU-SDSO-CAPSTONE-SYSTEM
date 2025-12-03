@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Permit;
 use App\Models\Organization;
 use App\Models\Venue;
@@ -287,7 +288,76 @@ $permit = Permit::create([
 
     return view('student.permit.tracking', compact('permits'));
   }
+ public function download($hashedId)
+    {
+        try {
+            // Find the permit by hashed_id
+            $permit = Permit::where('hashed_id', $hashedId)->firstOrFail();
 
+            // Get the current user
+            $user = Auth::user();
+
+            // Check if user has access to this permit through organization membership
+            $hasAccess = \DB::table('permits')
+                ->join('organizations', 'permits.organization_id', '=', 'organizations.organization_id')
+                ->join('members', 'organizations.organization_id', '=', 'members.organization_id')
+                ->join('user_profiles', 'members.profile_id', '=', 'user_profiles.profile_id')
+                ->join('users', 'user_profiles.profile_id', '=', 'users.profile_id')
+                ->where('permits.hashed_id', $hashedId)
+                ->where('users.user_id', $user->user_id)
+                ->exists();
+
+            if (!$hasAccess) {
+                abort(403, 'Unauthorized access to this permit.');
+            }
+
+            // Check if permit is fully approved
+            if (!$permit->isFullyApproved()) {
+                return redirect()->back()->with('error', 'This permit is not yet fully approved.');
+            }
+
+            // Check if PDF data exists in database
+            if ($permit->pdf_data) {
+                // Return the stored PDF from database
+                return response($permit->pdf_data)
+                    ->header('Content-Type', 'application/pdf')
+                    ->header('Content-Disposition', 'attachment; filename="Permit-' . $permit->hashed_id . '.pdf"');
+            }
+
+            // If no PDF in database, generate one
+            $pdf = $this->generatePermitPDF($permit);
+
+            // Download the PDF
+            return $pdf->download('Permit-' . $permit->hashed_id . '.pdf');
+
+        } catch (\Exception $e) {
+            \Log::error('Permit download error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Unable to download permit. Please try again.');
+        }
+    }
+      private function generatePermitPDF($permit)
+    {
+        // Get organization details
+        $organization = $permit->organization;
+
+        // Get all approvals with signatures
+        $approvals = $permit->approvals()
+            ->where('status', 'approved')
+            ->with('approver')
+            ->orderBy('approved_at')
+            ->get();
+
+        // Generate PDF
+        $pdf = PDF::loadView('student.permit.pdf', [
+            'permit' => $permit,
+            'organization' => $organization,
+            'approvals' => $approvals
+        ]);
+
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf;
+    }
   public function viewPdf($id)
   {
     $permit = Permit::findOrFail($id);

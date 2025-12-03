@@ -1,89 +1,99 @@
-@php
-    $container = 'container-xxl';
+{{-- resources/views/student/dashboard.blade.php --}}
+@extends('layouts.contentNavbarLayout')
 
-    $approvedPermits = $permits->where('status', 'approved');
-    $pendingPermits  = $permits->where('status', 'pending');
-    $rejectedPermits = $permits->where('status', 'rejected');
-
-    $ongoingEvents = $permits->where('event_status', 'ongoing');
-    $successfulEvents = $permits->where('event_status', 'successful');
-    $canceledEvents = $permits->where('event_status', 'canceled');
-
-    $fullName =
-        Auth::user()->profile?->first_name . ' ' .
-        (Auth::user()->profile?->middle_name ? strtoupper(substr(Auth::user()->profile->middle_name, 0, 1)) . '. ' : '') .
-        Auth::user()->profile?->last_name . ' ' .
-        Auth::user()->profile?->suffix;
-@endphp
-
-@extends('layouts/contentNavbarLayout')
-
-@section('title', 'Permit Tracking')
+@section('title', 'Permit Analytics Dashboard')
 
 @section('page-style')
 <style>
-    .stats-card-modern {
-        transition: all 0.3s ease;
-    }
-    .stats-card-modern:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1) !important;
-    }
-    .nav-tabs .nav-link {
+    .stat-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         border: none;
-        color: #697a8d;
-        font-weight: 500;
-        padding: 0.75rem 1.25rem;
+        border-radius: 0.75rem;
     }
-    .nav-tabs .nav-link.active {
-        color: #696cff;
-        border-bottom: 2px solid #696cff;
-        background: transparent;
+    .stat-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 0.5rem 1.5rem rgba(67, 89, 113, 0.15) !important;
     }
-    .nav-tabs .nav-link:hover {
-        color: #696cff;
-        border: none;
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
     }
-    .section-label {
-        font-size: 0.8125rem;
-        font-weight: 600;
-        color: #b4bdc6;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 0.75rem 1.25rem;
-        pointer-events: none;
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    @media (max-width: 768px) {
+        .chart-container { height: 250px; }
     }
 </style>
 @endsection
 
 @section('content')
-<div class="{{ $container }} flex-grow-1 container-p-y">
+@php
+    $approvedPermits    = $permits->where('status', 'approved');
+    $pendingPermits     = $permits->where('status', 'pending');
+    $rejectedPermits    = $permits->where('status', 'rejected');
+
+    $ongoingEvents      = $permits->where('event_status', 'ongoing');
+    $successfulEvents   = $permits->where('event_status', 'successful');
+    $canceledEvents     = $permits->where('event_status', 'canceled');
+
+    $totalPermits       = $permits->count();
+    $approvalRate       = $totalPermits > 0 ? round(($approvedPermits->count() / $totalPermits) * 100, 1) : 0;
+    $rejectionRate      = $totalPermits > 0 ? round(($rejectedPermits->count() / $totalPermits) * 100, 1) : 0;
+
+    $fullName = trim(
+        (Auth::user()->profile?->first_name ?? '') . ' ' .
+        (Auth::user()->profile?->middle_name ? strtoupper(substr(Auth::user()->profile->middle_name, 0, 1)) . '. ' : '') .
+        (Auth::user()->profile?->last_name ?? '') . ' ' .
+        (Auth::user()->profile?->suffix ?? '')
+    );
+
+    // Recent 5 permits (latest first)
+    $recentPermits = $permits->sortByDesc('created_at')->take(5);
+@endphp
+
+<div class="container-xxl flex-grow-1 container-p-y">
 
     {{-- Page Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h4 class="fw-bold">Welcome, {{ trim($fullName) }}!</h4>
-      <p class="text-muted mb-0">Monitor your permit submissions and event status</p>
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h4 class="mb-1">
+                        Hello, <span class="text-primary">{{ $fullName ?: 'Student' }}</span>!
+                    </h4>
+                    <p class="mb-0 text-muted">Track your event permit applications and performance</p>
+                </div>
+                <div>
+                    <a href="{{ route('student.permits.create') ?? '#' }}" class="btn btn-primary">
+                        <i class="ti ti-plus ti-xs me-1"></i> New Permit
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
     {{-- Statistics Cards --}}
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mb-5">
 
-        {{-- Pending --}}
-        <div class="col-sm-6 col-lg-4 col-xl-2">
-            <div class="card stats-card-modern">
+        {{-- Total Submissions --}}
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-muted d-block mb-1">Pending</span>
-                            <div class="d-flex align-items-center">
-                                <h3 class="mb-0 me-2">{{ $pendingPermits->count() }}</h3>
-                            </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="card-info">
+                            <p class="card-text mb-1">Total Submissions</p>
+                            <h4 class="mb-0">{{ $totalPermits }}</h4>
+                            <small class="text-muted">All your applications</small>
                         </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-warning">
-                                <i class="bx bx-time-five bx-sm"></i>
+                        <div class="card-icon">
+                            <span class="stat-icon bg-label-primary">
+                                <i class="ti ti-file-text ti-md"></i>
                             </span>
                         </div>
                     </div>
@@ -91,20 +101,19 @@
             </div>
         </div>
 
-        {{-- Approved --}}
-        <div class="col-sm-6 col-lg-4 col-xl-2">
-            <div class="card stats-card-modern">
+        {{-- Pending Review --}}
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-muted d-block mb-1">Approved</span>
-                            <div class="d-flex align-items-center">
-                                <h3 class="mb-0 me-2">{{ $approvedPermits->count() }}</h3>
-                            </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="card-info">
+                            <p class="card-text mb-1">Pending Review</p>
+                            <h4 class="mb-0 text-warning">{{ $pendingPermits->count() }}</h4>
+                            <small class="text-muted">Awaiting approval</small>
                         </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-success">
-                                <i class="bx bx-check-circle bx-sm"></i>
+                        <div class="card-icon">
+                            <span class="stat-icon bg-label-warning">
+                                <i class="ti ti-clock ti-md"></i>
                             </span>
                         </div>
                     </div>
@@ -112,20 +121,19 @@
             </div>
         </div>
 
-        {{-- Rejected --}}
-        <div class="col-sm-6 col-lg-4 col-xl-2">
-            <div class="card stats-card-modern">
+        {{-- Approved Permits --}}
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-muted d-block mb-1">Rejected</span>
-                            <div class="d-flex align-items-center">
-                                <h3 class="mb-0 me-2">{{ $rejectedPermits->count() }}</h3>
-                            </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="card-info">
+                            <p class="card-text mb-1">Approved</p>
+                            <h4 class="mb-0 text-success">{{ $approvedPermits->count() }}</h4>
+                            <small class="text-muted">Ready to execute</small>
                         </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-danger">
-                                <i class="bx bx-x-circle bx-sm"></i>
+                        <div class="card-icon">
+                            <span class="stat-icon bg-label-success">
+                                <i class="ti ti-circle-check ti-md"></i>
                             </span>
                         </div>
                     </div>
@@ -133,183 +141,220 @@
             </div>
         </div>
 
-        {{-- Ongoing --}}
-        <div class="col-sm-6 col-lg-4 col-xl-2">
-            <div class="card stats-card-modern">
+        {{-- Ongoing Events --}}
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-muted d-block mb-1">Ongoing</span>
-                            <div class="d-flex align-items-center">
-                                <h3 class="mb-0 me-2">{{ $ongoingEvents->count() }}</h3>
-                            </div>
+                    <div class="d-flex justify-content-between">
+                        <div class="card-info">
+                            <p class="card-text mb-1">Ongoing Events</p>
+                            <h4 class="mb-0 text-info">{{ $ongoingEvents->count() }}</h4>
+                            <small class="text-muted">Currently running</small>
                         </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-primary">
-                                <i class="bx bx-play-circle bx-sm"></i>
+                        <div class="card-icon">
+                            <span class="stat-icon bg-label-info">
+                                <i class="ti ti-player-play ti-md"></i>
                             </span>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
-
-        {{-- Successful --}}
-        <div class="col-sm-6 col-lg-4 col-xl-2">
-            <div class="card stats-card-modern">
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-muted d-block mb-1">Successful</span>
-                            <div class="d-flex align-items-center">
-                                <h3 class="mb-0 me-2">{{ $successfulEvents->count() }}</h3>
-                            </div>
-                        </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-success">
-                                <i class="bx bx-trophy bx-sm"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Canceled --}}
-        <div class="col-sm-6 col-lg-4 col-xl-2">
-            <div class="card stats-card-modern">
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between">
-                        <div class="content-left">
-                            <span class="text-muted d-block mb-1">Canceled</span>
-                            <div class="d-flex align-items-center">
-                                <h3 class="mb-0 me-2">{{ $canceledEvents->count() }}</h3>
-                            </div>
-                        </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-secondary">
-                                <i class="bx bx-block bx-sm"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    {{-- Main Content Card --}}
-    <div class="card">
-        <div class="card-body">
+    {{-- Charts Row --}}
+    <div class="row g-4 mb-5">
 
-            {{-- Navigation Tabs --}}
-            <ul class="nav nav-tabs" role="tablist">
-
-                {{-- Permits Section --}}
-                <li class="section-label">Permits</li>
-
-                <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pendingTab" role="tab">
-                        <i class="bx bx-time-five me-1"></i>
-                        <span class="d-none d-sm-inline">Pending</span>
-                        <span class="badge rounded-pill badge-center bg-label-warning ms-1">{{ $pendingPermits->count() }}</span>
-                    </button>
-                </li>
-
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#approvedTab" role="tab">
-                        <i class="bx bx-check-circle me-1"></i>
-                        <span class="d-none d-sm-inline">Approved</span>
-                        <span class="badge rounded-pill badge-center bg-label-success ms-1">{{ $approvedPermits->count() }}</span>
-                    </button>
-                </li>
-
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rejectedTab" role="tab">
-                        <i class="bx bx-x-circle me-1"></i>
-                        <span class="d-none d-sm-inline">Rejected</span>
-                        <span class="badge rounded-pill badge-center bg-label-danger ms-1">{{ $rejectedPermits->count() }}</span>
-                    </button>
-                </li>
-
-                {{-- Events Section --}}
-                <li class="section-label ms-3">Events</li>
-
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#ongoingTab" role="tab">
-                        <i class="bx bx-play-circle me-1"></i>
-                        <span class="d-none d-sm-inline">Ongoing</span>
-                        <span class="badge rounded-pill badge-center bg-label-primary ms-1">{{ $ongoingEvents->count() }}</span>
-                    </button>
-                </li>
-
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#successfulTab" role="tab">
-                        <i class="bx bx-trophy me-1"></i>
-                        <span class="d-none d-sm-inline">Successful</span>
-                        <span class="badge rounded-pill badge-center bg-label-success ms-1">{{ $successfulEvents->count() }}</span>
-                    </button>
-                </li>
-
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#canceledTab" role="tab">
-                        <i class="bx bx-block me-1"></i>
-                        <span class="d-none d-sm-inline">Canceled</span>
-                        <span class="badge rounded-pill badge-center bg-label-secondary ms-1">{{ $canceledEvents->count() }}</span>
-                    </button>
-                </li>
-
-            </ul>
-
-            {{-- Tab Content --}}
-            <div class="tab-content pt-4">
-
-                {{-- PENDING PERMITS --}}
-                <div class="tab-pane fade show active" id="pendingTab" role="tabpanel">
-                    @include('student.permit.pending', [
-                        'items' => $pendingPermits
-                    ])
+        {{-- Permit Status Overview (Bar Chart) --}}
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Permit Application Status</h5>
+                    <small class="text-muted">{{ $totalPermits }} total submissions</small>
                 </div>
-
-                {{-- APPROVED PERMITS --}}
-                <div class="tab-pane fade" id="approvedTab" role="tabpanel">
-                    @include('student.permit.approved', [
-                        'items' => $approvedPermits
-                    ])
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
                 </div>
-
-                {{-- REJECTED PERMITS --}}
-                <div class="tab-pane fade" id="rejectedTab" role="tabpanel">
-                    @include('student.permit.rejected', [
-                        'items' => $rejectedPermits
-                    ])
-                </div>
-
-                {{-- ONGOING EVENTS --}}
-                <div class="tab-pane fade" id="ongoingTab" role="tabpanel">
-                    @include('student.permit.ongoing', [
-                        'items' => $ongoingEvents
-                    ])
-                </div>
-
-                {{-- SUCCESSFUL EVENTS --}}
-                <div class="tab-pane fade" id="successfulTab" role="tabpanel">
-                    @include('student.permit.successful', [
-                        'items' => $successfulEvents
-                    ])
-                </div>
-
-                {{-- CANCELED EVENTS --}}
-                <div class="tab-pane fade" id="canceledTab" role="tabpanel">
-                    @include('student.permit.canceled', [
-                        'items' => $canceledEvents
-                    ])
-                </div>
-
             </div>
+        </div>
 
+        {{-- Approval Rate (Doughnut with Center Text) --}}
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Overall Approval Rate</h5>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <div class="mb-4 position-relative">
+                        <canvas id="approvalRateChart" width="220" height="220"></canvas>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center">
+                            <h2 class="mb-0 text-primary fw-bold">{{ $approvalRate }}%</h2>
+                            <small class="text-muted">Approved</small>
+                        </div>
+                    </div>
+                    <div class="row w-100 text-center mt-3">
+                        <div class="col-6 border-end">
+                            <h5 class="mb-0 text-success">{{ $approvedPermits->count() }}</h5>
+                            <small class="text-muted">Approved</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="mb-0 text-danger">{{ $rejectedPermits->count() }}</h5>
+                            <small class="text-muted">Rejected</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Recent Permits Table --}}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Permit Applications</h5>
+                    <a href="{{ route('student.permits.index') ?? '#' }}" class="btn btn-sm btn-label-primary">
+                        View All <i class="ti ti-arrow-right ti-xs ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-datatable table-responsive">
+                    @if($recentPermits->count() > 0)
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Activity Title</th>
+                                <th>Type</th>
+                                <th>Date Submitted</th>
+                                <th>Status</th>
+                                <th>Event Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($recentPermits as $permit)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-sm me-3">
+                                            <span class="avatar-initial rounded-circle bg-label-primary">
+                                                {{ strtoupper(substr($permit->title_activity ?? 'P', 0, 2)) }}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span class="fw-medium d-block">{{ Str::limit($permit->title_activity ?? 'Untitled', 28) }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><small class="text-muted">{{ ucfirst($permit->type ?? 'N/A') }}</small></td>
+                                <td><small>{{ $permit->created_at?->format('M d, Y') }}</small></td>
+                                <td>
+                                    @switch($permit->status)
+                                        @case('approved')
+                                            <span class="badge bg-label-success"><i class="ti ti-check ti-xs"></i> Approved</span>
+                                            @break
+                                        @case('pending')
+                                            <span class="badge bg-label-warning"><i class="ti ti-clock ti-xs"></i> Pending</span>
+                                            @break
+                                        @case('rejected')
+                                            <span class="badge bg-label-danger"><i class="ti ti-x ti-xs"></i> Rejected</span>
+                                            @break
+                                        @default
+                                            <span class="badge bg-label-secondary">Unknown</span>
+                                    @endswitch
+                                </td>
+                                <td>
+                                    @if($permit->event_status)
+                                        @switch($permit->event_status)
+                                            @case('ongoing')   <span class="badge bg-label-info">Ongoing</span> @break
+                                            @case('successful')<span class="badge bg-label-success">Successful</span> @break
+                                            @case('canceled')  <span class="badge bg-label-danger">Canceled</span> @break
+                                            @default           <span class="badge bg-label-secondary">{{ ucfirst($permit->event_status) }}</span>
+                                        @endswitch
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    @else
+                    <div class="text-center py-6">
+                        <div class="avatar avatar-lg mx-auto mb-3">
+                            <span class="avatar-initial rounded-circle bg-label-secondary">
+                                <i class="ti ti-file-off ti-lg"></i>
+                            </span>
+                        </div>
+                        <h5>No permits yet</h5>
+                        <p class="text-muted">Start by creating your first event permit.</p>
+                        <a href="{{ route('student.permits.create') ?? '#' }}" class="btn btn-primary mt-3">
+                            <i class="ti ti-plus"></i> Create Permit
+                        </a>
+                    </div>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 
 </div>
+@endsection
+
+@section('page-script')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Bar Chart - Permit Status Distribution
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Pending', 'Approved', 'Rejected'],
+                datasets: [{
+                    label: 'Permits',
+                    data: [{{ $pendingPermits->count() }}, {{ $approvedPermits->count() }}, {{ $rejectedPermits->count() }}],
+                    backgroundColor: ['rgba(255, 171, 0, 0.8)', 'rgba(113, 221, 55, 0.8)', 'rgba(255, 62, 29, 0.8)'],
+                    borderColor: ['rgb(255, 171, 0)', 'rgb(113, 221, 55)', 'rgb(255, 62, 29)'],
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // Doughnut Chart - Approval Rate
+    const rateCtx = document.getElementById('approvalRateChart');
+    if (rateCtx) {
+        new Chart(rateCtx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [{{ $approvedPermits->count() }}, {{ $rejectedPermits->count() }}, {{ $pendingPermits->count() }}],
+                    backgroundColor: ['#71dd37', '#ff3e1d', '#ffab00'],
+                    borderWidth: 4,
+                    borderColor: '#fff',
+                }]
+            },
+            options: {
+                cutout: '78%',
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+});
+</script>
 @endsection

@@ -24,7 +24,9 @@ use App\Http\Controllers\AdviserCalendarController;
 // AUTH ROUTES
 // ============================
 
-Route::get('/', function () {return redirect('/login');});
+Route::get('/', function () {
+  return redirect('/login');
+});
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile');
@@ -202,9 +204,9 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
 
   // Store new permit
   Route::post('/calendar/store', [CalendarController::class, 'store'])->name('calendar.store');
-
+  Route::get('/student/permit/download/{hashed_id}', [PermitController::class, 'download'])->name('student.permit.download');
   Route::get('/permit/view/{hashed_id}', [PermitController::class, 'view'])->name('student.permit.view');
-
+  Route::get('/permit/download/{hashedId}', [PermitController::class, 'download'])->name('permit.download');
 
   //profiles
   Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
@@ -216,41 +218,32 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
   // contact update Routeer')->group(function () {
   // routes/web.php
 
-  Route::get('page/pending-permits', [PermitTrackingController::class, 'pendingPage'])
-    ->name('student.page.pending');
+  Route::get('page/pending-permits', [PermitTrackingController::class, 'pendingPage'])->name('student.page.pending');
+  Route::get('page/approved-permits', [PermitTrackingController::class, 'approvedPage'])->name('student.page.approved');
+  Route::get('page/rejected-permits', [PermitTrackingController::class, 'rejectedPage'])->name('student.page.rejected');
+  Route::get('/successful', [PermitTrackingController::class, 'successfulPage'])->name('successful');
+  Route::post('/reports', [PermitTrackingController::class, 'storeReport'])->name('reports.store');
+  Route::get('/ongoing', [PermitTrackingController::class, 'ongoingPage'])->name('student.ongoing');
+  Route::get('/successful/{hashed_id}/reports', [PermitTrackingController::class, 'showReports'])->name('student.reports.show');
+  Route::post('/ongoing/{permit}/complete', [PermitTrackingController::class, 'markAsCompleted'])->name('student.ongoing.complete');
+  Route::post('/successful/submit/{hashed_id}', [PermitTrackingController::class, 'submitToSdso'])->name('student.permit.submit'); // View PDF securely (ensure hashed_id works)
+  Route::post('/successful/{hashed_id}/submit-to-sdso', [PermitTrackingController::class, 'submitToSdso'])->name('student.permit.submit');
+  Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])->name('faculty.permit.view');
+  Route::get('/student/page/submissions-history', [PermitTrackingController::class, 'submissionsHistory'])->name('student.submissions.history');
 
-  Route::get('page/approved-permits', [PermitTrackingController::class, 'approvedPage'])
-    ->name('student.page.approved');
-
-  Route::get('page/rejected-permits', [PermitTrackingController::class, 'rejectedPage'])
-    ->name('student.page.rejected');
-
+  // Approve & Reject
+  Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])->name('faculty.approve');
+  Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])->name('faculty.reject');
 
 
 
   // View PDF securely (ensure hashed_id works)
-  Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])
-    ->name('faculty.permit.view');
+  Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])->name('faculty.permit.view');
 
 
   // Approve & Reject
-  Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
-    ->name('faculty.approve');
-  Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
-    ->name('faculty.reject');
-
-
-
-  // View PDF securely (ensure hashed_id works)
-  Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])
-    ->name('faculty.permit.view');
-
-
-  // Approve & Reject
-  Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
-    ->name('faculty.approve');
-  Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
-    ->name('faculty.reject');
+  Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])->name('faculty.approve');
+  Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])->name('faculty.reject');
 });
 
 
@@ -302,11 +295,13 @@ Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(fu
 
   //notifications
 
-Route::get('/notifications/data', [App\Http\Controllers\Adviser\PermitController::class, 'notificationsData'])->name('adviser.notifications.data');
-Route::get('/permits', [App\Http\Controllers\Adviser\PermitController::class, 'index'])->name('adviser.permits.index');
+  Route::get('/notifications/data', [App\Http\Controllers\Adviser\PermitController::class, 'notificationsData'])->name('adviser.notifications.data');
+  Route::get('/permits', [App\Http\Controllers\Adviser\PermitController::class, 'index'])->name('adviser.permits.index');
   Route::get('/notifications/unread', [App\Http\Controllers\Adviser\NotificationController::class, 'unread'])->name('notifications.unread');
   Route::get('/notifications', [App\Http\Controllers\Adviser\NotificationController::class, 'index'])->name('notifications');
   Route::post('/notifications/mark-read', [App\Http\Controllers\Adviser\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+
+  
 });
 
 
