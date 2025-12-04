@@ -187,7 +187,7 @@ class OrganizationController extends Controller
                         ->get();
 
             return view('admin.organizations.addmember', compact('students','orgId'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Unable to fetch students.'

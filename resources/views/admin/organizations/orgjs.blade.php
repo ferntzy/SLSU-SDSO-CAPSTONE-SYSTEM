@@ -62,15 +62,22 @@
               $("#btnaddmembers").prop("disabled", true);
           },
           success: function(response) {
-              $("#addmembermsg").html(response.success);
-              $("#btnaddmembers").prop("disabled", false);
+              // // $("#addmembermsg").html("<div class = 'alert alert-success'>Members successfully added.</div>");
+              // $("#btnaddmembers").prop("disabled", false);
+              // // loadAvailableStudents();
+              // $('.select-student').prop('checked', false);
+              // selectedStudents = [];
 
-              // Clear checkboxes
-              $('.select-student').prop('checked', false);
-              selectedStudents = [];
-
-              // Optionally close modal after success
-              // $("#addMembersModal").modal('hide');
+              Swal.fire({
+                  icon: 'success',
+                  title: 'Success!',
+                  html: response.success, // or response.success if you want exact message
+                  timer: 2000,
+                  timerProgressBar: true,
+                  showConfirmButton: false
+              });
+              orglist();
+              $("#addMembersModal").modal('hide');
           },
           error: function(xhr) {
               console.log(xhr.responseText);
@@ -84,7 +91,22 @@
           }
       });
   });
+  // function loadAvailableStudents() {
+  //     var id = $(".btn-add-members").first().data("id");
 
+  //     $.ajax({
+  //         url: "{{route('organizations.available-students')}}",
+  //         method: "POST",
+  //         data: { id: id },
+  //         success: function(response) {
+  //             $("#studentlist").html(response);
+
+  //             // Reset selections
+  //             selectedStudents = [];
+  //             $('.select-student').prop('checked', false);
+  //         }
+  //     });
+  // }
 
 
 
