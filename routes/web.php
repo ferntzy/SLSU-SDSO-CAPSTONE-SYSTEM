@@ -367,24 +367,11 @@ Route::prefix('adviser')->name('adviser.')->middleware(['auth', 'role:Faculty_Ad
     //     Route::post('/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read');
     // });
 
-
-
-  Route::get('/calendar', [App\Http\Controllers\AdviserCalendarController::class, 'index'])
-    ->name('adviser.calendar');
-
-  Route::get('/calendar/events', [App\Http\Controllers\AdviserCalendarController::class, 'getEvents'])->name('adviser.calendar.events');
-
-
-
-  //notifications
-
-  Route::get('/notifications/data', [App\Http\Controllers\Adviser\PermitController::class, 'notificationsData'])->name('adviser.notifications.data');
-  Route::get('/permits', [App\Http\Controllers\Adviser\PermitController::class, 'index'])->name('permits.index');
-  Route::get('/notifications/unread', [App\Http\Controllers\Adviser\NotificationController::class, 'unread'])->name('notifications.unread');
-  Route::get('/notifications', [App\Http\Controllers\Adviser\NotificationController::class, 'index'])->name('notifications');
-  Route::post('/notifications/mark-read', [App\Http\Controllers\Adviser\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
-
-
+    // ————————————————————————————————————————
+    // Approved Permits History (optional — add controller later)
+    // ————————————————————————————————————————
+    Route::get('/permits', [PermitController::class, 'index'])
+        ->name('permits.index');
 });
 
 

@@ -141,117 +141,87 @@
   @endphp
 
   {{-- ================== DETAILS MODAL ================== --}}
- {{-- ================== DETAILS MODAL (NOW WITH UPLOADED FILES) ================== --}}
-<div class="modal fade" id="detailsModal{{ $permitFlow->approval_id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header  text-white">
-                <h5 class="modal-title">
-                    <i class="mdi mdi-file-document-multiple-outline me-2"></i>
-                    Permit Details & Supporting Documents
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-
-                <!-- Permit Info -->
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">ACTIVITY TITLE</label>
-                        <p class="fs-5 fw-semibold text-primary">{{ $permit->title_activity }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">ORGANIZATION</label>
-                        <p class="fs-5">{{ $permit->organization->organization_name ?? 'N/A' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">NATURE OF ACTIVITY</label>
-                        <p>{{ $permit->nature ?? 'N/A' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">VENUE</label>
-                        <p>{{ $permit->venue ?? 'N/A' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">EVENT DATE</label>
-                        <p>
-                            {{ \Carbon\Carbon::parse($permit->date_start)->format('F j, Y') }}
-                            @if($permit->date_end && $permit->date_end != $permit->date_start)
-                                → {{ \Carbon\Carbon::parse($permit->date_end)->format('F j, Y') }}
-                            @endif
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">EXPECTED PARTICIPANTS</label>
-                        <p>{{ $permit->number ?? 'N/A' }}</p>
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                <!-- Supporting Documents Section -->
-                <h6 class="fw-bold text-primary mb-3">
-                    <i class="mdi mdi-folder-zip-outline me-2"></i>
-                    Supporting Documents ({{ $permit->offCampusRequirements->count() }})
-                </h6>
-
-                @if($permit->offCampusRequirements->count() >= 0)
-                    <div class="row g-3">
-                        @foreach($permit->offCampusRequirements as $file)
-                            <div class="col-md-6 col-lg-4">
-                                <div class="card h-100 border shadow-sm hover-shadow">
-                                    <div class="card-body text-center py-4">
-                                        @php
-                                            $ext = pathinfo($file->file_path, PATHINFO_EXTENSION);
-                                            $isImage = in_array(strtolower($ext), ['jpg','jpeg','png','gif','webp']);
-                                        @endphp
-
-                                        @if($isImage)
-                                            <img src="{{ Storage::url($file->file_path) }}"
-                                                 alt="Document" class="img-fluid rounded mb-3"
-                                                 style="max-height: 120px; object-fit: cover;">
-                                        @else
-                                            <i class="mdi mdi-file-document-outline text-primary" style="font-size: 4rem;"></i>
-                                        @endif
-
-                                        <h6 class="mt-3 mb-1 text-truncate" title="{{ basename($file->file_path) }}">
-                                            {{ Str::limit(basename($file->file_path), 25) }}
-                                        </h6>
-
-
-                                        <div class="mt-3">
-                                            <a href="{{ Storage::url($file->file_path) }}"
-                                               target="_blank"
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="mdi mdi-eye"></i> View
-                                            </a>
-                                            <a href="{{ Storage::url($file->file_path) }}"
-                                               download
-                                               class="btn btn-sm btn-outline-success">
-                                                <i class="mdi mdi-download"></i> Download
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="text-center py-5 bg-light rounded">
-                        <i class="mdi mdi-folder-open-outline text-muted" style="font-size: 4rem;"></i>
-                        <p class="mt-3 text-muted">No supporting documents uploaded</p>
-                    </div>
-                @endif
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
-                    <i class="mdi mdi-close me-1"></i> Close
-                </button>
-            </div>
+  <div class="modal fade" id="detailsModal{{ $permitFlow->approval_id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Permit Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-    </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">ACTIVITY TITLE</label>
+            <p class="mb-0">{{ $permit->title_activity }}</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">ORGANIZATION</label>
+            <p class="mb-0">{{ $permit->organization->organization_name ?? 'Unknown' }}</p>
+          </div>
+          <div class="mb-3">
+    <label class="form-label fw-semibold small text-muted">OFFICER IN-CHARGE</label>
+    <p class="mb-0">
+        @php
+            $member = $permit->organization
+                        ? $permit->organization->members->first()
+                        : null;
+            $profile = $member ? $member->userProfile : null;
+
+            $fullName = $profile
+                ? trim(
+                    $profile->first_name . ' ' .
+                    ($profile->middle_name ? strtoupper(substr($profile->middle_name,0,1)) . '. ' : '') .
+                    $profile->last_name . ' ' .
+                    ($profile->suffix ?? '')
+                )
+                : 'N/A';
+        @endphp
+        {{ $fullName }}
+    </p>
 </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">NATURE OF ACTIVITY</label>
+            <p class="mb-0">{{ $permit->nature ?? 'Unknown' }}</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">PURPOSE</label>
+            <p class="mb-0">{{ $permit->purpose }}</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">PARTICIPANTS</label>
+            <p class="mb-0">{{ $permit->participants }}</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">EXPECTED NUMBER</label>
+            <p class="mb-0">{{ $permit->number }}</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">VENUE</label>
+            <p class="mb-0">{{ $permit->venue ?? 'N/A' }}</p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">TIME START</label>
+            <p class="mb-0">
+              {{ $permit->time_start ? \Carbon\Carbon::parse($permit->time_start)->format('g:i a') : 'N/A' }}
+            </p>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-muted">EVENT DATE</label>
+            <p class="mb-0">
+              {{ \Carbon\Carbon::parse($permit->date_start)->format('M d, Y') }}
+              @if($permit->date_end && $permit->date_end != $permit->date_start)
+                - {{ \Carbon\Carbon::parse($permit->date_end)->format('M d, Y') }}
+              @endif
+            </p>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   {{-- ================== APPROVE MODAL ================== --}}
   <div class="modal fade" id="approveModal{{ $permitFlow->approval_id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
