@@ -100,7 +100,7 @@
                         <tr class="hover-ongoing">
                             <td>
                                 <strong class="d-block">{{ Str::limit($permit->title_activity, 50) }}</strong>
-                                <small class="text-muted">Permit #{{ $permit->hashed_id }}</small>
+
                             </td>
                             <td class="small">
                                 <i class="mdi mdi-calendar-month text-info me-1"></i>{{ $dateDisplay }}<br>
@@ -197,7 +197,7 @@
                         <tr class="hover-upcoming">
                             <td>
                                 <strong class="d-block">{{ Str::limit($permit->title_activity, 50) }}</strong>
-                                <small class="text-muted">Permit #{{ $permit->hashed_id }}</small>
+
                             </td>
                             <td class="small">
                                 <i class="mdi mdi-calendar-month text-success me-1"></i>{{ $dateDisplay }}<br>
@@ -297,7 +297,7 @@
                             <tr class="opacity-75 hover-completed">
                                 <td>
                                     <strong class="d-block text-muted">{{ Str::limit($permit->title_activity, 50) }}</strong>
-                                    <small class="text-muted">Permit #{{ $permit->hashed_id }}</small>
+
                                 </td>
                                 <td class="small text-muted">
                                     <i class="mdi mdi-calendar-month me-1"></i>{{ $dateDisplay }}<br>

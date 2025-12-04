@@ -64,12 +64,7 @@
                 Uploaded Files ({{ $permit->reports->count() }})
             </h5>
 
-            <!-- HIDE "Add More Files" BUTTON WHEN SUBMITTED -->
-            @if(!$permit->is_completed)
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                    <i class="mdi mdi-plus"></i> Add Files
-                </button>
-            @endif
+            <!-- HIDE "Add More Files" BUTTON WHEN SUBMITTED -->  
         </div>
 
         <div class="card-body">

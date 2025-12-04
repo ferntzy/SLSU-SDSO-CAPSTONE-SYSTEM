@@ -34,6 +34,13 @@
 
 @section('content')
 @php
+  use Carbon\Carbon;
+   $now      = Carbon::now();
+    $today    = $now->format('Y-m-d');
+    $timeNow  = $now->format('H:i:s');
+    $hour = $now->hour;
+    $greeting = $hour < 12 ? 'Good Morning' : ($hour < 17 ? 'Good Afternoon' : 'Good Evening');
+
     $orgIds = Auth::user()->advisedOrganizations()->pluck('organization_id');
 
     // Total permits
@@ -114,31 +121,33 @@
     $approvalRate = $totalPermits > 0 ? round(($fullyApproved / $totalPermits) * 100, 1) : 0;
 @endphp
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    {{-- Page Header --}}
+<!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                <div>
-                    <h4 class="mb-1">
-                        👋 Welcome back, <span class="text-primary">{{ Auth::user()->profile->first_name ?? 'Adviser' }}</span>!
-                    </h4>
-                    <p class="mb-0">
-                        <span class="badge bg-label-primary">
-                            <i class="ti ti-users ti-xs me-1"></i>
-                            {{ Auth::user()->advisedOrganizations()->count() }} Organization(s)
-                        </span>
-                    </p>
-                </div>
-                <div>
-                    <a href="{{ route('adviser.permits.index') }}" class="btn btn-primary">
-                        <i class="ti ti-file-text me-1"></i>
-                        View All Permits
-                    </a>
+            <div class="card bg-primary text-white" style="background: linear-gradient(135deg, #696cff 0%, #8b8dff 100%);">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="text-white mb-2 fw-semibold">{{ $greeting }},  {{ Auth::user()->profile?->first_name }}</h4>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="badge bg-white text-primary">
+                                    <i class="mdi mdi-calendar-month me-1"></i>{{ $now->format('l, F j, Y') }}
+                                </span>
+                                <span class="badge bg-white text-primary">
+                                    <i class="mdi mdi-clock-outline me-1"></i>{{ $now->format('h:i A') }}
+                                </span>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <h5 class="text-white fw-semibold mb-1">Organization Adviser Review Dashboard</h5>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     {{-- Statistics Cards --}}
     <div class="row g-4 mb-4">
@@ -195,6 +204,7 @@
         <div class="col-xl-3 col-sm-6">
             <div class="card stat-card">
                 <div class="card-body">
+                   <a href="{{ route('adviser.history') }}" class="text-decoration-none">
                     <div class="d-flex justify-content-between">
                         <div class="card-info">
                             <p class="card-text mb-1">Approved by You</p>
@@ -209,6 +219,7 @@
                             </span>
                         </div>
                     </div>
+                  </a>
                 </div>
             </div>
         </div>

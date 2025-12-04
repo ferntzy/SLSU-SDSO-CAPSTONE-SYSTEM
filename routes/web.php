@@ -19,10 +19,11 @@ use App\Http\Controllers\SdsoheadController;
 use App\Http\Controllers\SasController;
 use App\Http\Controllers\Vp_sasController;
 use App\Http\Controllers\AdviserCalendarController;
-
+use App\Models\Permit;
 // ============================
 // AUTH ROUTES
 // ============================
+Route::post('/reports/store', [PermitTrackingController::class, 'storeReport'])->name('reports.store');
 
 Route::get('/', function () {
   return redirect('/login');
@@ -297,42 +298,74 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
 });
 
 
-
-// ============================
+// ==================================================================
 // FACULTY ADVISER ROUTES
-// ============================
-Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(function () {
+// ==================================================================
+Route::prefix('adviser')->name('adviser.')->middleware(['auth', 'role:Faculty_Adviser'])->group(function () {
 
-  Route::middleware(['auth', 'role:Faculty_Adviser'])->group(function () {
-    Route::get('/dashboard', function () {
-      return view('adviser.dashboard');
-    })->name('adviser.dashboard');
-  });
-
-  Route::get('/approvals', [FacultyAdviserController::class, 'approvals'])
-    ->name('adviser.approvals');
-
-  // View PDF securely (ensure hashed_id works)
-  Route::get('/adviser/permit/view/{hashed_id}', [FacultyAdviserController::class, 'viewPermitPdf'])
-    ->name('faculty.permit.view');
+    // Dashboard
+    Route::get('/dashboard', [FacultyAdviserController::class, 'dashboard'])->name('dashboard');
+    // Pending Approvals List
+    Route::get('/approvals', [FacultyAdviserController::class, 'approvals'])->name('approvals');
+    Route::get('/history', [FacultyAdviserController::class, 'approvalHistory'])->name('history');
 
 
-  // Approve & Reject
-  Route::post('/permit/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
-    ->name('faculty.approve');
-  Route::post('/permit/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
-    ->name('faculty.reject');
+    // ————————————————————————————————————————
+    // SECURE PERMIT REVIEW & ACTIONS (using hashed_id)
+    // ————————————————————————————————————————
+    Route::prefix('permit')->name('permit.')->group(function () {
+
+        // Full Review Page (Beautiful & Secure)
+    Route::get('/{hashedId}/review', [FacultyAdviserController::class, 'review'])->name('review');
+
+        // Approve Permit
+    Route::post('/{approval_id}/approve', [FacultyAdviserController::class, 'approve'])
+            ->name('approve');
+
+        // Reject Permit (with reason)
+    Route::post('/{approval_id}/reject', [FacultyAdviserController::class, 'reject'])
+            ->name('reject');
+
+        // View Generated PDF
+    Route::get('/{hashed_id}/pdf', [FacultyAdviserController::class, 'viewPermitPdf'])
+            ->name('pdf');
+    });
+
+    // Legacy model-binding route (if you still use it somewhere)
+    Route::get('/permits/{permit}', function (Permit $permit) {
+        return app(FacultyAdviserController::class)->show($permit);
+    })->name('permits.show');
+
+     // ————————————————————————————————————————
+    // Profile & Signature
+    // ————————————————————————————————————————
+     Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('uploadSignature');
+     Route::delete('/profile/signature', [UserController::class, 'removeSignature'])->name('removeSignature');
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', fn() => view('adviser.profile'))->name('index');
+        Route::put('/contact', [UserController::class, 'updateContact'])->name('updateContact');
 
 
+    });
 
+    // ————————————————————————————————————————
+    // Calendar
+    // ————————————————————————————————————————
+    Route::prefix('calendar')->name('calendar.')->group(function () {
+        Route::get('/', [AdviserCalendarController::class, 'index'])->name('index');
+        Route::get('/events', [AdviserCalendarController::class, 'getEvents'])->name('events');
+    });
 
-  //profiles
-  Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
-  Route::get('/profile', function () {
-    return view('adviser.profile');
-  })->name('user.profile');
-  Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('adviser.uploadSignature');
-  Route::delete('/profile/signature/', [UserController::class, 'removeSignature'])->name('adviser.removeSignature');
+    // ————————————————————————————————————————
+    // Notifications
+    // ————————————————————————————————————————
+    // Route::prefix('notifications')->name('notifications.')->group(function () {
+    //     Route::get('/', [NotificationController::class, 'index'])->name('index');
+    //     Route::get('/data', [PermitController::class, 'notificationsData'])->name('data');
+    //     Route::get('/unread', [NotificationController::class, 'unread'])->name('unread');
+    //     Route::post('/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read');
+    // });
 
 
 
@@ -346,7 +379,7 @@ Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(fu
   //notifications
 
   Route::get('/notifications/data', [App\Http\Controllers\Adviser\PermitController::class, 'notificationsData'])->name('adviser.notifications.data');
-  Route::get('/permits', [App\Http\Controllers\Adviser\PermitController::class, 'index'])->name('adviser.permits.index');
+  Route::get('/permits', [App\Http\Controllers\Adviser\PermitController::class, 'index'])->name('permits.index');
   Route::get('/notifications/unread', [App\Http\Controllers\Adviser\NotificationController::class, 'unread'])->name('notifications.unread');
   Route::get('/notifications', [App\Http\Controllers\Adviser\NotificationController::class, 'index'])->name('notifications');
   Route::post('/notifications/mark-read', [App\Http\Controllers\Adviser\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
@@ -362,30 +395,17 @@ Route::middleware(['auth', 'role:Faculty_Adviser'])->prefix('adviser')->group(fu
 // ============================
 // BARGO ROUTES
 // ============================
-Route::middleware(['auth', 'role:BARGO'])->group(function () {
+Route::middleware(['auth', 'role:BARGO'])->prefix('bargo')->group(function () {
+    Route::get('/dashboard', [BargoController::class, 'dashboard'])->name('bargo.dashboard');
+    Route::get('/pending', [BargoController::class, 'pending'])->name('bargo.pending');
+    Route::get('/approved', [BargoController::class, 'approved'])->name('bargo.approved');
+    Route::get('/rejected', [BargoController::class, 'rejected'])->name('bargo.rejected');
+    Route::get('/history', [BargoController::class, 'history'])->name('bargo.history');
 
-  // Dashboard
-  Route::get('/bargo/dashboard', [BargoController::class, 'dashboard'])->name('bargo.dashboard');
+    Route::get('/permit/{hashed_id}/pdf', [BargoController::class, 'viewPermitPdf'])->name('bargo.permit.pdf');
 
-  // View/Approve PDF
-  Route::get('/bargo/permit/{hashed_id}', [BargoController::class, 'viewPermitPdf'])->name('bargo.view.pdf');
-
-  // Approvals Page (this is the one missing)
-  Route::get('/bargo/approval', [BargoController::class, 'approvals'])->name('bargo.approvals');
-
-  // Approve / Reject actions
-  Route::post('/bargo/approve/{approval_id}', [BargoController::class, 'approve'])->name('bargo.approve');
-  Route::post('/bargo/reject/{approval_id}', [BargoController::class, 'reject'])->name('bargo.reject');
-
-  // Event monitoring pages
-  Route::get('/bargo/events/pending', [BargoController::class, 'pending'])->name('bargo.events.pending');
-  Route::get('/bargo/events/approved', [BargoController::class, 'approved'])->name('bargo.events.approved');
-  Route::get('/bargo/events/rejected', [BargoController::class, 'rejected'])->name('bargo.events.rejected');
-  Route::get('/bargo/events/history', [BargoController::class, 'history'])->name('bargo.events.history');
-
-
-  //Profile
-  Route::get('bargo/profile', [BargoController::class, 'show'])->name('bargo.profile');
+    Route::post('/approve/{approval_id}', [BargoController::class, 'approve'])->name('bargo.approve');
+    Route::post('/reject/{approval_id}', [BargoController::class, 'reject'])->name('bargo.reject');
 });
 
 

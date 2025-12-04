@@ -1,56 +1,62 @@
-@extends('layouts/contentNavbarLayout')
+{{-- resources/views/bargo/events/approved.blade.php --}}
+@extends('layouts.contentNavbarLayout')
 
-@section('title', 'BARGO - Approved Events')
+@section('title', 'Approved Permits - BARGO')
 
 @section('content')
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-success text-white" style="background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);">
+                <div class="card-body">
+                    <h4 class="text-white mb-0">
+                        <i class="mdi mdi-check-decagram me-2"></i>
+                        Permits Approved by BARGO
+                    </h4>
+                    <p class="mb-0 opacity-75">These have been forwarded to SDSO Head</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-
-  <div class="d-flex align-items-center mb-3">
-      <span class="text-secondary fs-5 fw-normal">Event Monitoring</span>
-      <span class="mx-2 text-secondary">|</span>
-      <i class="mdi mdi-home-outline text-secondary fs-6"></i>
-      <span class="mx-1 text-secondary" style="font-size: 10px;">&gt;</span>
-      <span class="ms-2 text-muted fs-6">Approved Events</span>
-  </div>
-  <div class="container py-4">
-
-    <h3 class="mb-4">Approved Event Permits (BARGO)</h3>
-
-    @if ($approvedReviews->isEmpty())
-      <div class="alert alert-info">No approved permits yet.</div>
-    @else
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Organization</th>
-              <th>Event Title</th>
-              <th>Date Approved</th>
-              <th>Status</th>
-              <th style="width: 130px;">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($approvedReviews as $review)
-              {{-- <tr>
-                <td>{{ $review->permit->organization->organization_name ?? 'N/A' }}</td>
-                <td>{{ $review->permit->event_title }}</td>
-                <td>{{ $review->approved_at ? $review->approved_at->format('F d, Y') : 'N/A' }}</td> --}}
-                <td>
-                  <span class="badge bg-success">Approved</span>
-                </td>
-                <td>
-                  <a href="{{ route('bargo.view.pdf', $review->permit->hashed_id) }}" target="_blank"
-                    class="btn btn-sm btn-primary">
-                    View PDF
-                  </a>
-                </td>
-              </tr>
-            @endforeach
-          </tbody>
-        </table>
-      </div>
-    @endif
-
-  </div>
+    <div class="card">
+        <div class="card-body">
+            @if($approvedReviews->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Organization</th>
+                                <th>Event</th>
+                                <th>Approved On</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($approvedReviews as $flow)
+                                @php $permit = $flow->permit; @endphp
+                                <tr>
+                                    <td><strong>{{ $permit->organization->acronym }}</strong></td>
+                                    <td>{{ Str::limit($permit->title_activity, 50) }}</td>
+                                    <td>{{ $flow->approved_at?->format('M d, Y h:i A') }}</td>
+                                    <td>
+                                        <a href="{{ route('bargo.permit.pdf', $permit->hashed_id) }}" target="_blank"
+                                           class="btn btn-sm btn-success">
+                                            <i class="mdi mdi-file-pdf-box"></i> View Signed PDF
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <i class="mdi mdi-thumb-up-outline text-success" style="font-size: 4rem;"></i>
+                    <h5>No approved permits yet</h5>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
 @endsection

@@ -6,7 +6,8 @@
     $now      = Carbon::now();
     $today    = $now->format('Y-m-d');
     $timeNow  = $now->format('H:i:s');
-
+    $hour = $now->hour;
+    $greeting = $hour < 12 ? 'Good Morning' : ($hour < 17 ? 'Good Afternoon' : 'Good Evening');
     // YOUR ORIGINAL DATA LOGIC — STILL UNTOUCHED
     $container = 'container-xxl';
 
@@ -14,11 +15,7 @@
     $successfulEvents  = $successfulEvents ?? collect();
     $canceledEvents    = $canceledEvents ?? collect();
 
-    $fullName =
-        Auth::user()->profile?->first_name . ' ' .
-        (Auth::user()->profile?->middle_name ? strtoupper(substr(Auth::user()->profile->middle_name, 0, 1)) . '. ' : '') .
-        Auth::user()->profile?->last_name . ' ' .
-        (Auth::user()->profile?->suffix ?? '');
+
 
     $totalPermits   = $pendingPermits->count() + $approvedPermits->count() + $rejectedPermits->count();
     $approvalRate   = $totalPermits > 0 ? round(($approvedPermits->count() / $totalPermits) * 100, 1) : 0;
@@ -99,15 +96,29 @@
 @section('content')
 <div class="{{ $container }} flex-grow-1 container-p-y">
 
-    {{-- Welcome Header --}}
-    <div class="row mb-5">
+    <!-- Header Section -->
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                <div>
-                    <h4 class="mb-1">
-                        Hello, <span class="text-primary">{{ trim($fullName) }}</span>!
-                    </h4>
-                    <p class="mb-0 text-muted">Track your permit applications and event progress</p>
+            <div class="card bg-primary text-white" style="background: linear-gradient(135deg, #696cff 0%, #8b8dff 100%);">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="text-white mb-2 fw-semibold">{{ $greeting }}, {{ Auth::user()->profile?->first_name }}</h4>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="badge bg-white text-primary">
+                                    <i class="mdi mdi-calendar-month me-1"></i>{{ $now->format('l, F j, Y') }}
+                                </span>
+                                <span class="badge bg-white text-primary">
+                                    <i class="mdi mdi-clock-outline me-1"></i>{{ $now->format('h:i A') }}
+                                </span>
+                            </div>
+
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <h5 class="text-white fw-semibold mb-1">STUDENT Dashboard</h5>
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

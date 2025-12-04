@@ -2,198 +2,206 @@
 
 namespace App\Http\Controllers;
 
-use setasign\Fpdi\Fpdi;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\EventApprovalFlow;
 use App\Models\Permit;
-use App\Models\Organization;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use setasign\Fpdi\Fpdi;
+use Illuminate\Support\Facades\Storage;
 
 class BargoController extends Controller
 {
-  public function show()
+    public function dashboard()
     {
-        // User must be logged in
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
+        $pendingReviews = EventApprovalFlow::where('approver_role', 'BARGO')
+            ->where('status', 'pending')
+            ->count();
 
-        return view('bargo.profile');
+        $approved = EventApprovalFlow::where('approver_role', 'BARGO')
+            ->where('status', 'approved')
+            ->count();
+
+        $rejected = EventApprovalFlow::where('approver_role', 'BARGO')
+            ->where('status', 'rejected')
+            ->count();
+
+        return view('bargo.dashboard', compact('pendingReviews', 'approved', 'rejected'));
     }
 
+    public function pending()
+    {
+        $pendingReviews = EventApprovalFlow::with(['permit.organization'])
+            ->where('approver_role', 'BARGO')
+            ->where('status', 'pending')
+            ->latest('created_at')
+            ->get();
 
-  public function dashboard()
-  {
-    $bargoId = Auth::user()->user_id;
-
-    // Get all permits where BARGO is the next approver
-    $pendingReviews = EventApprovalFlow::where('approver_role', 'BARGO')
-      ->where('status', 'pending')
-      ->count();
-
-    $approved = EventApprovalFlow::where('approver_role', 'BARGO')
-      ->where('status', 'approved')
-      ->count();
-
-    $rejected = EventApprovalFlow::where('approver_role', 'BARGO')
-      ->where('status', 'rejected')
-      ->count();
-
-    return view('bargo.dashboard', compact('pendingReviews', 'approved', 'rejected'));
-  }
-  public function pending()
-  {
-    $pendingReviews = EventApprovalFlow::with(['permit', 'permit.organization'])
-      ->where('approver_role', 'BARGO')
-      ->where('status', 'pending')
-      ->orderBy('created_at', 'asc')
-      ->get();
-
-    return view('bargo.events.pending', compact('pendingReviews'));
-  }
-  public function approvals()
-  {
-    $pendingPermits = EventApprovalFlow::with(['permit.organization'])
-      ->where('approver_role', 'BARGO')
-      ->where('status', 'pending')
-      ->orderBy('created_at', 'desc')
-      ->get();
-
-    return view('bargo.approvals', compact('pendingPermits'));
-  }
-
-  public function viewPermitPdf($hashed_id)
-  {
-    $permit = Permit::where('hashed_id', $hashed_id)->first();
-
-    if (!$permit || !$permit->pdf_data) {
-      abort(404, 'PDF not available.');
+        return view('bargo.events.pending', compact('pendingReviews'));
     }
 
-    return response($permit->pdf_data)
-      ->header('Content-Type', 'application/pdf')
-      ->header('Content-Disposition', 'inline; filename="permit.pdf"');
-  }
+    public function approved()
+    {
+        $approvedReviews = EventApprovalFlow::with(['permit.organization'])
+            ->where('approver_role', 'BARGO')
+            ->where('status', 'approved')
+            ->latest('approved_at')
+            ->get();
+
+        return view('bargo.events.approved', compact('approvedReviews'));
+    }
 
     public function rejected()
-  {
-    $pendingPermits = EventApprovalFlow::with(['permit.organization'])
-      ->where('approver_role', 'BARGO')
-      ->where('status', 'pending')
-      ->orderBy('created_at', 'desc')
-      ->get();
+    {
+        $rejectedReviews = EventApprovalFlow::with(['permit.organization'])
+            ->where('approver_role', 'BARGO')
+            ->where('status', 'rejected')
+            ->latest('updated_at')
+            ->get();
 
-    return view('bargo.events.rejected', compact('pendingPermits'));
-  }
-
-
-
-
-
-
-
-  public function approve(Request $request, $approval_id)
-  {
-    $flow = EventApprovalFlow::findOrFail($approval_id);
-    $permit = $flow->permit;
-
-    if (!$permit->pdf_data) {
-      return back()->with('error', 'No PDF found.');
+        return view('bargo.events.rejected', compact('rejectedReviews'));
     }
 
-    $bargoName = strtoupper(Auth::user()->name ?? 'UNKNOWN');
+    public function history()
+    {
+        $historyReviews = EventApprovalFlow::with(['permit.organization'])
+            ->where('approver_role', 'BARGO')
+            ->whereIn('status', ['approved', 'rejected'])
+            ->latest('updated_at')
+            ->get();
 
-    $tempDir = storage_path('app/temp');
-    if (!is_dir($tempDir)) mkdir($tempDir, 0755, true);
-
-    $tempPdfPath = $tempDir . "/temp_permit_{$permit->hashed_id}.pdf";
-    file_put_contents($tempPdfPath, $permit->pdf_data);
-
-    $pdf = new FPDI();
-    $pdf->AddPage();
-    $pdf->setSourceFile($tempPdfPath);
-    $templateId = $pdf->importPage(1);
-    $pdf->useTemplate($templateId, 0, 0, 210);
-
-    // Signature Logic
-    $signaturePath = null;
-    if ($request->hasFile('signature_upload')) {
-      $signaturePath = $request->file('signature_upload')->getRealPath();
-    } elseif ($request->filled('signature_data')) {
-      $imgData = base64_decode(str_replace(['data:image/png;base64,', ' '], ['', '+'], $request->signature_data));
-      $signaturePath = $tempDir . "/signature_bargo_{$approval_id}.png";
-      file_put_contents($signaturePath, $imgData);
+        return view('bargo.events.history', compact('historyReviews'));
     }
 
-    $centerX = 100;
-    $signatureY = 155;
-    $nameY = 164;
+    public function viewPermitPdf($hashed_id)
+    {
+        $permit = Permit::where('hashed_id', $hashed_id)->firstOrFail();
 
-    if ($signaturePath && file_exists($signaturePath)) {
-      $sigWidth = 40;
-      list($ow, $oh) = getimagesize($signaturePath);
-      $sigHeight = ($sigWidth / $ow) * $oh;
-      $sigX = $centerX - ($sigWidth / 2);
-      $pdf->Image($signaturePath, $sigX, $signatureY, $sigWidth, $sigHeight);
+        if (!$permit->pdf_data) {
+            abort(404, 'PDF not generated yet.');
+        }
+
+        return response($permit->pdf_data, 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="Permit_' . $hashed_id . '.pdf"');
     }
 
-    $pdf->SetFont('Helvetica', '', 10);
-    $textWidth = $pdf->GetStringWidth($bargoName);
-    $pdf->SetXY($centerX - ($textWidth / 2), $nameY);
-    $pdf->Write(0, $bargoName);
+    // BARGO APPROVE – with digital signature (upload or draw)
+    public function approve(Request $request, $approval_id)
+    {
+        $flow = EventApprovalFlow::findOrFail($approval_id);
 
-    $outputPath = $tempDir . "/approved_bargo_{$permit->hashed_id}.pdf";
-    $pdf->Output($outputPath, 'F');
+        // Security: Only BARGO role can approve BARGO step
+        if ($flow->approver_role !== 'BARGO' || $flow->status !== 'pending') {
+            abort(403);
+        }
 
-    // Update Database
-    $flow->update([
-      'status' => 'approved',
-      'approver_id' => Auth::user()->user_id,
-      'approved_at' => now(),
-    ]);
+        $permit = $flow->permit;
+        if (!$permit || !$permit->pdf_data) {
+            return back()->with('error', 'PDF not found.');
+        }
 
-    // Save new PDF to permit
-    $permit->update([
-      'pdf_data' => file_get_contents($outputPath),
-    ]);
+        // Get BARGO full name
+        $bargoName = strtoupper(trim(Auth::user()->name ?? 'BARGO OFFICER'));
 
-    return back()->with('success', 'Permit approved and signed by BARGO.');
-  }
+        // Prepare temp directory
+        $tempDir = storage_path('app/temp');
+        if (!is_dir($tempDir)) mkdir($tempDir, 0755, true);
 
-  public function approved()
-  {
-    $approvedReviews = EventApprovalFlow::with(['permit', 'permit.organization'])
-      ->where('approver_role', 'BARGO')
-      ->where('status', 'approved')
-      ->orderBy('approved_at', 'desc')
-      ->get();
+        $tempPdfPath = $tempDir . "/permit_{$permit->hashed_id}.pdf";
+        file_put_contents($tempPdfPath, $permit->pdf_data);
 
-    return view('bargo.events.approved', compact('approvedReviews'));
-  }
+        $pdf = new Fpdi();
+        $pageCount = $pdf->setSourceFile($tempPdfPath);
 
-  public function history()
-  {
-    $historyReviews = EventApprovalFlow::with(['permit', 'permit.organization'])
-      ->where('approver_role', 'BARGO')
-      ->whereIn('status', ['approved', 'rejected'])
-      ->orderBy('updated_at', 'desc')
-      ->get();
+        $signaturePath = null;
 
-    return view('bargo.events.history', compact('historyReviews'));
-  }
+        // Option 1: Uploaded signature
+        if ($request->hasFile('signature_upload') && $request->file('signature_upload')->isValid()) {
+            $signaturePath = $request->file('signature_upload')->getRealPath();
+        }
+        // Option 2: Drawn signature (canvas)
+        elseif ($request->filled('signature_data')) {
+            $imgData = preg_replace('#^data:image/\w+;base64,#i', '', $request->signature_data);
+            $imgData = str_replace(' ', '+', $imgData);
+            $data = base64_decode($imgData);
+            $signaturePath = $tempDir . "/bargo_sig_{$approval_id}.png";
+            file_put_contents($signaturePath, $data);
+        }
+        // Option 3: Use saved signature from profile (optional)
+        elseif (Auth::user()->signature && Storage::disk('public')->exists(Auth::user()->signature)) {
+            $signaturePath = storage_path('app/public/' . Auth::user()->signature);
+        }
 
-  public function reject(Request $request, $approval_id)
-  {
-    $request->validate(['comments' => 'required|string']);
+        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+            $tplIdx = $pdf->importPage($pageNo);
+            $size = $pdf->getTemplateSize($tplIdx);
+            $pdf->AddPage($size['orientation'], $size['width'], $size['height']);
+            $pdf->useTemplate($tplIdx);
 
-    $flow = EventApprovalFlow::findOrFail($approval_id);
-    $flow->update([
-      'status' => 'rejected',
-      'comments' => $request->comments,
-      'approver_id' => Auth::user()->user_id,
-      'approved_at' => now(),
-    ]);
+            // Only sign on first page (adjust Y position as needed)
+            if ($pageNo === 1 && $signaturePath && file_exists($signaturePath)) {
+                $sigX = 80;      // Adjust X position
+                $sigY = 150;      // Adjust Y position for BARGO signature
+                $sigWidth = 50;
+                list($origW, $origH) = getimagesize($signaturePath);
+                $sigHeight = ($sigWidth / $origW) * $origH;
 
-    return back()->with('error', 'Permit rejected.');
-  }
+                $pdf->Image($signaturePath, $sigX, $sigY, $sigWidth, $sigHeight);
+
+                // Print name below signature
+                $pdf->SetFont('Helvetica', 'B', 10);
+                $pdf->SetXY($sigX - 5, $sigY + $sigHeight + 3);
+                $pdf->Cell($sigWidth + 10, 8, $bargoName, 0, 1, 'C');
+            }
+        }
+
+        // Save signed PDF
+        $outputPath = $tempDir . "/bargo_signed_{$permit->hashed_id}.pdf";
+        $pdf->Output($outputPath, 'F');
+
+        // Update permit with new signed PDF
+        $permit->pdf_data = file_get_contents($outputPath);
+        $permit->save();
+
+        // Update approval flow
+        $flow->update([
+            'status' => 'approved',
+            'approver_id' => Auth::id(),
+            'approver_name' => $bargoName,
+            'approved_at' => now(),
+        ]);
+
+        // Cleanup
+        @unlink($tempPdfPath);
+        @unlink($outputPath);
+        if ($signaturePath && str_contains($signaturePath, 'bargo_sig_')) {
+            @unlink($signaturePath);
+        }
+
+        return back()->with('success', 'Permit successfully approved and signed by BARGO.');
+    }
+
+    // BARGO REJECT
+    public function reject(Request $request, $approval_id)
+    {
+        $request->validate([
+            'comments' => 'required|string|max:1000'
+        ]);
+
+        $flow = EventApprovalFlow::findOrFail($approval_id);
+
+        if ($flow->approver_role !== 'BARGO' || $flow->status !== 'pending') {
+            abort(403);
+        }
+
+        $flow->update([
+            'status' => 'rejected',
+            'comments' => $request->comments,
+            'approver_id' => Auth::id(),
+            'approver_name' => strtoupper(Auth::user()->name ?? 'BARGO'),
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('error', 'Permit has been rejected.');
+    }
 }

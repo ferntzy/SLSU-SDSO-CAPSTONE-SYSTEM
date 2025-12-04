@@ -33,7 +33,7 @@ class CalendarController extends Controller
           'permits.date_end',
           'permits.time_start',
           'permits.time_end',
-          'permits.venue as venue_raw',
+          'permits.venue',
           'organizations.organization_name',
           'venues.venue_name'
         )
@@ -51,7 +51,7 @@ class CalendarController extends Controller
         }
 
         // Determine venue name
-        $venueName = $permit->type === 'In-Campus' ? $permit->venue_name ?? 'Campus Venue' : $permit->venue_raw;
+        $venueName = $permit->venue;
 
         // Build event title - SHORTENED for better space usage
         $eventTitle = $permit->title_activity;
@@ -201,7 +201,58 @@ class CalendarController extends Controller
       }
 
       // Determine venue
-      $venue = $request->type === 'In-Campus' ? $request->venue_id : $request->venue_other;
+      $venueToCheck = $request->type === 'In-Campus' ? $request->venue_id : $request->venue_other;
+
+      $proposedStart = Carbon::parse($request->date_start . ' ' . ($request->time_start ?? '00:00'));
+      $proposedEnd   = Carbon::parse(
+        ($request->date_end ?? $request->date_start) . ' ' . ($request->time_end ?? '23:59')
+      );
+
+
+      // Check for conflicts
+      $conflicting = DB::table('permits')
+    ->join('event_approval_flow', 'permits.permit_id', '=', 'event_approval_flow.permit_id')
+    ->where(function ($query) use ($venueToCheck, $request) {
+        if ($request->type === 'In-Campus') {
+            $query->where('permits.venue', $venueToCheck)
+                  ->where('permits.type', 'In-Campus');
+        } else {
+            $query->where('permits.venue', $venueToCheck)
+                  ->where('permits.type', 'Off-Campus');
+        }
+    })
+    // Only consider permits that are FULLY APPROVED
+    ->whereIn('permits.permit_id', function ($q) {
+        $q->select('permit_id')
+          ->from('event_approval_flow')
+          ->groupBy('permit_id')
+          ->havingRaw('COUNT(CASE WHEN status = "rejected" THEN 1 END) = 0') // No rejections
+          ->havingRaw('COUNT(CASE WHEN status = "approved" THEN 1 END) = COUNT(*)'); // All approved
+    })
+    ->select('permits.*')
+    ->get()
+    ->filter(function ($permit) use ($proposedStart, $proposedEnd) {
+        $existingStart = Carbon::parse($permit->date_start . ' ' . ($permit->time_start ?? '00:00'));
+        $existingEnd   = Carbon::parse(
+            ($permit->date_end ?? $permit->date_start) . ' ' . ($permit->time_end ?? '23:59')
+        );
+
+        // True if the two events overlap at all
+        return $proposedStart < $existingEnd && $proposedEnd > $existingStart;
+    });
+
+      if ($conflicting->isNotEmpty()) {
+    $conflictList = $conflicting->map(function ($p) {
+        return "- {$p->title_activity} ({$p->date_start}"
+             . ($p->date_end && $p->date_end != $p->date_start ? " to {$p->date_end}" : "")
+             . ", {$p->time_start} - {$p->time_end})";
+    })->implode("\n");
+
+    return response()->json([
+        'success' => false,
+        'message' => "Schedule conflict detected with the following approved event(s):\n\n{$conflictList}\n\nPlease choose a different date, time, or venue.",
+    ], 422);
+}
 
       // Handle signature
       $signatureData = null;
@@ -265,5 +316,14 @@ class CalendarController extends Controller
         500
       );
     }
+  }
+  private function isPermitFullyApproved($permitId)
+  {
+    return DB::table('event_approval_flow')
+      ->where('permit_id', $permitId)
+      ->where('status', '!=', 'approved')
+      ->orWhereNull('status')
+      ->count() === 0
+      && DB::table('event_approval_flow')->where('permit_id', $permitId)->where('status', 'rejected')->count() === 0;
   }
 }

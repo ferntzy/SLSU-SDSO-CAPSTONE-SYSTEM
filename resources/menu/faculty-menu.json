@@ -15,18 +15,15 @@
       "icon": "menu-icon tf-icons mdi mdi-calendar-month-outline",
       "slug": "adviser-calendar"
     },
+
     {
+      "menuHeader": "Events"
+    },
+     {
       "url": "/adviser/approvals",
       "name": "Event Approvals",
+      "icon": "menu-icon tf-icons mdi mdi-calendar-check",
       "slug": "adviser-approvals"
-    },
-    {
-      "menuHeader": "Reports"
-    },
-    {
-      "url": "/adviser/reports",
-      "name": "My Reports",
-      "slug": "adviser-reports"
     },
     {
       "menuHeader": "Account"

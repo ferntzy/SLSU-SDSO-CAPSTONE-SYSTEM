@@ -19,26 +19,26 @@
       "menuHeader": "Event Monitoring"
     },
     {
-      "url": "/bargo/events/pending",
+      "url": "/bargo/pending",
       "name": "Pending Approvals",
       "icon": "menu-icon tf-icons mdi mdi-receipt-clock-outline",
       "slug": "bargo-events-pending"
     },
     {
-      "url": "/bargo/events/approved",
+      "url": "/bargo/approved",
       "name": "Approved Events",
       "icon": "menu-icon tf-icons mdi mdi-file-check",
       "slug": "bargo-events-approved"
     },
 
        {
-      "url": "/bargo/events/rejected",
+      "url": "/bargo/rejected",
       "name": "Rejected Events",
       "icon": "menu-icon tf-icons mdi mdi-file-document-remove-outline",
       "slug": "bargo-events-rejected"
     },
     {
-      "url": "/bargo/events/history",
+      "url": "/bargo/history",
       "name": "Event History",
       "icon": "menu-icon tf-icons mdi mdi-history",
       "slug": "bargo-events-history"

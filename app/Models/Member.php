@@ -27,7 +27,10 @@ class Member extends Model
     {
       return $this->belongsTo(UserProfile::class, 'profile_id', 'profile_id');
     }
-
+    public function userProfile()
+{
+    return $this->belongsTo(UserProfile::class, 'profile_id');
+}
    public function officer()
     {
         return $this->hasOne(Officer::class, 'members_id', 'member_id');

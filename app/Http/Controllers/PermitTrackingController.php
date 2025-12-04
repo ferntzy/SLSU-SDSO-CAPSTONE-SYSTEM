@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Report;          // ← add this too
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 class PermitTrackingController extends Controller
 {
   /**
@@ -248,84 +249,99 @@ class PermitTrackingController extends Controller
 
     return view('student.page.successful', compact('successfulEvents'));
   }
-  public function storeReport(Request $request)
-  {
+public function storeReport(Request $request)
+{
     $request->validate([
-      'event_id' => 'required|exists:permits,permit_id',
-      'document_type' => 'required|string|max:100',
-      'title' => 'nullable|string|max:255',
-      'description' => 'nullable|string',
-      'documents.*' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:10240'
+        'permit_id'     => 'required|integer|exists:permits,permit_id',
+        'event_id'      => 'nullable|integer',
+        'document_type' => 'required|in:minutes,photos,report,certificate,other',
+        'title'         => 'nullable|string|max:255',
+        'description'   => 'nullable|string',
+        'documents.*'   => 'required|file|mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx|max:20480',
     ]);
 
-    $permit = Permit::findOrFail($request->event_id);
+    // Verify ownership
+    $permit = \App\Models\Permit::where('permit_id', $request->permit_id)
+        ->whereIn('organization_id', function($q) {
+            $q->select('off.organization_id')
+              ->from('officers as off')
+              ->join('members as m', 'off.members_id', '=', 'm.member_id')
+              ->join('user_profiles as up', 'm.profile_id', '=', 'up.profile_id')
+              ->join('users as u', 'up.profile_id', '=', 'u.profile_id')
+              ->where('u.user_id', auth()->id());
+        })
+        ->firstOrFail();
 
-    if ($permit->organization_id !== $this->getUserOrganizationId()) {
-      abort(403);
+    if ($permit->is_completed) {
+        return back()->with('swal', [
+            'title' => 'Error',
+            'text'  => 'This event is already submitted.',
+            'icon'  => 'error'
+        ]);
     }
 
     foreach ($request->file('documents') as $file) {
-      $hashedName = $file->hashName(); // e.g., abc123xyz.jpg
-      $path = $file->storeAs('reports/' . $permit->permit_id, $hashedName, 'public');
+        $folder = "permits/offcampus/{$permit->permit_id}";
+        $name   = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $ext    = $file->getClientOriginalExtension();
+        $filename = \Str::slug($name) . '_' . time() . \Str::random(6) . '.' . $ext;
 
-      Report::create([
-        'event_id' => $permit->permit_id,
-        'document_type' => $request->document_type,
-        'title' => $request->title,
-        'description' => $request->description,
-        'document_url' => $path,
-        'original_filename' => $file->getClientOriginalName(),
-        'mime_type' => $file->getMimeType(),
-        'file_size' => $file->getSize(),
-      ]);
+        $path = $file->storeAs($folder, $filename, 'public');
 
-
-      return redirect()
-        ->route('student.reports.show', $permit->permit_id)
-        ->with('success', 'Files uploaded successfully! View them below.');
+        Report::create([
+            'permit_id'         => $permit->permit_id,        // ← NOW SAVED!
+            'event_id'          => $request->event_id ?? null,
+            'document_type'     => $request->document_type,
+            'title'             => $request->title ?? $file->getClientOriginalName(),
+            'description'       => $request->description,
+            'document_url'      => $path,
+            'original_filename' => $file->getClientOriginalName(),
+            'mime_type'         => $file->getClientMimeType(),
+            'file_size'         => $file->getSize(),
+        ]);
     }
 
-    return back()->with('success', 'Files uploaded successfully!');
-  }
-  public function ongoingPage()
+    return back()->with('swal', [
+        'title' => 'Success!',
+        'text'  => 'Files uploaded successfully!',
+        'icon'  => 'success',
+        'timer' => 2500
+    ]);
+}
+  public function submissionsHistory()
 {
+    $this->sharePermitCounts(); // assuming this shares $pendingPermits, etc.
+
+    return view('student.page.submissions-history');
+}
+  public function ongoingPage()
+  {
     $this->sharePermitCounts();
 
-    $now = now();                    // e.g., 2025-12-03 18:45:22
-    $today = $now->toDateString();   // 2025-12-03
-    $timeNow = $now->format('H:i:s'); // 18:45:22
+    $now = now();
 
     $ongoingEvents = $this->getOrganizationPermitsQuery()
-        ->whereNotNull('date_start')
-        ->where(function ($query) use ($today, $now) {
-            // The event is happening today or started in the past and ends today or later
-            $query->where('date_start', '<=', $today)
-                  ->where(function ($q) use ($today) {
-                      $q->whereNull('date_end')
-                        ->orWhere('date_end', '>=', $today);
-                  });
-        })
-        ->where(function ($query) use ($timeNow) {
-            // Critical: Current time must be between time_start and time_end
-            $query->whereRaw(
-                "CAST(? AS TIME) BETWEEN
-                 COALESCE(TIME(time_start), '00:00:00') AND
-                 COALESCE(TIME(time_end), '23:59:59')",
-                [$timeNow]
-            );
-        })
-        ->whereHas('approvalFlow', fn($q) =>
-            $q->where('approver_role', 'VP_SAS')->where('status', 'approved')
-        )
-        ->whereDoesntHave('approvalFlow', fn($q) =>
-            $q->whereIn('status', ['pending', 'rejected'])
-        )
-        ->latest('date_start')
-        ->latest('time_start')
-        ->paginate(15);
+      ->whereNotNull('date_start')
+      ->where('date_start', '<=', $now)
+      ->where(function ($q) use ($now) {
+        $q->whereNull('date_end')
+          ->orWhere('date_end', '>=', $now->startOfDay());
+      })
+      ->whereHas(
+        'approvalFlow',
+        fn($q) =>
+        $q->where('approver_role', 'VP_SAS')->where('status', 'approved')
+      )
+      ->whereDoesntHave(
+        'approvalFlow',
+        fn($q) =>
+        $q->whereIn('status', ['pending', 'rejected'])
+      )
+      ->latest('date_start')
+      ->paginate(15);
 
     return view('student.page.ongoing', compact('ongoingEvents'));
-}
+  }
   public function showReports($hashed_id)
   {
     try {
@@ -411,10 +427,11 @@ class PermitTrackingController extends Controller
       'timer' => 3000
     ]);
   }
-public function submissionsHistory()
-{
-    $this->sharePermitCounts(); // assuming this shares $pendingPermits, etc.
+  public function download($hashed_id)
+  {
+    $permit = Permit::where('hashed_id', $hashed_id)->firstOrFail();
 
-    return view('student.page.submissions-history');
-}
+    // Make sure your view() method returns proper PDF headers
+    return $this->view($permit->hashed_id); // or however you generate PDF
+  }
 }

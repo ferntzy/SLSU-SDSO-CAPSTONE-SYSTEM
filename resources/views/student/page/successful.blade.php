@@ -39,7 +39,7 @@
                                 <div class="d-flex align-items-center">
                                     <div>
                                         <div class="fw-semibold">{{ Str::limit($permit->title_activity, 40) }}</div>
-                                        <small class="text-muted">Permit #{{ $permit->permit_id }}</small>
+
                                     </div>
                                 </div>
                             </td>
@@ -57,10 +57,10 @@
                             <td class="text-muted">{{ $permit->participants ?? '—' }}</td>
                             <td>
                                 @if($permit->reports->count())
-                                    <a href="{{ route('student.reports.show',Crypt::encryptString($permit->permit_id)) }}"
+                                    <a href="{{ route('student.reports.show', Crypt::encryptString($permit->permit_id)) }}"
                                        class="btn btn-sm btn-outline-success">
                                         <i class="menu-icon tf-icons ti ti-files"></i>
-                                     {{ $permit->reports->count() }} file{{ $permit->reports->count() > 1 ? 's' : '' }}
+                                        {{ $permit->reports->count() }} file{{ $permit->reports->count() > 1 ? 's' : '' }}
                                     </a>
                                 @else
                                     <span class="text-muted">No files</span>
@@ -83,15 +83,14 @@
                                         <i class="mdi mdi-dots-vertical"></i>
                                     </button>
                                     <div class="dropdown-menu">
-
                                         @if(!$permit->is_completed)
-                                        <a class="dropdown-item" href="javascript:void(0);"
-                                           data-bs-toggle="modal"
-                                           data-bs-target="#uploadModal{{ $permit->permit_id }}">
-                                            <i class="mdi mdi-cloud-upload-outline me-1"></i> Upload Files
-                                        </a>
+                                            <a class="dropdown-item" href="javascript:void(0);"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#uploadModal{{ $permit->permit_id }}">
+                                                <i class="mdi mdi-cloud-upload-outline me-1"></i> Upload Files
+                                            </a>
                                         @endif
-                                        <!-- Submit to SDSO (only if files exist & not submitted) -->
+
                                         @if($permit->reports->count() > 0 && !$permit->is_completed)
                                             <a class="dropdown-item text-success" href="javascript:void(0);"
                                                data-bs-toggle="modal"
@@ -100,7 +99,6 @@
                                             </a>
                                         @endif
 
-                                        <!-- View Files -->
                                         @if($permit->reports->count())
                                             <a class="dropdown-item" href="{{ route('student.reports.show', Crypt::encryptString($permit->permit_id)) }}">
                                                 <i class="mdi mdi-eye-outline me-1"></i> View Files
@@ -111,50 +109,61 @@
                             </td>
                         </tr>
 
-                        {{-- Upload Modal --}}
-                        <div class="modal fade" id="uploadModal{{ $permit->permit_id }}">
+                        {{-- ONLY ONE UPLOAD MODAL - FIXED ID & FULLY WORKING --}}
+                        <div class="modal fade" id="uploadModal{{ $permit->permit_id }}" tabindex="-1">
                             <div class="modal-dialog modal-lg">
                                 <form action="{{ route('reports.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
-                                    <input type="hidden" name="event_id" value="{{ $permit->permit_id }}">
+                                   <input type="hidden" name="permit_id" value="{{ $permit->permit_id }}">
+                                   <input type="hidden" name="event_id" value="{{ $permit->permit_id }}">
+
                                     <div class="modal-content">
-                                        <div class="modal-header">
+                                        <div class="modal-header bg-primary text-white">
                                             <h5 class="modal-title">
                                                 <i class="mdi mdi-cloud-upload-outline"></i>
-                                                Upload Documentation
+                                                Upload Documentation – {{ Str::limit($permit->title_activity, 30) }}
                                             </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                         </div>
+
                                         <div class="modal-body">
-                                            <div class="alert alert-info">
+                                            <div class="alert alert-info small">
                                                 <i class="mdi mdi-information-outline"></i>
-                                                Upload minutes, photos, reports, certificates, etc.
+                                                Upload minutes, photos, reports, certificates, etc. Multiple files allowed.
                                             </div>
+
                                             <div class="row g-3">
-                                                <div class="col-12">
-                                                    <label>Category</label>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Category <span class="text-danger">*</span></label>
                                                     <select name="document_type" class="form-select" required>
-                                                        <option value="minutes">Minutes of the Meeting</option>
+                                                        <option value="">-- Select Type --</option>
+                                                        <option value="minutes">Minutes of Meeting</option>
                                                         <option value="photos">Event Photos</option>
                                                         <option value="report">Post-Event Report</option>
                                                         <option value="certificate">Certificate</option>
                                                         <option value="other">Other Document</option>
                                                     </select>
                                                 </div>
+
                                                 <div class="col-md-6">
-                                                    <label>Title (Optional)</label>
-                                                    <input type="text" name="title" class="form-control">
+                                                    <label class="form-label">Title (Optional)</label>
+                                                    <input type="text" name="title" class="form-control" placeholder="e.g. Attendance Sheet">
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <label>Description</label>
-                                                    <textarea name="description" rows="2" class="form-control"></textarea>
-                                                </div>
+
                                                 <div class="col-12">
-                                                    <label>Select Files</label>
-                                                    <input type="file" name="documents[]" multiple required class="form-control">
+                                                    <label class="form-label">Description (Optional)</label>
+                                                    <textarea name="description" rows="3" class="form-control" placeholder="Add notes here..."></textarea>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label">Select Files <span class="text-danger">*</span></label>
+                                                    <input type="file" name="documents[]" multiple required class="form-control"
+                                                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+                                                    <small class="text-muted">Max 15MB per file • Multiple files allowed</small>
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
                                             <button type="submit" class="btn btn-primary">
@@ -167,93 +176,74 @@
                         </div>
 
                         {{-- Submit to SDSO Modal --}}
-                        <!-- Submit to SDSO Modal -->
-<!-- Submit to SDSO Modal -->
-<!-- Submit to SDSO Modal – IRREVERSIBLE WARNING -->
-<div class="modal fade" id="submitModal{{ $permit->permit_id }}" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <form action="{{ route('student.permit.submit', Crypt::encryptString($permit->permit_id)) }}" method="POST">
-            @csrf
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-body text-center py-5 px-4">
-                    <!-- Big Warning Icon -->
-                    <div class="mb-4">
-                        <i class="mdi mdi-alert-circle-outline text-warning" style="font-size: 5rem;"></i>
-                    </div>
+                        <div class="modal fade" id="submitModal{{ $permit->permit_id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <form action="{{ route('student.permit.submit', Crypt::encryptString($permit->permit_id)) }}" method="POST">
+                                    @csrf
+                                    <div class="modal-content border-0 shadow-lg">
+                                        <div class="modal-body text-center py-5">
+                                            <i class="mdi mdi-alert-circle-outline text-warning mb-4" style="font-size: 4.5rem;"></i>
+                                            <h4 class="fw-bold">Final Submission</h4>
+                                            <p class="text-muted">You are about to submit documentation for:</p>
+                                            <h5 class="text-primary fw-bold">{{ $permit->title_activity }}</h5>
 
-                    <h3 class="mb-3 fw-bold text-dark">Final Submission to SDSO</h3>
+                                            <div class="alert alert-danger mt-3">
+                                                <strong>This action is IRREVERSIBLE!</strong><br>
+                                                After submission:
+                                                <ul class="text-start mt-2 mb-0">
+                                                    <li>You cannot add or remove files</li>
+                                                    <li>You cannot edit anything</li>
+                                                </ul>
+                                            </div>
 
-                    <p class="text-muted mb-4">
-                        You are about to submit documentation for:<br>
-                        <strong class="text-primary">{{ $permit->title_activity }}</strong>
-                    </p>
+                                            <p>You have uploaded <strong class="text-success">{{ $permit->reports->count() }}</strong> file(s)</p>
 
-                    <div class="alert alert-danger border-0 rounded-3 mb-4">
-                        <i class="mdi mdi-alert-decagram text-danger me-2"></i>
-                        <strong>This action is IRREVERSIBLE!</strong><br>
-                        Once submitted:
-                        <ul class="list-unstyled mt-2 mb-0 text-start small">
-                            <li>You <strong>cannot add or remove</strong> any files</li>
-                            <li>You <strong>cannot edit</strong> titles or descriptions</li>
-
-                        </ul>
-                    </div>
-
-                    <p class="mb-4">
-                        You have uploaded <strong class="text-success">{{ $permit->reports->count() }} file(s)</strong><br>
-                        <span class="text-danger fw-bold">Are you absolutely sure?</span>
-                    </p>
-
-                    <!-- Action Buttons -->
-                    <div class="d-flex gap-3 justify-content-center">
-                        <button type="button" class="btn btn-label-secondary btn-lg px-4" data-bs-dismiss="modal">
-                            <i class="mdi mdi-arrow-left"></i> Cancel
-                        </button>
-                        <button type="submit" class="btn btn-success btn-lg px-5">
-                            <i class="mdi mdi-send-lock-outline"></i>
-                            Yes, Submit Permanently
-                        </button>
-                    </div>
-
-                    <!-- Extra Confirmation Text -->
-                    <small class="text-muted d-block mt-4">
-                        This action cannot be undone.
-                    </small>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+                                            <div class="d-flex gap-3 justify-content-center mt-4">
+                                                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="mdi mdi-send-check"></i> Submit Permanently
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
 
                     @empty
                         <tr>
                             <td colspan="8" class="text-center py-6">
-                                <i class="mdi mdi-trophy-outline text-success" style="font-size: 3.5rem;"></i>
-                                <h5 class="mt-3">No Completed Events</h5>
-                                <p class="text-muted">Events will appear here after they are marked as done.</p>
+                                <div class="mb-3">
+                                    <i class="mdi mdi-trophy-outline text-success" style="font-size: 4rem;"></i>
+                                </div>
+                                <h5>No Completed Events Yet</h5>
+                                <p class="text-muted">Events will appear here after they are marked as successful.</p>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+
         <div class="card-footer">
             {{ $successfulEvents->links() }}
         </div>
     </div>
 </div>
+{{-- SweetAlert2 - CENTERED MODAL (Default Style) --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-{{-- Show Swal if session has it --}}
 @if(session('swal'))
 <script>
     Swal.fire({
         title: "{{ session('swal.title') }}",
         text: "{{ session('swal.text') }}",
         icon: "{{ session('swal.icon') }}",
-        timer: {{ session('swal.timer') ?? 'null' }},
+        timer: {{ session('swal.timer') ?? 3000 }},
+        timerProgressBar: true,
         showConfirmButton: false,
-        allowOutsideClick: false
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        // Removed toast + position → now shows in the CENTER like a normal modal
     });
 </script>
 @endif
