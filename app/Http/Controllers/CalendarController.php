@@ -13,104 +13,51 @@ class CalendarController extends Controller
    * This fetches permits and checks their approval status
    * Only returns APPROVED events
    */
-  public function getEvents()
-  {
-    try {
-      // Fetch permits with organization and venue information
-      $permits = DB::table('permits')
+
+public function getEvents()
+{
+    $permits = DB::table('permits')
         ->join('organizations', 'permits.organization_id', '=', 'organizations.organization_id')
-        ->leftJoin('venues', function ($join) {
-          $join
-            ->on(DB::raw('CAST(permits.venue AS UNSIGNED)'), '=', 'venues.venue_id')
-            ->where('permits.type', '=', 'In-Campus');
-        })
-        ->select(
-          'permits.permit_id',
-          'permits.title_activity',
-          'permits.purpose',
-          'permits.type',
-          'permits.date_start',
-          'permits.date_end',
-          'permits.time_start',
-          'permits.time_end',
-          'permits.venue',
-          'organizations.organization_name',
-          'venues.venue_name'
-        )
+        ->leftJoin('venues', fn($j) => $j->on(DB::raw('CAST(permits.venue AS UNSIGNED)'), '=', 'venues.venue_id')
+            ->where('permits.type', '=', 'In-Campus'))
+        ->select('permits.*', 'organizations.organization_name', 'venues.venue_name')
         ->get();
 
-      $events = [];
+    $events = [];
 
-      foreach ($permits as $permit) {
-        // Determine the approval status by checking event_approval_flow
+    foreach ($permits as $permit) {
         $approvalStatus = $this->getPermitApprovalStatus($permit->permit_id);
+        if ($approvalStatus !== 'Approved') continue;
 
-        // ONLY SHOW APPROVED EVENTS
-        if ($approvalStatus !== 'Approved') {
-          continue;
-        }
+        $isBargoEvent = false; // Default
 
-        // Determine venue name
-        $venueName = $permit->venue;
-
-        // Build event title - SHORTENED for better space usage
-        $eventTitle = $permit->title_activity;
-
-        // Determine color based on status
-        $color = $this->getStatusColor($approvalStatus);
-
-        // Check if it's an all-day event (no time specified)
-        $isAllDay = empty($permit->time_start) || empty($permit->time_end);
-
-        if ($isAllDay) {
-          // All-day event
-          $start = $permit->date_start;
-
-          // If there's an end date and it's different from start
-          if ($permit->date_end && $permit->date_end !== $permit->date_start) {
-            // FullCalendar expects exclusive end date for all-day events
-            $endDate = Carbon::parse($permit->date_end)
-              ->addDay()
-              ->format('Y-m-d');
-            $end = $endDate;
-          } else {
-            // Single day event - no end date needed
-            $end = null;
-          }
-        } else {
-          // Timed event
-          $start = $permit->date_start . 'T' . substr($permit->time_start, 0, 5);
-
-          // Use end date if different, otherwise same date
-          $endDate =
-            $permit->date_end && $permit->date_end !== $permit->date_start ? $permit->date_end : $permit->date_start;
-
-          $end = $endDate . 'T' . substr($permit->time_end, 0, 5);
+        // Detect if this event was created by BARGO (you can improve this logic)
+        if (str_contains(strtoupper($permit->title_activity), 'BARGO') ||
+            str_contains(strtoupper($permit->purpose ?? ''), 'BARGO')) {
+            $isBargoEvent = true;
         }
 
         $events[] = [
-          'title' => $eventTitle,
-          'start' => $start,
-          'end' => $end,
-          'allDay' => $isAllDay,
-          'color' => $color,
-          'extendedProps' => [
-            'permit_id' => $permit->permit_id,
-            'organization_name' => $permit->organization_name,
-            'venue' => $venueName,
-            'purpose' => $permit->purpose,
-            'status' => $approvalStatus,
-            'type' => $permit->type,
-          ],
+            'title' => $permit->title_activity,
+            'start' => $permit->date_start . ($permit->time_start ? 'T' . substr($permit->time_start, 0, 5) : ''),
+            'end'   => $permit->date_end && $permit->time_end
+                ? $permit->date_end . 'T' . substr($permit->time_end, 0, 5)
+                : null,
+            'allDay' => empty($permit->time_start),
+            'color' => $isBargoEvent ? '#ff851b' : '#28a745', // ORANGE for BARGO
+            'extendedProps' => [
+                'venue' => $permit->venue_name ?? $permit->venue,
+                'organization_name' => $permit->organization_name,
+                'purpose' => $permit->purpose,
+                'type' => $permit->type,
+                'is_bargo_event' => $isBargoEvent
+            ]
         ];
-      }
-
-      return response()->json($events);
-    } catch (\Exception $e) {
-      \Log::error('Calendar Events Error: ' . $e->getMessage());
-      return response()->json(['error' => 'Failed to fetch events'], 500);
     }
-  }
+
+    return response()->json($events);
+}
+
 
   /**
    * Check the approval status of a permit by examining event_approval_flow
@@ -150,17 +97,13 @@ class CalendarController extends Controller
    * Get color based on approval status
    */
   private function getStatusColor($status)
-  {
-    switch ($status) {
-      case 'Approved':
-        return '#28a745'; // Green
-      case 'Rejected':
-        return '#dc3545'; // Red
-      case 'Pending':
-      default:
-        return '#ffc107'; // Yellow/Orange
-    }
-  }
+{
+    return match($status) {
+        'approved' => '#28a745',
+        'rejected' => '#dc3545',
+        default    => '#ffc107',
+    };
+}
 
   /**
    * Store a new permit (existing method - may need adjustment based on your current implementation)

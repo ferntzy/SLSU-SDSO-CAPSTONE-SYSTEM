@@ -20,6 +20,8 @@ use App\Http\Controllers\SasController;
 use App\Http\Controllers\Vp_sasController;
 use App\Http\Controllers\AdviserCalendarController;
 use App\Models\Permit;
+use App\Models\User;
+
 // ============================
 // AUTH ROUTES
 // ============================
@@ -241,17 +243,11 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
 
   // Calendar view route (the main page) - This is now just a helper view route.
   // Display the calendar page
-  Route::get('/calendar', function () {
-    return view('student.calendardisplay');
-  })->name('calendar.index');
+  Route::get('/calendar', function () {return view('student.calendardisplay');})->name('calendar.index');
 
   // API endpoint to fetch calendar events (permits)
-  Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
-
-  // Get the permit form (if you have a separate view for the form)
-  Route::get('/calendar/permit-form', function () {
-    return view('calendar.permit-form');
-  })->name('student.permit.form');
+  Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');  // Get the permit form (if you have a separate view for the form)
+  Route::get('/calendar/permit-form', function () {return view('calendar.permit-form');})->name('student.permit.form');
 
   // Store new permit
   Route::post('/calendar/store', [CalendarController::class, 'store'])->name('calendar.store');
@@ -261,9 +257,7 @@ Route::middleware(['auth', 'role:Student_Organization'])->prefix('student')->gro
 
   //profiles
   Route::put('/profile/contact', [UserController::class, 'updateContact'])->name('user.updateContact');
-  Route::get('/profile', function () {
-    return view('student.profile');
-  })->name('user.profile');
+  Route::get('/profile', function () {return view('student.profile');})->name('user.profile');
   Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('student.uploadSignature');
   Route::delete('/profile/signature/', [UserController::class, 'removeSignature'])->name('student.removeSignature');
   // contact update Routeer')->group(function () {
@@ -339,12 +333,12 @@ Route::prefix('adviser')->name('adviser.')->middleware(['auth', 'role:Faculty_Ad
      // ————————————————————————————————————————
     // Profile & Signature
     // ————————————————————————————————————————
-     Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('uploadSignature');
-     Route::delete('/profile/signature', [UserController::class, 'removeSignature'])->name('removeSignature');
+      Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])->name('uploadSignature');
+      Route::delete('/profile/signature', [UserController::class, 'removeSignature'])->name('removeSignature');
 
-    Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', fn() => view('adviser.profile'))->name('index');
-        Route::put('/contact', [UserController::class, 'updateContact'])->name('updateContact');
+      Route::prefix('profile')->name('profile.')->group(function () {
+      Route::get('/', fn() => view('adviser.profile'))->name('index');
+      Route::put('/contact', [UserController::class, 'updateContact'])->name('updateContact');
 
 
     });
@@ -378,24 +372,44 @@ Route::prefix('adviser')->name('adviser.')->middleware(['auth', 'role:Faculty_Ad
 
 
 
-
 // ============================
-// BARGO ROUTES
+// BARGO ROUTES — FULLY WORKING SIGNATURE UPLOAD
 // ============================
-Route::middleware(['auth', 'role:BARGO'])->prefix('bargo')->group(function () {
-    Route::get('/dashboard', [BargoController::class, 'dashboard'])->name('bargo.dashboard');
-    Route::get('/pending', [BargoController::class, 'pending'])->name('bargo.pending');
-    Route::get('/approved', [BargoController::class, 'approved'])->name('bargo.approved');
-    Route::get('/rejected', [BargoController::class, 'rejected'])->name('bargo.rejected');
-    Route::get('/history', [BargoController::class, 'history'])->name('bargo.history');
+Route::middleware(['auth', 'role:BARGO'])->prefix('bargo')->name('bargo.')->group(function () {
 
-    Route::get('/permit/{hashed_id}/pdf', [BargoController::class, 'viewPermitPdf'])->name('bargo.permit.pdf');
+    // === MAIN PAGES ===
+    Route::get('/dashboard', [BargoController::class, 'dashboard'])->name('dashboard');
+    Route::get('/pending', [BargoController::class, 'pending'])->name('pending');
+    Route::get('/approved', [BargoController::class, 'approved'])->name('approved');
+    Route::get('/rejected', [BargoController::class, 'rejected'])->name('rejected');
+    Route::get('/history', [BargoController::class, 'history'])->name('history');
 
-    Route::post('/approve/{approval_id}', [BargoController::class, 'approve'])->name('bargo.approve');
-    Route::post('/reject/{approval_id}', [BargoController::class, 'reject'])->name('bargo.reject');
+    Route::get('/permit/{hashed_id}/pdf', [BargoController::class, 'viewPermitPdf'])->name('permit.pdf');
+    Route::post('/approve/{approval_id}', [BargoController::class, 'approve'])->name('approve');
+    Route::post('/reject/{approval_id}', [BargoController::class, 'reject'])->name('reject');
+
+    // === BARGO PROFILE & SIGNATURE (FIXED & WORKING) ===
+    Route::get('/profile', fn() => view('bargo.profile'))->name('profile');
+
+    // These routes now match your Blade file exactly
+    Route::post('/profile/signature/', [UserController::class, 'uploadSignature'])
+        ->name('uploadSignature');
+
+    Route::delete('/profile/signature', [UserController::class, 'removeSignature'])
+        ->name('removeSignature');
+
+    // Fixed: Correct view + proper nesting
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', fn() => view('bargo.profile'))->name('index'); // Changed from adviser.profile
+        Route::put('/contact', [UserController::class, 'updateContact'])->name('updateContact');
+    });
+
+    Route::get('/calendar', [BargoController::class, 'calendar'])->name('bargo.calendar');
+    Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
+    Route::post('/calendar/events', [BargoController::class, 'storeBargoEvent'])->name('calendar.store');
+    Route::put('/calendar/events/{event}', [BargoController::class, 'updateBargoEvent'])->name('calendar.update');
+    Route::delete('/calendar/events/{event}', [BargoController::class, 'deleteBargoEvent'])->name('calendar.delete');
 });
-
-
 
 // ============================
 // OTHER ROLES

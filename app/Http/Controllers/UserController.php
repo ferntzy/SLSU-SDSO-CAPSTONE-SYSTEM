@@ -332,66 +332,78 @@ class UserController extends Controller
   }
 
 
-  public function uploadSignature(Request $request)
-  {
-    // Accept both file upload and base64 (canvas)
+
+public function uploadSignature(Request $request)
+{
+    // Accept both: canvas drawing (signature_data) OR file upload (signature_upload)
     $request->validate([
-      'signature'        => 'nullable|file|image|mimes:png,jpg,jpeg|max:2048',
-      'signature_data'   => 'nullable|string',
+        'signature_data'   => 'required_without:signature_upload|string',
+        'signature_upload' => 'required_without:signature_data|image|mimes:png,jpg,jpeg|max:2048', // 2MB max
     ]);
 
     try {
-      $user = Auth::user();
+        $user = Auth::user();
 
-      // Delete old signature if exists
-      if ($user->signature) {
-        Storage::disk('public')->delete($user->signature);
-      }
+        // Delete old signature if exists
+        if ($user->signature && Storage::disk('public')->exists($user->signature)) {
+            Storage::disk('public')->delete($user->signature);
+        }
 
-      $path = null;
+        $path = null;
 
-      // Case 1: Canvas drawing (data URL)
-      if ($request->filled('signature_data')) {
-        $data = $request->signature_data;
-        $data = str_replace('data:image/png;base64,', '', $data);
-        $data = str_replace(' ', '+', $data);
-        $imageData = base64_decode($data);
+        // CASE 1: Canvas drawing (from signature_pad)
+        if ($request->filled('signature_data')) {
+            $data = $request->signature_data;
 
-        $fileName = 'signatures/signature_' . $user->user_id . '_' . time() . '.png';
-        Storage::disk('public')->put($fileName, $imageData);
-        $path = $fileName;
-      }
+            // Clean data URL
+            $data = preg_replace('#^data:image/\w+;base64,#i', '', $data);
+            $data = str_replace(' ', '+', $data);
+            $imageData = base64_decode($data);
 
-      // Case 2: File upload
-      elseif ($request->hasFile('signature') && $request->file('signature')->isValid()) {
-        $file = $request->file('signature');
-        $path = $file->store('signatures', 'public');
-      }
+            if (!$imageData) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid signature data.'
+                ], 400);
+            }
 
-      if (!$path) {
+            $filename = 'signatures/signature_' . $user->user_id . '_' . time() . '.png';
+            Storage::disk('public')->put($filename, $imageData);
+            $path = $filename;
+        }
+
+        // CASE 2: Direct file upload
+        elseif ($request->hasFile('signature_upload') && $request->file('signature_upload')->isValid()) {
+            $path = $request->file('signature_upload')->store('signatures', 'public');
+        }
+
+        // Final check
+        if (!$path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No valid signature provided.'
+            ], 400);
+        }
+
+        // Save to user
+        $user->signature = $path;
+        $user->save();
+
         return response()->json([
-          'success' => false,
-          'message' => 'No signature provided.'
-        ], 400);
-      }
+            'success' => true,
+            'message' => 'Signature uploaded successfully!',
+            'signature_url' => asset('storage/' . $path)
+        ]);
 
-      // Save to user
-      $user->signature = $path;
-      $user->save();
-
-      return response()->json([
-        'success' => true,
-        'message' => 'Signature uploaded successfully!',
-        'signature_url' => asset('storage/' . $path)
-      ]);
     } catch (\Exception $e) {
-      \Log::error('Signature Upload Error: ' . $e->getMessage());
-      return response()->json([
-        'success' => false,
-        'message' => 'Upload failed. Please try again.'
-      ], 500);
+        \Log::error('Signature Upload Failed (User ID: ' . Auth::id() . '): ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Upload failed. Please try again.'
+        ], 500);
     }
-  }
+}
   public function removeSignature(Request $request)
   {
     $user = auth()->user();

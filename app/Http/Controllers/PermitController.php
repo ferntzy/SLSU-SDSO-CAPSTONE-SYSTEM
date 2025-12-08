@@ -145,7 +145,6 @@ $permit = Permit::create([
         (Auth::user()->user_profile->suffix ?? ''))
       : Auth::user()->username;
 
-    // YOUR ORIGINAL COORDINATES — UNCHANGED
     $pdf->SetXY(73.5, 41);
     $pdf->Write(0, $fullName);
     $pdf->SetXY(73.5, 45);

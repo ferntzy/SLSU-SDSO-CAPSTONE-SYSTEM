@@ -46,10 +46,10 @@
                 <td>{{ $review->comments ?: 'None' }}</td>
                 <td>{{ $review->updated_at->format('F d, Y') }}</td>
                 <td>
-                  <a href="{{ route('bargo.view.pdf', $review->permit->hashed_id) }}" target="_blank"
+                  {{-- <a href="{{ route('bargo.view.pdf', $review->permit->hashed_id) }}" target="_blank"
                     class="btn btn-sm btn-primary">
                     View PDF
-                  </a>
+                  </a> --}}
                 </td>
               </tr>
             @endforeach

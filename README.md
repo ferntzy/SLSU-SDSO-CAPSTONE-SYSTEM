@@ -1,211 +1,552 @@
-<p align="center"></p>
-
 <p align="center">
-   <a href="https://themeselection.com/item/materio-free-bootstrap-html-laravel-admin-template/" target="_blank">
-      <img src="https://cdn.themeselection.com/ts-assets/materio/logo/logo.png" alt="materio-logo" width="40px" height="auto">
-   </a>
+   <img src="https://img.shields.io/badge/Laravel-10.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="laravel">
+   <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="php">
+   <img src="https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="mysql">
 </p>
 
 <h1 align="center">
-   <a href="https://themeselection.com/item/materio-free-bootstrap-html-laravel-admin-template/" target="_blank" align="center">
-      Materio - Free Bootstrap 5 HTML Laravel Admin Template
-   </a>
+   📅 EMPS - Event Management & Permit System
 </h1>
 
-<p align="center">Most Powerful & Comprehensive Free Bootstrap 5 HTML Laravel Admin Dashboard Template built for developers!</p>
+<p align="center">A comprehensive Laravel-based Event Management and Permit System designed for educational institutions to streamline event planning, approval workflows, and calendar management.</p>
 
-![GitHub](https://img.shields.io/github/license/themeselection/materio-bootstrap-html-laravel-admin-template-free) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/themeselection/materio-bootstrap-html-laravel-admin-template-free) ![GitHub issues](https://img.shields.io/github/issues/themeselection/materio-bootstrap-html-laravel-admin-template-free) ![GitHub closed issues](https://img.shields.io/github/issues-closed/themeselection/materio-bootstrap-html-laravel-admin-template-free) ![Twitter Follow](https://img.shields.io/twitter/follow/Theme_Selection?style=social)
+<p align="center">
+   <img src="https://img.shields.io/badge/Status-Active%20Development-success?style=flat-square" alt="status">
+   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="license">
+   <img src="https://img.shields.io/badge/Version-1.0.0-orange?style=flat-square" alt="version">
+</p>
 
-<kbd>[![Materio - Bootstrap 5 HTML Laravel Admin Template Demo Screenshot](https://cdn.themeselection.com/ts-assets/materio/materio-bootstrap-laravel-admin-template-free/banner/banner.png)](https://themeselection.com/item/materio-free-bootstrap-html-laravel-admin-template/)</kbd>
+---
 
-## Introduction 🚀
+## 🌟 Introduction
 
-If you’re a developer looking for the most Powerful & comprehensive [**Free Bootstrap 5 HTML Laravel Admin Template**](https://themeselection.com/item/materio-free-bootstrap-html-laravel-admin-template/) built for developers, rich with features, and highly customizable look no further than materio. We’ve followed the highest industry standards to bring you the very best admin template that is not only fast and easy to use but highly scalable. Offering ultimate convenience and flexibility, you’ll be able to build whatever application you want with very little hassle.
+**EMPS (Event Management & Permit System)** is a powerful, full-featured web application built with Laravel 10 and Materio Bootstrap Admin Template. It provides a complete solution for managing student organization events, handling multi-level approval workflows, venue bookings, and real-time calendar visualization.
 
-Build premium quality applications with ease. Use our innovative **[Laravel admin template](https://themeselection.com/item/category/laravel-admin-templates/)** to create eye-catching, high-quality WebApps. Your apps will be completely responsive, ensuring they’ll look stunning and function flawlessly on desktops, tablets, and mobile devices.
+Perfect for:
+- 🎓 **Universities & Colleges** managing student organization events
+- 🏢 **Student Affairs Offices** coordinating campus activities
+- 👥 **Student Organizations** planning and tracking their events
+- ✅ **Administrative Staff** streamlining approval processes
 
-[View Demo](https://demos.themeselection.com/materio-bootstrap-html-laravel-admin-template-free/demo/)
+### ✨ Key Highlights
 
-## Installation ⚒️
+- **Multi-Role System** - Students, Advisers, OSA, VP for SAS, Admin
+- **Smart Approval Workflow** - Role-based, sequential approval chain
+- **Interactive Calendar** - Drag-to-select dates, visual event management
+- **BARGO Integration** - Auto-approved events for official activities
+- **Real-time Notifications** - Email & in-app notifications
+- **PDF Generation** - Professional permit documents with digital signatures
+- **Venue Management** - Conflict detection and availability checking
+- **Document Upload** - Support for event requirements and attachments
 
-Installing and running materio is super easy, please Follow below steps and you will be ready to rock 🤘
+---
 
-1. Open the terminal in your root directory of materio Laravel.
-2. Use the following command to install the composer
+## 📸 Screenshots
 
+<details>
+<summary>Click to view screenshots</summary>
+
+### Student Dashboard
+![Student Dashboard](docs/screenshots/student-dashboard.png)
+
+### Event Calendar with Date Selection
+![Calendar](docs/screenshots/calendar-selection.png)
+
+### Permit Application Form
+![Permit Form](docs/screenshots/permit-form.png)
+
+### Approval Workflow
+![Approval](docs/screenshots/approval-flow.png)
+
+### BARGO Event Creation
+![BARGO](docs/screenshots/bargo-event.png)
+
+</details>
+
+---
+
+## 🚀 Features
+
+### 📋 Event Management
+- ✅ Create and manage event permits
+- ✅ In-Campus and Off-Campus event support
+- ✅ Multi-day event scheduling
+- ✅ Venue booking with conflict detection
+- ✅ Attach documents and requirements
+- ✅ Track event status in real-time
+
+### 🔄 Approval Workflow
+- ✅ Sequential multi-level approval chain
+- ✅ Role-based approval routing (Adviser → OSA → VP_SAS)
+- ✅ Comments and feedback system
+- ✅ Email notifications at each approval stage
+- ✅ Approve, revise, or reject permits
+- ✅ Detailed audit trail
+
+### 📅 Calendar System
+- ✅ Interactive FullCalendar integration
+- ✅ Click-and-drag date selection
+- ✅ Color-coded events by organization
+- ✅ BARGO events highlighted in orange
+- ✅ Venue availability visualization
+- ✅ Multiple calendar views (month, week, day)
+
+### 🏛️ BARGO Module
+- ✅ Auto-approved official events
+- ✅ Instant visibility to all users
+- ✅ Dedicated BARGO calendar
+- ✅ Streamlined event creation
+- ✅ No permit PDF required
+
+### 📄 Document Management
+- ✅ PDF permit generation with signatures
+- ✅ Digital signature support
+- ✅ Upload event requirements
+- ✅ Downloadable approved permits
+- ✅ Document versioning
+
+### 👥 User Management
+- ✅ Role-based access control (RBAC)
+- ✅ Organization membership management
+- ✅ User profiles with signatures
+- ✅ Activity tracking
+- ✅ Notification preferences
+
+---
+
+## 🛠️ Technology Stack
+
+| Technology | Purpose |
+|------------|---------|
+| **Laravel 10** | Backend Framework |
+| **PHP 8.2+** | Programming Language |
+| **MySQL 8.0+** | Database |
+| **Bootstrap 5** | Frontend Framework |
+| **FullCalendar** | Interactive Calendar |
+| **SweetAlert2** | Beautiful Alerts |
+| **Flatpickr** | Date/Time Picker |
+| **DomPDF** | PDF Generation |
+| **Mailtrap/SMTP** | Email Notifications |
+| **Materio Template** | Admin UI Theme |
+
+---
+
+## 📦 Installation
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+- PHP >= 8.2
+- Composer
+- Node.js & NPM/Yarn
+- MySQL >= 8.0
+- Git
+
+### Step-by-Step Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/emps.git
+cd emps
+```
+
+2. **Install PHP dependencies**
 ```bash
 composer install
 ```
 
-3. Run the following command to generate the key
-
+3. **Install JavaScript dependencies**
 ```bash
+npm install
+# or
+yarn install
+```
+
+4. **Environment setup**
+```bash
+cp .env.example .env
 php artisan key:generate
 ```
 
-4. By running the following command, you will be able to get all the dependencies in your **node_modules** folder:
+5. **Configure your `.env` file**
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=emps
+DB_USERNAME=root
+DB_PASSWORD=your_password
 
-```bash
-yarn
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
 ```
 
-5. To run the project, you need to run the following command in the project directory. It will compile JavaScript and Styles.
-
+6. **Run migrations and seeders**
 ```bash
-yarn dev
+php artisan migrate --seed
 ```
 
-6. To serve the application, you need to run the following command in the project directory
+7. **Link storage**
+```bash
+php artisan storage:link
+```
 
+8. **Compile assets**
+```bash
+npm run dev
+# For production:
+npm run build
+```
+
+9. **Start the development server**
 ```bash
 php artisan serve
 ```
 
-7. Now navigate to the given address, and you will see your application is running.🥳
-
-## Available Tasks 🧑‍💻
-
-**Building for Production:** If you want to run the project and make the build in the production mode then run the following command in the root directory, by default The project will continue to run in the development mode:
-
-```bash
-yarn prod
+10. **Access the application**
+```
+http://localhost:8000
 ```
 
-## What's Included 📦
+### Default Login Credentials
 
-- Dashboard
-- Layouts
-  - Without menu
-  - Without Navbar
-  - Container
-  - Fluid
-  - Blank
-- Pages
-  - Account Settings
-  - Login
-  - Register
-  - Forgot Password
-  - Error
-  - Under Maintenance
-- Cards
-- User Interface
-  - **All Bootstrap Components**
-- Extended UI
-  - Perfect Scrollbar
-  - Text Divider
-- Material Design Icons
-- Form Elements
-  - Basic Inputs
-  - Input Groups
-- Form Layout
-  - Vertical Form
-  - Horizontal Form
-- Tables
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@emps.edu | password |
+| VP_SAS | vpsas@emps.edu | password |
+| OSA | osa@emps.edu | password |
+| Adviser | adviser@emps.edu | password |
+| Student | student@emps.edu | password |
 
-## What's in Premium Version 💎
+---
 
-| Materio Free Version                                                                              | Materio Premium Version                                                                                                                                                                       |
-| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Demo](https://demos.themeselection.com/materio-bootstrap-html-laravel-admin-template-free/demo/) | [Demo](https://demos.themeselection.com/materio-bootstrap-html-laravel-admin-template/demo-1/)                                                                                                |
-| [Download](https://themeselection.com/item/materio-free-bootstrap-html-laravel-admin-template/)   | [Purchase](https://themeselection.com/item/materio-bootstrap-laravel-admin-template/)                                                                                                         |
-| Single vertical Menu                                                                              | Vertical Menu + Horizontal Menu                                                                                                                                                               |
-| Simple Light Style                                                                                | Light, Dark & System Style                                                                                                                                                                    |
-| Default Theme                                                                                     | Default, Semi Dark & Bordered Themes                                                                                                                                                          |
-| Fixed Layout(Menu)                                                                                | Fixed & Static Layout(Menu)                                                                                                                                                                   |
-| 1 Simple Dashboard                                                                                | 5 Niche Dashboards                                                                                                                                                                            |
-| -                                                                                                 | Multiple Ready to use Application like **Laravel CRUD Application**, Email, Chat, Calendar, Kanban, eCommerce, Academy, Logistics, Invoice, Users List, Users View, Roles and Permission etc. |
-| Simple From Elements                                                                              | Advance form elements, validation & form wizard                                                                                                                                               |
-| Basic Cards                                                                                       | Basic, Advance , Statistics, Analytics, Gamifications and Actions Cards                                                                                                                       |
-| Basic User Interface(Components)                                                                  | Advance and Custom User Interfaces(Components)                                                                                                                                                |
-| Two Extended Components                                                                           | Twelve Ready to use Extended Components                                                                                                                                                       |
-| -                                                                                                 | Quick Search - Quickly navigate between pages (w/ hotkey support)                                                                                                                             |
-| Basic Pages                                                                                       | Authentication Pages in 2 Variants + Ready to use pages like User Profile, Account Settings,FAQ, Help Center, Pricing, Misc etc.                                                              |
-| -                                                                                                 | 3D Characters + Illustrations                                                                                                                                                                 |
-| Basic tables                                                                                      | Advanced & Data tables                                                                                                                                                                        |
-| -                                                                                                 | Quick customization using theme config file                                                                                                                                                   |
-| -                                                                                                 | Leaflet Maps                                                                                                                                                                                  |
-| 1 Chart Library                                                                                   | 2 Chart Libraries                                                                                                                                                                             |
-| -                                                                                                 | Multiple Navbar & Menu Options                                                                                                                                                                |
-| -                                                                                                 | Starter-kit                                                                                                                                                                                   |
-| -                                                                                                 | **Localization support**                                                                                                                                                                      |
-| -                                                                                                 | RTL Support                                                                                                                                                                                   |
-| Regular Support                                                                                   | Priority Support                                                                                                                                                                              |
-| Detailed Documentation                                                                            | Detailed Documentation                                                                                                                                                                        |
+## 📚 Database Structure
 
-## Documentation 📜
+### Core Tables
 
-<!-- If you have live docs then use below line -->
+- `users` - User accounts and authentication
+- `user_profiles` - Extended user information
+- `organizations` - Student organizations
+- `members` - Organization membership
+- `permits` - Event permit applications
+- `venues` - Available event venues
+- `event_approval_flows` - Approval workflow tracking
+- `notifications` - User notifications
 
-Check out our live [Documentation](https://themeselection.com/demo/materio-bootstrap-html-admin-template/documentation/laravel-introduction.html)
+### Key Relationships
 
-## Browser Support 🖥️
+```
+Users → Members → Organizations
+Users → Permits → Event Approval Flows
+Permits → Venues
+Permits → Documents (attachments)
+```
 
-At present, we officially aim to support the last two versions of the following browsers:
+---
 
-- Chrome (latest)
-- FireFox (latest)
-- Safari (latest)
-- Microsoft Edge (latest)
-- Opera (latest)
+## 🎯 User Roles & Permissions
 
-## Useful Links 🎁
+### 🎓 Student
+- Submit event permit applications
+- View organization events
+- Track permit approval status
+- Upload signature and documents
+- Receive notifications
 
-- [Freebies](https://themeselection.com/item/category/freebies/)
-- [Download Free Admin Templates](https://themeselection.com/item/category/free-admin-templates/)
-- [Bootstrap 5 CheatSheet](https://bootstrap-cheatsheet.themeselection.com/)
+### 👨‍🏫 Adviser
+- Review student permit requests
+- Approve/revise/reject permits
+- Add comments and feedback
+- View organization calendar
+- Manage advisee organizations
 
-## Support 👨‍💻
+### 🏢 OSA (Office of Student Affairs)
+- Review permits after adviser approval
+- Second-level approval authority
+- Monitor all campus events
+- Venue conflict management
+- Generate reports
 
-We use GitHub issues as support tickets to manage Item support.
+### 👔 VP_SAS (Vice President for Student Affairs)
+- Final approval authority
+- View all campus activities
+- BARGO event management
+- System-wide oversight
+- Policy enforcement
 
-1. In order to raise the GitHub issue, you must have a GitHub account. [Raise an Issue](https://github.com/themeselection/materio-bootstrap-html-laravel-admin-template-free/issues)
+### ⚙️ Admin
+- Full system access
+- User management
+- Organization setup
+- Venue management
+- System configuration
 
-## License ©
+---
 
-- Copyright © [ThemeSelection](https://themeselection.com/)
-- Licensed under [MIT](LICENSE)
+## 🔄 Approval Workflow
 
-## Contributing 🦸
+```
+┌─────────────┐
+│   Student   │
+│  Submits    │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐     ┌──────────┐
+│   Adviser   │────►│  Reject  │
+│   Reviews   │     └──────────┘
+└──────┬──────┘
+       │ Approve
+       ▼
+┌─────────────┐     ┌──────────┐
+│     OSA     │────►│  Reject  │
+│   Reviews   │     └──────────┘
+└──────┬──────┘
+       │ Approve
+       ▼
+┌─────────────┐     ┌──────────┐
+│   VP_SAS    │────►│  Reject  │
+│   Reviews   │     └──────────┘
+└──────┬──────┘
+       │ Approve
+       ▼
+┌─────────────┐
+│  Approved   │
+│   Event!    │
+└─────────────┘
+```
 
-Contribution are always welcome and recommended! Here is how:
+---
 
-- Fork the repository ([here is the guide](https://docs.github.com/en/get-started/quickstart/fork-a-repo)).
-- Clone to your machine `git clone https://github.com/YOUR_USERNAME/REPO_NAME` Make your changes
-- Create a pull request
+## 🎨 Key Features Walkthrough
 
-### Contribution Requirements 🧰
+### 1. Creating an Event Permit
 
-- When you contribute, you agree to give a non-exclusive license to ThemeSelection to use that contribution in any context as we (ThemeSelection) see appropriate.
-- If you use content provided by another party, it must be appropriately licensed using an open-source license.
-- Contributions are only accepted through Github pull requests.
-- Finally, the contributed code must work in all supported browsers (see above for browser support).
+1. Navigate to **Calendar** → Click/drag dates
+2. View existing events and venue availability
+3. Click **"Create Permit Request"**
+4. Fill out the form:
+   - Event title and purpose
+   - Event type (In-Campus/Off-Campus)
+   - Venue selection
+   - Date and time
+   - Participants and expected number
+   - Upload requirements (if off-campus)
+5. Review and submit
+6. Generate PDF permit
 
-## Creators 😇
+### 2. BARGO Event Creation
 
-- [ThemeSelection](https://themeselection.com)
+1. Navigate to **BARGO Calendar**
+2. Click/drag dates on calendar
+3. Fill simplified form:
+   - Event title
+   - Venue
+   - Description
+4. Submit → Auto-approved instantly!
 
-## Changelog 📆
+### 3. Approval Process
 
-Please refer to the [CHANGELOG](CHANGELOG.md) file. We will add detailed release notes to each new release.
+**For Approvers:**
+1. View **Pending Permits** dashboard
+2. Click permit to review details
+3. Check venue conflicts
+4. Add comments if needed
+5. Choose action:
+   - ✅ Approve
+   - 🔄 Request Revision
+   - ❌ Reject
 
-## NOTE 🏷️
+---
 
-**We request you to keep the ThemeSelection credit link in the footer section.**
+## 📱 API Endpoints
 
-## Looking For Premium Admin Templates ?? 👀
+<details>
+<summary>Click to view API documentation</summary>
 
-**[ThemeSelection](https://themeselection.com/)** provides Selected high quality, modern design, professional and easy-to-use Free and Premium [Bootstrap Admin Templates](https://themeselection.com/item/category/bootstrap-admin-templates/), [VueJS Admin Templates](https://themeselection.com/item/category/vuejs-admin-templates/), [Laravel Admin Templates](https://themeselection.com/item/category/laravel-admin-templates/), HTML Themes, and [Free UI Kits](https://themeselection.com/item/category/free-ui-kits/) to create your applications faster!.
+### Calendar Events
+```
+GET  /api/calendar/events          - Fetch all approved events
+GET  /api/bargo/calendar/events    - Fetch BARGO events
+POST /api/calendar/check-conflicts - Check venue availability
+```
 
-If you want to Download [Free Admin Templates](https://themeselection.com/item/category/free-ui-kits/) like Materio then do visit [ThemeSelection](https://themeselection.com/).
+### Permits
+```
+GET    /permits                  - List user's permits
+POST   /permits/generate         - Create new permit
+GET    /permits/{id}             - View permit details
+PUT    /permits/{id}/update      - Update permit
+DELETE /permits/{id}             - Delete permit
+```
 
-## Other variants
+### Approvals
+```
+GET  /approvals/pending          - Get pending approvals
+POST /approvals/{id}/approve     - Approve permit
+POST /approvals/{id}/revise      - Request revision
+POST /approvals/{id}/reject      - Reject permit
+```
 
-- [html variant]({https://themeselection.com/item/materio-free-bootstrap-html-admin-template/})
-<!-- Add others here -->
+</details>
 
-## Social Media :earth_africa:
+---
 
-- Twitter : [https://twitter.com/Theme_Selection](https://twitter.com/Theme_Selection)
-- Facebook : [https://www.facebook.com/ThemeSelections/](https://www.facebook.com/ThemeSelections/)
-- Pinterest : [https://pinterest.com/themeselect/](https://pinterest.com/themeselect/)
-- Instagram : [https://www.instagram.com/themeselection/](https://www.instagram.com/themeselection/)
+## 🧪 Testing
+
+Run the test suite:
+
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test suite
+php artisan test --testsuite=Feature
+
+# Run with coverage
+php artisan test --coverage
+```
+
+---
+
+## 🔧 Configuration
+
+### Email Configuration
+
+Edit `.env`:
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=your-smtp-host
+MAIL_PORT=587
+MAIL_USERNAME=your-email
+MAIL_PASSWORD=your-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@emps.edu
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+### Calendar Settings
+
+Edit `config/calendar.php`:
+```php
+return [
+    'default_view' => 'dayGridMonth',
+    'first_day' => 0, // Sunday
+    'business_hours' => [
+        'start' => '08:00',
+        'end' => '18:00',
+    ],
+];
+```
+
+---
+
+## 📖 Documentation
+
+- [User Guide](docs/USER_GUIDE.md)
+- [API Reference](docs/API.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
+
+---
+
+## 🐛 Known Issues
+
+- [ ] Calendar timezone handling for international users
+- [ ] Mobile responsiveness on permit form
+- [ ] Bulk permit approval feature pending
+
+See [Issues](https://github.com/yourusername/emps/issues) for full list.
+
+---
+
+## 🗺️ Roadmap
+
+### Version 1.1 (Q1 2025)
+- [ ] Mobile application (React Native)
+- [ ] Advanced reporting and analytics
+- [ ] Email template customization
+- [ ] Bulk operations for approvers
+
+### Version 1.2 (Q2 2025)
+- [ ] Multi-campus support
+- [ ] SMS notifications
+- [ ] Integration with student information systems
+- [ ] Advanced calendar features (recurring events)
+
+### Version 2.0 (Q3 2025)
+- [ ] AI-powered scheduling suggestions
+- [ ] Automated venue recommendations
+- [ ] Budget tracking module
+- [ ] Attendance management
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Contribution Guidelines
+
+- Follow PSR-12 coding standards
+- Write tests for new features
+- Update documentation
+- Keep commits atomic and descriptive
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👥 Team
+
+**Development Team:**
+- **Project Lead** - System Architecture & Backend
+- **Frontend Developer** - UI/UX Implementation
+- **Database Administrator** - Schema Design & Optimization
+- **QA Engineer** - Testing & Quality Assurance
+
+---
+
+## 🙏 Acknowledgments
+
+- [Laravel Framework](https://laravel.com/)
+- [Materio Bootstrap Template](https://themeselection.com/)
+- [FullCalendar](https://fullcalendar.io/)
+- [SweetAlert2](https://sweetalert2.github.io/)
+- All contributors and testers
+
+---
+
+## 📞 Support
+
+- 📧 Email: support@emps.edu
+- 💬 Discord: [Join our server](https://discord.gg/emps)
+- 📝 Issues: [GitHub Issues](https://github.com/yourusername/emps/issues)
+- 📚 Documentation: [Read the docs](https://docs.emps.edu)
+
+---
+
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/emps&type=Date)](https://star-history.com/#yourusername/emps&Date)
+
+---
+
+<p align="center">Made with ❤️ for Educational Institutions</p>
+
+<p align="center">
+   <a href="#-introduction">Back to Top ⬆️</a>
+</p>

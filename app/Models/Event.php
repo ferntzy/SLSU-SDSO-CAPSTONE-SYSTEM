@@ -22,4 +22,13 @@ class Event extends Model
   {
     return $this->hasMany(EventApprovalFlow::class, 'permit_id', 'permit_id');
   }
+  public function organization()
+{
+    return $this->belongsTo(Organization::class, 'organization_id');
+}
+
+public function venue()
+{
+    return $this->belongsTo(Venue::class, 'venue_id');
+}
 }

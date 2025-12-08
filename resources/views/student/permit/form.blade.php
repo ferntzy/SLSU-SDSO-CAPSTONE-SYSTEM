@@ -20,7 +20,8 @@ $user = Auth::user();
 
     $offCampusRequirements = [
         'curriculum_requirement' => 'Curriculum Requirement',
-        'destination_handbook' => 'Destination Handbook or Manual',
+        'destination' => 'Destination',
+        'handbook_or_manual' => 'Handbook or Manual'
         'notarized_parents_consent' => 'Notarized Parents Consent',
         'medical_certificate' => 'Medical Certificate',
         'personnel_in_charge' => 'Personnel-in-Charge',

@@ -3,6 +3,47 @@
 
 @section('title', 'BARGO Dashboard')
 
+@section('page-style')
+<style>
+    .stat-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0.5rem 1.5rem rgba(67, 89, 113, 0.15) !important;
+    }
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.375rem;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    @media (max-width: 768px) {
+        .chart-container {
+            height: 250px;
+        }
+    }
+    .action-card {
+        transition: all 0.3s ease;
+    }
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(67, 89, 113, 0.2) !important;
+    }
+    .card {
+        box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
+        border: none;
+        border-radius: 0.5rem;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
 
@@ -25,6 +66,11 @@
         $approvalRate = $approvedThisMonth + $rejectedThisMonth > 0
             ? round(($approvedThisMonth / ($approvedThisMonth + $rejectedThisMonth)) * 100, 1)
             : 0;
+
+      $approvedByYou = \DB::table('event_approval_flow')
+    ->where('approver_role', 'BARGO')
+    ->where('status', 'approved')
+    ->count();
     @endphp
 
     <!-- Header Section -->
@@ -34,7 +80,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h4 class="text-white mb-2 fw-semibold">{{ $greeting }},  {{ Auth::user()->profile?->first_name }}</h4>
+                            <h4 class="text-white mb-2 fw-semibold">{{ $greeting }}, {{ Auth::user()->profile?->first_name }}</h4>
                             <div class="d-flex align-items-center gap-3 mb-3">
                                 <span class="badge bg-white text-primary">
                                     <i class="mdi mdi-calendar-month me-1"></i>{{ $now->format('l, F j, Y') }}
@@ -43,10 +89,10 @@
                                     <i class="mdi mdi-clock-outline me-1"></i>{{ $now->format('h:i A') }}
                                 </span>
                             </div>
-
                         </div>
                         <div class="col-md-4 text-md-end mt-3 mt-md-0">
                             <h5 class="text-white fw-semibold mb-1">BARGO Review Dashboard</h5>
+
                         </div>
                     </div>
                 </div>
@@ -58,265 +104,299 @@
     <div class="row g-4 mb-4">
         <!-- Pending Reviews -->
         <div class="col-xl-3 col-sm-6">
-            <div class="card h-100">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <span class="badge bg-label-warning rounded-pill mb-2">Pending</span>
-                            <h3 class="mb-1 fw-bold">{{ $pendingReviews }}</h3>
-                            <small class="text-muted">Awaiting Your Review</small>
+                    <a href="{{ route('bargo.pending') }}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between">
+                            <div class="card-info">
+                                <p class="card-text mb-1">Pending Review</p>
+                                <div class="d-flex align-items-center mb-1">
+                                    <h4 class="mb-0 me-2 text-warning">{{ $pendingReviews }}</h4>
+                                    @if($pendingReviews > 0)
+                                        <span class="badge bg-label-warning">Action Required</span>
+                                    @endif
+                                </div>
+                                <small class="text-muted">Awaiting Your Review</small>
+                            </div>
+                            <div class="card-icon">
+                                <span class="stat-icon bg-label-warning">
+                                    <i class="mdi mdi-clock-alert-outline mdi-24px"></i>
+                                </span>
+                            </div>
                         </div>
-                        <div class="avatar flex-shrink-0">
-                            <span class="avatar-initial rounded bg-label-warning">
-                                <i class="mdi mdi-clock-alert-outline mdi-24px"></i>
-                            </span>
-                        </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Approved -->
-        <div class="col-xl-3 col-sm-6">
-            <div class="card h-100">
+        {{-- Approved by You --}}
+        {{-- <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <span class="badge bg-label-success rounded-pill mb-2">Approved</span>
-                            <h3 class="mb-1 fw-bold">{{ $approved }}</h3>
-                            <small class="text-muted">Forwarded to SDSO Head</small>
+                   <a href="{{ route('adviser.history') }}" class="text-decoration-none">
+                    <div class="d-flex justify-content-between">
+                        <div class="card-info">
+                            <p class="card-text mb-1">Approved by You</p>
+                            <div class="d-flex align-items-center mb-1">
+                                <h4 class="mb-0 me-2 text-info">{{ $approvedByYou }}</h4>
+                            </div>
+                            <small class="text-muted">Your approved permits</small>
                         </div>
-                        <div class="avatar flex-shrink-0">
-                            <span class="avatar-initial rounded bg-label-success">
-                                <i class="mdi mdi-check-bold mdi-24px"></i>
+                        <div class="card-icon">
+                            <span class="stat-icon bg-label-info">
+                                <i class="ti ti-check ti-md"></i>
                             </span>
                         </div>
                     </div>
+                  </a>
+                </div>
+            </div>
+        </div> --}}
+
+        <!-- Approved -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <a href="{{ route('bargo.approved') }}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between">
+                            <div class="card-info">
+                                <p class="card-text mb-1">Approved</p>
+                                <div class="d-flex align-items-center mb-1">
+                                    <h4 class="mb-0 me-2 text-success">{{ $approved }}</h4>
+                                </div>
+                                <small class="text-muted">Forwarded to SDSO Head</small>
+                            </div>
+                            <div class="card-icon">
+                                <span class="stat-icon bg-label-success">
+                                    <i class="mdi mdi-check-bold mdi-24px"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
 
         <!-- Rejected -->
         <div class="col-xl-3 col-sm-6">
-            <div class="card h-100">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <span class="badge bg-label-danger rounded-pill mb-2">Rejected</span>
-                            <h3 class="mb-1 fw-bold">{{ $rejected }}</h3>
-                            <small class="text-muted">Returned to Organization</small>
+                    <a href="{{ route('bargo.rejected') }}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between">
+                            <div class="card-info">
+                                <p class="card-text mb-1">Rejected</p>
+                                <div class="d-flex align-items-center mb-1">
+                                    <h4 class="mb-0 me-2 text-danger">{{ $rejected }}</h4>
+                                </div>
+                                <small class="text-muted">Returned to Organization</small>
+                            </div>
+                            <div class="card-icon">
+                                <span class="stat-icon bg-label-danger">
+                                    <i class="mdi mdi-close-thick mdi-24px"></i>
+                                </span>
+                            </div>
                         </div>
-                        <div class="avatar flex-shrink-0">
-                            <span class="avatar-initial rounded bg-label-danger">
-                                <i class="mdi mdi-close-thick mdi-24px"></i>
-                            </span>
-                        </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
 
         <!-- Total Processed -->
         <div class="col-xl-3 col-sm-6">
-            <div class="card h-100">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <span class="badge bg-label-primary rounded-pill mb-2">Total</span>
-                            <h3 class="mb-1 fw-bold">{{ $approved + $rejected }}</h3>
-                            <small class="text-muted">Your Total Actions</small>
+                    <a href="{{ route('bargo.history') }}" class="text-decoration-none">
+                        <div class="d-flex justify-content-between">
+                            <div class="card-info">
+                                <p class="card-text mb-1">Total Processed</p>
+                                <div class="d-flex align-items-center mb-1">
+                                    <h4 class="mb-0 me-2 text-primary">{{ $approved + $rejected }}</h4>
+                                </div>
+                                <small class="text-muted">Your Total Actions</small>
+                            </div>
+                            <div class="card-icon">
+                                <span class="stat-icon bg-label-primary">
+                                    <i class="mdi mdi-counter mdi-24px"></i>
+                                </span>
+                            </div>
                         </div>
-                        <div class="avatar flex-shrink-0">
-                            <span class="avatar-initial rounded bg-label-primary">
-                                <i class="mdi mdi-counter mdi-24px"></i>
-                            </span>
-                        </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Performance Analytics -->
+    <!-- Charts & Analytics -->
     <div class="row g-4 mb-4">
-        <div class="col-12">
+        <!-- Performance Overview Chart -->
+        <div class="col-lg-8">
             <div class="card">
-                <div class="card-header d-flex align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
                         <i class="mdi mdi-chart-line text-primary me-2"></i>
                         BARGO Performance This Month
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row g-4">
-                        <!-- Approved This Month -->
-                        <div class="col-md-4">
-                            <div class="border rounded p-4 text-center h-100">
-                                <div class="avatar mx-auto mb-3">
-                                    <span class="avatar-initial rounded-circle bg-label-success">
-                                        <i class="mdi mdi-trending-up mdi-24px"></i>
-                                    </span>
-                                </div>
-                                <h6 class="text-muted mb-2">Approved This Month</h6>
-                                <h2 class="text-success fw-bold mb-2">{{ $approvedThisMonth }}</h2>
-                                <small class="text-muted">Permits Forwarded</small>
-                            </div>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <!-- Rejection Rate -->
-                        <div class="col-md-4">
-                            <div class="border rounded p-4 text-center h-100">
-                                <div class="avatar mx-auto mb-3">
-                                    <span class="avatar-initial rounded-circle bg-label-danger">
-                                        <i class="mdi mdi-trending-down mdi-24px"></i>
-                                    </span>
-                                </div>
-                                <h6 class="text-muted mb-2">Rejection Rate</h6>
-                                <h2 class="text-danger fw-bold mb-2">{{ $rejectedThisMonth }}</h2>
-                                <small class="text-muted">({{ 100 - $approvalRate }}%) Returned for Revision</small>
+        <!-- Approval Rate -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Approval Rate</h5>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <div class="mb-4">
+                        <div class="position-relative">
+                            <canvas id="approvalRateChart" width="200" height="200"></canvas>
+                            <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                <h2 class="mb-0 text-primary">{{ $approvalRate }}%</h2>
+                                <small class="text-muted">Success Rate</small>
                             </div>
                         </div>
-
-                        <!-- Approval Rate -->
-                        <div class="col-md-4">
-                            <div class="border rounded p-4 text-center h-100">
-                                <div class="avatar mx-auto mb-3">
-                                    <span class="avatar-initial rounded-circle bg-label-primary">
-                                        <i class="mdi mdi-percent-outline mdi-24px"></i>
-                                    </span>
-                                </div>
-                                <h6 class="text-muted mb-2">Approval Rate</h6>
-                                <h2 class="fw-bold mb-3" style="color: #696cff;">{{ $approvalRate }}%</h2>
-                                <div class="progress mb-2" style="height: 8px;">
-                                    <div class="progress-bar bg-success" role="progressbar"
-                                        style="width: {{ $approvalRate }}%"
-                                        aria-valuenow="{{ $approvalRate }}"
-                                        aria-valuemin="0"
-                                        aria-valuemax="100">
-                                    </div>
-                                </div>
-                                <small class="text-muted">Healthy Range: 85–95%</small>
-                            </div>
+                    </div>
+                    <div class="row w-100 text-center">
+                        <div class="col-6 border-end">
+                            <h5 class="mb-0 text-success">{{ $approvedThisMonth }}</h5>
+                            <small class="text-muted">Approved</small>
                         </div>
+                        <div class="col-6">
+                            <h5 class="mb-0 text-danger">{{ $rejectedThisMonth }}</h5>
+                            <small class="text-muted">Rejected</small>
+                        </div>
+                    </div>
+                    <div class="mt-3 w-100">
+                        <small class="text-muted d-block text-center">Healthy Range: 85–95%</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <h5 class="mb-3 text-muted">
-                <i class="mdi mdi-lightning-bolt-outline"></i>
-                Quick Actions
-            </h5>
-        </div>
 
-        <!-- Review Pending -->
-        <div class="col-lg-3 col-md-6">
-            <a href="{{ route('bargo.pending') }}" class="text-decoration-none">
-                <div class="card card-action h-100 hover-shadow">
-                    <div class="card-body text-center py-4">
-                        <div class="avatar avatar-lg mx-auto mb-3">
-                            <span class="avatar-initial rounded bg-label-warning">
-                                <i class="mdi mdi-file-clock-outline mdi-36px"></i>
-                            </span>
-                        </div>
-                        <h5 class="mb-2">Review Pending</h5>
-                        <div class="badge bg-warning rounded-pill mb-2">{{ $pendingReviews }} Permits</div>
-                        <p class="text-muted small mb-0">Review awaiting permits</p>
-                    </div>
-                </div>
-            </a>
-        </div>
 
-        <!-- View Approved -->
-        <div class="col-lg-3 col-md-6">
-            <a href="{{ route('bargo.approved') }}" class="text-decoration-none">
-                <div class="card card-action h-100 hover-shadow">
-                    <div class="card-body text-center py-4">
-                        <div class="avatar avatar-lg mx-auto mb-3">
-                            <span class="avatar-initial rounded bg-label-success">
-                                <i class="mdi mdi-check-all mdi-36px"></i>
-                            </span>
-                        </div>
-                        <h5 class="mb-2">View Approved</h5>
-                        <div class="badge bg-success rounded-pill mb-2">{{ $approved }} Total</div>
-                        <p class="text-muted small mb-0">See approved permits</p>
-                    </div>
-                </div>
-            </a>
-        </div>
 
-        <!-- Full History -->
-        <div class="col-lg-3 col-md-6">
-            <a href="{{ route('bargo.history') }}" class="text-decoration-none">
-                <div class="card card-action h-100 hover-shadow">
-                    <div class="card-body text-center py-4">
-                        <div class="avatar avatar-lg mx-auto mb-3">
-                            <span class="avatar-initial rounded bg-label-primary">
-                                <i class="mdi mdi-history mdi-36px"></i>
-                            </span>
-                        </div>
-                        <h5 class="mb-2">Full History</h5>
-                        <div class="badge bg-primary rounded-pill mb-2">{{ $approved + $rejected }} Total</div>
-                        <p class="text-muted small mb-0">View all records</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- View Rejected -->
-        <div class="col-lg-3 col-md-6">
-            <a href="{{ route('bargo.rejected') }}" class="text-decoration-none">
-                <div class="card card-action h-100 hover-shadow">
-                    <div class="card-body text-center py-4">
-                        <div class="avatar avatar-lg mx-auto mb-3">
-                            <span class="avatar-initial rounded bg-label-danger">
-                                <i class="mdi mdi-alert-remove mdi-36px"></i>
-                            </span>
-                        </div>
-                        <h5 class="mb-2">View Rejected</h5>
-                        <div class="badge bg-danger rounded-pill mb-2">{{ $rejected }} Total</div>
-                        <p class="text-muted small mb-0">See rejected permits</p>
-                    </div>
-                </div>
-            </a>
-        </div>
     </div>
 
+    <!-- Information Footer -->
 
 </div>
+@endsection
 
-<style>
-.hover-shadow {
-    transition: all 0.3s ease;
-}
+@section('page-script')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Performance Overview Chart (Bar Chart)
+    const performanceCtx = document.getElementById('performanceChart');
+    if (performanceCtx) {
+        new Chart(performanceCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Pending Review', 'Approved By You',  'Approved', 'Rejected'],
+                datasets: [{
+                    label: 'Permits',
+                    data: [{{ $pendingReviews }},{{ $approvedByYou }}, {{ $approved }}, {{ $rejected }}],
+                    backgroundColor: [
+                        'rgba(255, 171, 0, 0.8)',   // Warning
+                         'rgba(3, 195, 236, 0.8)', // Info
+                        'rgba(113, 221, 55, 0.8)',  // Success
+                        'rgba(255, 62, 29, 0.8)',    // Danger
 
-.hover-shadow:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(67, 89, 113, 0.2) !important;
-}
+                    ],
+                    borderColor: [
+                        'rgb(255, 171, 0)',
+                         'rgba(3, 195, 236, 0.8)',   // Info
+                        'rgb(113, 221, 55)',
+                        'rgb(255, 62, 29)',
 
-.card-action:hover {
-    cursor: pointer;
-}
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(67, 89, 113, 0.9)',
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            color: '#697a8d'
+                        },
+                        grid: {
+                            color: 'rgba(67, 89, 113, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#697a8d'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
 
-.avatar-initial {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.bg-opacity-25 {
-    --bs-bg-opacity: 0.25;
-}
-
-.card {
-    box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-    border: none;
-    border-radius: 0.5rem;
-}
-</style>
+    // Approval Rate Chart (Doughnut)
+    const rateCtx = document.getElementById('approvalRateChart');
+    if (rateCtx) {
+        new Chart(rateCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Approved', 'Rejected', 'Pending'],
+                datasets: [{
+                    data: [
+                        {{ $approvedThisMonth }},
+                        {{ $rejectedThisMonth }},
+                        {{ $pendingReviews }}
+                    ],
+                    backgroundColor: [
+                        'rgba(113, 221, 55, 0.8)',
+                        'rgba(255, 62, 29, 0.8)',
+                                                'rgba(255, 171, 0, 0.8)'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(67, 89, 113, 0.9)',
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
 @endsection

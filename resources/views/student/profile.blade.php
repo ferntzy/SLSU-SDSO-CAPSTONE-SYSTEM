@@ -7,15 +7,43 @@
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}">
 <style>
     #signature-pad {
-        border: 2px dashed #ccc;
-        border-radius: 12px;
+        border: 2px dashed #d9dee3;
+        border-radius: 0.5rem;
         background: #fff;
         cursor: crosshair;
+        transition: border-color 0.3s;
     }
-    .btn-remove-bg {
-        background: linear-gradient(45deg, #ff6b6b, #feca57);
+
+    #signature-pad:hover {
+        border-color: #696cff;
+    }
+
+    .signature-preview {
+        min-height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 0.5rem;
+    }
+
+    .card {
+        box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
         border: none;
-        color: white;
+        border-radius: 0.5rem;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #a1acb8;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        color: #566a7f;
+        font-weight: 500;
     }
 </style>
 @endsection
@@ -26,13 +54,27 @@
 
 @if(session('success'))
 <script>
-    Swal.fire({ icon: 'success', title: 'Success!', text: @json(session('success')), timer: 2500, showConfirmButton: false });
+    Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: @json(session('success')),
+        confirmButtonColor: '#71dd37',
+        timer: 2500,
+        showConfirmButton: false
+    });
 </script>
 @endif
 
 @if(session('error'))
 <script>
-    Swal.fire({ icon: 'error', title: 'Error', text: @json(session('error')), timer: 3000, showConfirmButton: false });
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: @json(session('error')),
+        confirmButtonColor: '#ff3e1d',
+        timer: 3000,
+        showConfirmButton: false
+    });
 </script>
 @endif
 
@@ -41,7 +83,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const canvas = document.getElementById('signature-pad');
     const signaturePad = new SignaturePad(canvas, {
         backgroundColor: 'rgba(255,255,255,0)',
-        penColor: 'rgb(0, 0, 0)'
+        penColor: 'rgb(0, 0, 0)',
+        minWidth: 1,
+        maxWidth: 2.5
     });
 
     function resizeCanvas() {
@@ -55,101 +99,112 @@ document.addEventListener('DOMContentLoaded', function () {
     resizeCanvas();
 
     // Clear canvas
-    document.getElementById('clear-signature').onclick = () => signaturePad.clear();
+    document.getElementById('clear-signature').onclick = () => {
+        signaturePad.clear();
+        Swal.fire({
+            icon: 'info',
+            title: 'Canvas Cleared',
+            text: 'Draw your signature again',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000
+        });
+    };
 
     // Save drawn signature
     document.getElementById('save-draw').onclick = function () {
         if (signaturePad.isEmpty()) {
-            return Swal.fire('Oops!', 'Please draw your signature first.', 'warning');
+            return Swal.fire({
+                icon: 'warning',
+                title: 'Empty Signature',
+                text: 'Please draw your signature first.',
+                confirmButtonColor: '#696cff'
+            });
         }
-        uploadSignature(signaturePad.toDataURL('image/png'));
+
+        Swal.fire({
+            title: 'Save Signature?',
+            text: "This will replace your current signature",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#696cff',
+            cancelButtonColor: '#8592a3',
+            confirmButtonText: 'Yes, save it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                uploadSignature(signaturePad.toDataURL('image/png'));
+            }
+        });
     };
 
-    let currentImageData = null;
-
-    // File upload
+    // File upload with modal
     document.getElementById('upload-signature').onchange = function (e) {
         const file = e.target.files[0];
         if (!file) return;
 
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid File',
+                text: 'Please upload an image file',
+                confirmButtonColor: '#ff3e1d'
+            });
+            this.value = '';
+            return;
+        }
+
+        // Validate file size (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'Please upload an image smaller than 2MB',
+                confirmButtonColor: '#ff3e1d'
+            });
+            this.value = '';
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function (ev) {
-            currentImageData = ev.target.result;
-            document.getElementById('remove-bg-btn').style.display = 'block';
-            document.getElementById('save-original-btn').style.display = 'block';
+            const imageData = ev.target.result;
 
             Swal.fire({
-                title: 'Image Ready!',
-                imageUrl: currentImageData,
-                imageAlt: 'Uploaded signature',
-                imageWidth: 300,
-                text: 'Choose: Remove background (recommended) or keep original',
+                title: 'Confirm Signature Upload',
+                html: `
+                    <div class="text-center">
+                        <img src="${imageData}" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 0.5rem; margin: 1rem 0;">
+                        <p class="text-muted small">This will replace your current signature</p>
+                    </div>
+                `,
                 showCancelButton: true,
-                confirmButtonText: 'Remove Background',
-                cancelButtonText: 'Keep Original',
-                confirmButtonColor: '#ff6b6b'
+                confirmButtonColor: '#696cff',
+                cancelButtonColor: '#8592a3',
+                confirmButtonText: 'Upload Signature',
+                cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    removeBackgroundAndSave();
-                } else {
-                    uploadSignature(currentImageData);
+                    uploadSignature(imageData);
                 }
+                // Reset file input
+                document.getElementById('upload-signature').value = '';
             });
         };
         reader.readAsDataURL(file);
     };
 
-    // Remove background using Clipdrop (free, no key needed)
-    function removeBackgroundAndSave() {
-        if (!currentImageData) return;
-
+    // Universal upload function
+    function uploadSignature(dataUrl) {
         Swal.fire({
-            title: 'Removing background...',
-            text: 'Making your signature clean and transparent',
+            title: 'Uploading...',
+            text: 'Please wait while we save your signature',
             allowOutsideClick: false,
+            allowEscapeKey: false,
             didOpen: () => Swal.showLoading()
         });
 
-        const img = new Image();
-        img.onload = function () {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-
-            canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append('image_file', blob, 'signature.png');
-
-                try {
-                    const response = await fetch('https://clipdrop-api.co/cleanup/v1', {
-                        method: 'POST',
-                        headers: { 'x-api-key': '' }, // Leave empty = free tier
-                        body: formData
-                    });
-
-                    if (!response.ok) throw new Error();
-
-                    const cleanBlob = await response.blob();
-                    const cleanUrl = URL.createObjectURL(cleanBlob);
-                    uploadSignature(cleanUrl);
-                    Swal.fire('Perfect!', 'Background removed successfully!', 'success');
-                } catch (err) {
-                    console.warn('Background removal failed, using original');
-                    uploadSignature(currentImageData);
-                    Swal.fire('Note', 'Background removal unavailable. Using original image.', 'info');
-                }
-            }, 'image/png');
-        };
-        img.src = currentImageData;
-    }
-
-    document.getElementById('remove-bg-btn').onclick = removeBackgroundAndSave;
-    document.getElementById('save-original-btn').onclick = () => uploadSignature(currentImageData);
-
-    // Universal upload function
-    function uploadSignature(dataUrl) {
         const formData = new FormData();
         formData.append('signature_data', dataUrl);
         formData.append('_token', '{{ csrf_token() }}');
@@ -161,143 +216,301 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(r => r.json())
         .then(data => {
             if (data.success) {
-                Swal.fire('Success!', 'Signature saved perfectly!', 'success')
-                    .then(() => location.reload());
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Signature saved successfully!',
+                    confirmButtonColor: '#71dd37'
+                }).then(() => location.reload());
             } else {
                 throw new Error(data.message || 'Failed');
             }
         })
         .catch(() => {
-            Swal.fire('Error', 'Upload failed. Please try again.', 'error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Upload Failed',
+                text: 'Please try again later.',
+                confirmButtonColor: '#ff3e1d'
+            });
         });
+    }
+
+    // Remove signature confirmation
+    const removeForm = document.getElementById('remove-signature-form');
+    if (removeForm) {
+        removeForm.onsubmit = function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Remove Signature?',
+                text: "You won't be able to generate permits without a signature",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff3e1d',
+                cancelButtonColor: '#8592a3',
+                confirmButtonText: 'Yes, remove it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+        };
     }
 });
 </script>
 @endsection
 
 @section('content')
-<div class="row g-5">
+<div class="container-xxl flex-grow-1 container-p-y">
 
-    <!-- LEFT: Signature Manager -->
-    <div class="col-lg-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title mb-4">Your Signature</h5>
-
-                <!-- Current Signature -->
-                @if(Auth::user()->signature)
-                    <div class="mb-4 p-4 bg-light rounded-3 shadow-sm">
-                        <img src="{{ asset('storage/' . Auth::user()->signature) }}"
-                             alt="Current Signature" class="img-fluid rounded" style="max-height: 140px;">
-                        <p class="text-success small mt-2 mb-0">Currently Active</p>
-                    </div>
-                @else
-                    <div class="alert alert-info small mb-4">
-                        No signature yet. Add one below to generate permits.
-                    </div>
-                @endif
-
-                <!-- Draw Signature -->
-                <div class="mb-5">
-                    <h6 class="text-primary fw-bold mb-3">Draw Your Signature</h6>
-                    <canvas id="signature-pad" class="w-100 shadow-sm" height="200"></canvas>
-                    <div class="d-flex justify-content-center gap-3 mt-3">
-                        <button id="clear-signature" class="btn btn-outline-secondary btn-sm">Clear</button>
-                        <button id="save-draw" class="btn btn-primary btn-sm">Save Drawn</button>
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                <!-- Upload Signature -->
-                <div>
-                    <h6 class="text-primary fw-bold mb-3">OR Upload Image</h6>
-                    <input type="file" id="upload-signature" accept="image/*" class="form-control mb-3">
-
-                    <button id="remove-bg-btn" class="btn btn-remove-bg w-100" style="display:none;">
-                        Remove Background & Save
-                    </button>
-                    <button id="save-original-btn" class="btn btn-outline-secondary w-100 mt-2" style="display:none;">
-                        Save Original Image
-                    </button>
-                </div>
-
-                <!-- Remove Signature -->
-                @if(Auth::user()->signature)
-                    <hr class="my-4">
-                    <form action="{{ route('student.removeSignature') }}" method="POST">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn btn-outline-danger w-100 btn-sm">
-                            Remove Signature
-                        </button>
-                    </form>
-                @endif
-            </div>
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="fw-semibold mb-1">My Profile</h4>
+            <p class="text-muted small mb-0">Manage your account information and signature</p>
         </div>
     </div>
 
-    <!-- RIGHT: Profile Info (with correct organization from new DB) -->
-    <div class="col-lg-8">
+    <div class="row g-4">
 
-        <!-- Organization -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Organization</h5>
-                @php
-                    $profileId = \DB::table('users')->where('user_id', Auth::id())->value('profile_id');
-                    $member = \DB::table('members')->where('profile_id', $profileId)->first();
-                    $org = $member ? \App\Models\Organization::find($member->organization_id) : null;
-                @endphp
+        <!-- LEFT: Signature Manager -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="mdi mdi-draw text-primary me-2"></i>
+                        Digital Signature
+                    </h5>
+                </div>
+                <div class="card-body">
 
-                @if($org)
-                    <div class="row g-3">
-                        <div class="col-md-6"><strong>Name</strong><p class="mb-0 text-primary fw-bold">{{ $org->organization_name }}</p></div>
-                        <div class="col-md-6"><strong>Type</strong><p class="mb-0">{{ $org->organization_type ?? 'N/A' }}</p></div>
-                        <div class="col-12"><strong>Description</strong><p class="mb-0 text-muted">{{ $org->description ?? 'No description' }}</p></div>
-                        <div class="col-md-6"><strong>Status</strong><span class="badge bg-success">{{ ucfirst($org->status) }}</span></div>
-                        <div class="col-md-6"><strong>Member Since</strong><p class="mb-0">{{ $member->joined_at ? \Carbon\Carbon::parse($member->joined_at)->format('F Y') : 'N/A' }}</p></div>
+                    <!-- Current Signature Display -->
+                    <div class="mb-4">
+                        <label class="info-label">Current Signature</label>
+                        <div class="signature-preview border p-3">
+                            @if(Auth::user()->signature)
+                                <img src="{{ asset('storage/' . Auth::user()->signature) }}"
+                                     alt="Current Signature"
+                                     class="img-fluid"
+                                     style="max-height: 120px; max-width: 100%;">
+                            @else
+                                <div class="text-center text-muted">
+                                    <i class="mdi mdi-signature-freehand mdi-48px mb-2 opacity-50"></i>
+                                    <p class="small mb-0">No signature yet</p>
+                                </div>
+                            @endif
+                        </div>
+                        @if(Auth::user()->signature)
+                            <small class="text-success d-flex align-items-center mt-2">
+                                <i class="mdi mdi-check-circle me-1"></i>
+                                Signature Active
+                            </small>
+                        @else
+                            <small class="text-warning d-flex align-items-center mt-2">
+                                <i class="mdi mdi-alert me-1"></i>
+                                Add signature to generate permits
+                            </small>
+                        @endif
                     </div>
-                @else
-                    <div class="alert alert-warning">You are not assigned to any organization yet.</div>
-                @endif
-            </div>
-        </div>
 
-        <!-- Account & Personal Info (unchanged) -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Account Details</h5>
-                <div class="row g-4">
-                    <div class="col-md-6"><strong>Username</strong><p>{{ Auth::user()->username }}</p></div>
-                    <div class="col-md-6"><strong>Role</strong><p>{{ ucfirst(str_replace('_', ' ', Auth::user()->account_role)) }}</p></div>
-                    <div class="col-12"><strong>Joined</strong><p>{{ Auth::user()->created_at->format('F d, Y') }}</p></div>
+                    <hr class="my-4">
+
+                    <!-- Draw Signature -->
+                    <div class="mb-4">
+                        <label class="info-label">
+                            <i class="mdi mdi-pencil me-1"></i>
+                            Draw Signature
+                        </label>
+                        <canvas id="signature-pad" class="w-100" height="180"></canvas>
+                        <div class="d-flex gap-2 mt-3">
+                            <button id="clear-signature" class="btn btn-label-secondary btn-sm flex-fill">
+                                <i class="mdi mdi-eraser me-1"></i>Clear
+                            </button>
+                            <button id="save-draw" class="btn btn-primary btn-sm flex-fill">
+                                <i class="mdi mdi-content-save me-1"></i>Save
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-center my-3">
+                        <span class="badge bg-label-secondary">OR</span>
+                    </div>
+
+                    <!-- Upload Signature -->
+                    <div class="mb-4">
+                        <label class="info-label">
+                            <i class="mdi mdi-upload me-1"></i>
+                            Upload Image
+                        </label>
+                        <input type="file"
+                               id="upload-signature"
+                               accept="image/png,image/jpeg,image/jpg"
+                               class="form-control">
+                        <small class="text-muted d-block mt-2">
+                            <i class="mdi mdi-information-outline me-1"></i>
+                            Max 2MB • PNG, JPG formats only
+                        </small>
+                    </div>
+
+                    <!-- Remove Signature -->
+                    @if(Auth::user()->signature)
+                        <hr class="my-4">
+                        <form id="remove-signature-form"
+                              action="{{ route('student.removeSignature') }}"
+                              method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-label-danger w-100">
+                                <i class="mdi mdi-delete-outline me-1"></i>
+                                Remove Signature
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Personal Information</h5>
-                @php $p = Auth::user()->user_profile; @endphp
-                <div class="row g-4">
-                    <div class="col-md-6"><strong>Full Name</strong><p>{{ trim($p?->first_name . ' ' . ($p?->middle_name ? substr($p->middle_name,0,1).'.' : '') . ' ' . $p?->last_name . ' ' . ($p?->suffix ?? '')) }}</p></div>
-                    <div class="col-md-3"><strong>Sex</strong><p>{{ $p?->sex }}</p></div>
-                    <div class="col-md-3"><strong>Type</strong><p>{{ ucfirst($p?->type ?? '') }}</p></div>
-                    <div class="col-12"><strong>Address</strong><p class="text-muted">{{ $p?->address ?? 'Not set' }}</p></div>
-                </div>
+        <!-- RIGHT: Profile Info -->
+        <div class="col-lg-8">
 
-                <hr class="my-4">
-               <hr class="my-4">
-                <h6>Contact Information</h6>
-                <div class="row g-3 mt-3">
-                    <div class="col-md-6">
-                        <input type="email" class="form-control" value="{{ $p?->email }}" disabled placeholder="Email">
-                    </div>
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" value="{{ $p?->contact_number }}" disabled placeholder="Contact Number">
+            <!-- Organization Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="mdi mdi-account-group text-primary me-2"></i>
+                        Organization
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @php
+                        $profileId = \DB::table('users')->where('user_id', Auth::id())->value('profile_id');
+                        $member = \DB::table('members')->where('profile_id', $profileId)->first();
+                        $org = $member ? \App\Models\Organization::find($member->organization_id) : null;
+                    @endphp
+
+                    @if($org)
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="info-label">Organization Name</div>
+                                <div class="info-value">{{ $org->organization_name }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-label">Type</div>
+                                <div class="info-value">{{ $org->organization_type ?? 'N/A' }}</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="info-label">Description</div>
+                                <div class="info-value text-muted">{{ $org->description ?? 'No description' }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-label">Status</div>
+                                <span class="badge bg-label-success">{{ ucfirst($org->status) }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-label">Member Since</div>
+                                <div class="info-value">{{ $member->joined_at ? \Carbon\Carbon::parse($member->joined_at)->format('F Y') : 'N/A' }}</div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
+                            <i class="mdi mdi-alert-outline me-2"></i>
+                            <div>You are not assigned to any organization yet.</div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Account Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="mdi mdi-account-circle text-primary me-2"></i>
+                        Account Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="info-label">Username</div>
+                            <div class="info-value">{{ Auth::user()->username }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-label">Role</div>
+                            <div class="info-value">{{ ucfirst(str_replace('_', ' ', Auth::user()->account_role)) }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-label">Account Status</div>
+                            <span class="badge bg-label-success">Active</span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-label">Member Since</div>
+                            <div class="info-value">{{ Auth::user()->created_at->format('F d, Y') }}</div>
+                        </div>
                     </div>
                 </div>
-                <small class="text-muted">Contact your admin to update personal info.</small>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="mdi mdi-account-details text-primary me-2"></i>
+                        Personal Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @php
+                        $p = Auth::user()->user_profile;
+                        $fullName = trim(
+                            ($p?->first_name ?? '') . ' ' .
+                            ($p?->middle_name ? substr($p->middle_name,0,1).'.' : '') . ' ' .
+                            ($p?->last_name ?? '') . ' ' .
+                            ($p?->suffix ?? '')
+                        );
+                    @endphp
+
+                    <div class="row g-4">
+                        <div class="col-md-8">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">{{ $fullName }}</div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="info-label">Sex</div>
+                            <div class="info-value">{{ $p?->sex ?? 'N/A' }}</div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="info-label">Type</div>
+                            <div class="info-value">{{ ucfirst($p?->type ?? 'N/A') }}</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="info-label">Address</div>
+                            <div class="info-value text-muted">{{ $p?->address ?? 'Not set' }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="info-label">Contact Information</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Email Address</label>
+                            <input type="email" class="form-control" value="{{ $p?->email }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Contact Number</label>
+                            <input type="text" class="form-control" value="{{ $p?->contact_number }}" disabled>
+                        </div>
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex align-items-center mb-0" role="alert">
+                                <i class="mdi mdi-information-outline me-2"></i>
+                                <small>Contact your admin to update personal information.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
