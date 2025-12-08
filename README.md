@@ -5,7 +5,7 @@
 </p>
 
 <h1 align="center">
-   📅 EMPS - Event Management & Permit System
+   📅 SEMIS - STUDENT EVENT MANAGEMENT INFORMATION SYSTEM
 </h1>
 
 <p align="center">A comprehensive Laravel-based Event Management and Permit System designed for educational institutions to streamline event planning, approval workflows, and calendar management.</p>
@@ -20,7 +20,7 @@
 
 ## 🌟 Introduction
 
-**EMPS (Event Management & Permit System)** is a powerful, full-featured web application built with Laravel 10 and Materio Bootstrap Admin Template. It provides a complete solution for managing student organization events, handling multi-level approval workflows, venue bookings, and real-time calendar visualization.
+**SEMIS (STUDENT EVENT MANAGEMENT INFORMATION SYSTEM)** is a powerful, full-featured web application built with Laravel 10 and Materio Bootstrap Admin Template. It provides a complete solution for managing student organization events, handling multi-level approval workflows, venue bookings, and real-time calendar visualization.
 
 Perfect for:
 - 🎓 **Universities & Colleges** managing student organization events
@@ -33,8 +33,7 @@ Perfect for:
 - **Multi-Role System** - Students, Advisers, OSA, VP for SAS, Admin
 - **Smart Approval Workflow** - Role-based, sequential approval chain
 - **Interactive Calendar** - Drag-to-select dates, visual event management
-- **BARGO Integration** - Auto-approved events for official activities
-- **Real-time Notifications** - Email & in-app notifications
+- **Real-time Notifications** - in-app notifications
 - **PDF Generation** - Professional permit documents with digital signatures
 - **Venue Management** - Conflict detection and availability checking
 - **Document Upload** - Support for event requirements and attachments
@@ -55,11 +54,6 @@ Perfect for:
 ### Permit Application Form
 ![Permit Form](docs/screenshots/permit-form.png)
 
-### Approval Workflow
-![Approval](docs/screenshots/approval-flow.png)
-
-### BARGO Event Creation
-![BARGO](docs/screenshots/bargo-event.png)
 
 </details>
 
@@ -77,7 +71,7 @@ Perfect for:
 
 ### 🔄 Approval Workflow
 - ✅ Sequential multi-level approval chain
-- ✅ Role-based approval routing (Adviser → OSA → VP_SAS)
+- ✅ Role-based approval routing (Adviser → BARGO → OSA → VP_SAS)
 - ✅ Comments and feedback system
 - ✅ Email notifications at each approval stage
 - ✅ Approve, revise, or reject permits
@@ -86,8 +80,6 @@ Perfect for:
 ### 📅 Calendar System
 - ✅ Interactive FullCalendar integration
 - ✅ Click-and-drag date selection
-- ✅ Color-coded events by organization
-- ✅ BARGO events highlighted in orange
 - ✅ Venue availability visualization
 - ✅ Multiple calendar views (month, week, day)
 
@@ -177,11 +169,6 @@ DB_DATABASE=emps
 DB_USERNAME=root
 DB_PASSWORD=your_password
 
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.mailtrap.io
-MAIL_PORT=2525
-MAIL_USERNAME=your_username
-MAIL_PASSWORD=your_password
 ```
 
 6. **Run migrations and seeders**
@@ -210,18 +197,6 @@ php artisan serve
 ```
 http://localhost:8000
 ```
-
-### Default Login Credentials
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@emps.edu | password |
-| VP_SAS | vpsas@emps.edu | password |
-| OSA | osa@emps.edu | password |
-| Adviser | adviser@emps.edu | password |
-| Student | student@emps.edu | password |
-
----
 
 ## 📚 Database Structure
 
@@ -302,6 +277,12 @@ Permits → Documents (attachments)
        │ Approve
        ▼
 ┌─────────────┐     ┌──────────┐
+│   Student   │────►│  Reject  │
+│  Submits    │     └──────────┘
+└──────┬──────┘
+       │ Approve
+       ▼
+┌─────────────┐     ┌──────────┐
 │     OSA     │────►│  Reject  │
 │   Reviews   │     └──────────┘
 └──────┬──────┘
@@ -357,7 +338,6 @@ Permits → Documents (attachments)
 4. Add comments if needed
 5. Choose action:
    - ✅ Approve
-   - 🔄 Request Revision
    - ❌ Reject
 
 ---
@@ -533,20 +513,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - 📧 Email: support@emps.edu
-- 💬 Discord: [Join our server](https://discord.gg/emps)
-- 📝 Issues: [GitHub Issues](https://github.com/yourusername/emps/issues)
+- 💬 Instagram: [Join our server](https://www.instagram.com/krristiaanxbzy/)
 - 📚 Documentation: [Read the docs](https://docs.emps.edu)
 
 ---
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/emps&type=Date)](https://star-history.com/#yourusername/emps&Date)
+## Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=ferntzy/emps&type=date&legend=top-left)](https://www.star-history.com/#ferntzy/emps&type=date&legend=top-left)
 
 ---
 
 <p align="center">Made with ❤️ for Educational Institutions</p>
 
 <p align="center">
-   <a href="#-introduction">Back to Top ⬆️</a>
+   <a href="#-introduction">Back to Top</a>
 </p>
