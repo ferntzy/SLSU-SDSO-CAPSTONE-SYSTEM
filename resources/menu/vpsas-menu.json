@@ -23,19 +23,19 @@
       "menuHeader": "Event Tracking"
     },
     {
-      "url": "/vpsas/events/pending",
+      "url": "/vpsas/pending",
       "name": "Pending Events",
       "icon": "menu-icon tf-icons mdi mdi-receipt-clock-outline",
       "slug": "vpsas-events-pending"
     },
     {
-      "url": "/vpsas/events/approved",
+      "url": "/vpsas/approved",
       "name": "Approved Events",
       "icon": "menu-icon tf-icons mdi mdi-file-check",
       "slug": "vpsas-events-approved"
     },
     {
-      "url": "/vpsas/events/history",
+      "url": "/vpsas/history",
       "name": "Event History",
      "icon": "menu-icon tf-icons mdi mdi-history",
       "slug": "vpsas-events-history"

@@ -53,7 +53,7 @@
                                     </td>
                                     <td class="text-center">
                                         <!-- View PDF -->
-                                        <a href="{{ route('bargo.permit.pdf', $permit->hashed_id) }}" target="_blank"
+                                        <a href="{{ route('sas.permit.pdf', $permit->hashed_id) }}" target="_blank"
                                            class="btn btn-sm btn-outline-primary me-2" title="View PDF">
                                             View PDF
                                         </a>
@@ -76,7 +76,7 @@
                                 {{-- Reject Modal --}}
                                 <div class="modal fade" id="rejectModal{{ $flow->approval_id }}" tabindex="-1">
                                     <div class="modal-dialog">
-                                        <form action="{{ route('bargo.reject', $flow->approval_id) }}" method="POST">
+                                        <form action="{{ route('sas.reject', $flow->approval_id) }}" method="POST">
                                             @csrf
                                             <div class="modal-content">
                                                 <div class="modal-header bg-danger text-white">
@@ -131,7 +131,7 @@ function approvePermit(approvalId, title) {
         btn.disabled = true;
         btn.innerHTML = 'Approving...';
 
-        fetch(`/bargo/approve/${approvalId}`, {
+        fetch(`/sas/approve/${approvalId}`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

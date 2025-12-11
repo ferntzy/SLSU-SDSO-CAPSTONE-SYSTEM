@@ -2,7 +2,7 @@
   "menu": [
 
     {
-      "url": "/bargo/dashboard",
+      "url": "bargo/dashboard",
       "name": "Dashboard",
       "icon": "menu-icon tf-icons mdi mdi-view-dashboard-outline",
       "slug": "bargo-dashboard"

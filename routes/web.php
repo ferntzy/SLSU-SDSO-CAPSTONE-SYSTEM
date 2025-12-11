@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\auth\LoginController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\PermitController;
@@ -405,10 +405,10 @@ Route::middleware(['auth', 'role:BARGO'])->prefix('bargo')->name('bargo.')->grou
     });
 
     Route::get('/calendar', [BargoController::class, 'calendar'])->name('bargo.calendar');
-    Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
-    Route::post('/calendar/events', [BargoController::class, 'storeBargoEvent'])->name('calendar.store');
-    Route::put('/calendar/events/{event}', [BargoController::class, 'updateBargoEvent'])->name('calendar.update');
-    Route::delete('/calendar/events/{event}', [BargoController::class, 'deleteBargoEvent'])->name('calendar.delete');
+     Route::get('/events', [BargoController::class, 'calendar'])->name('events.calendar');
+    Route::get('/events/create', [BargoController::class, 'createEvent'])->name('events.create');
+    Route::get('/events/data', [CalendarController::class, 'getEvents'])->name('calendar.events');
+    Route::post('/events', [BargoController::class, 'storeBargoEvent'])->name('calendar.store');
 });
 
 // ============================
@@ -417,30 +417,124 @@ Route::middleware(['auth', 'role:BARGO'])->prefix('bargo')->name('bargo.')->grou
 
 
 //SDSO
+Route::middleware(['auth', 'role:SDSO_Head'])->prefix('sdso')->name('sdso.')->group(function () {
 
-Route::middleware(['auth', 'role:SDSO_Head'])->group(function () {
-  Route::view('/sdso/dashboard', 'sdso.dashboard')->name('sdso.dashboard');
-  Route::get('sdso/profile', [SdsoheadController::class, 'profile'])->name('sdso.profile');
-  Route::get('/sdso/events/pending', [SdsoheadController::class, 'pending'])->name('sdso.events.pending');
-  Route::get('/sdso/events/approved', [SdsoheadController::class, 'approved'])->name('sdso.events.approved');
-  Route::get('/sdso/events/history', [SdsoheadController::class, 'history'])->name('sdso.events.history');
+    // === SDSO HEAD DASHBOARD & VIEWS ===
+    Route::get('/dashboard', [SdsoHeadController::class, 'dashboard'])->name('dashboard');
+    Route::get('/pending', [SdsoHeadController::class, 'pending'])->name('pending');
+    Route::get('/approved', [SdsoHeadController::class, 'approved'])->name('approved');
+    Route::get('/rejected', [SdsoHeadController::class, 'rejected'])->name('rejected');
+    Route::get('/history', [SdsoHeadController::class, 'history'])->name('history');
+
+    // === PERMIT ACTIONS (SDSO Head approves after BARGO) ===
+    Route::get('/permit/{hashed_id}/pdf', [SdsoHeadController::class, 'viewPermitPdf'])->name('permit.pdf');
+    Route::post('/approve/{approval_id}', [SdsoHeadController::class, 'approve'])->name('approve');
+    Route::post('/reject/{approval_id}', [SdsoHeadController::class, 'reject'])->name('reject');
+
+    // === PROFILE & SIGNATURE ===
+    Route::get('/profile', fn() => view('sdso.profile'))->name('profile');
+
+    Route::post('/profile/signature', [UserController::class, 'uploadSignature'])->name('uploadSignature');
+    Route::delete('/profile/signature', [UserController::class, 'removeSignature'])->name('removeSignature');
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', fn() => view('sdso.profile'))->name('index');
+        Route::put('/contact', [UserController::class, 'updateContact'])->name('updateContact');
+    });
+
+    // === CALENDAR & EVENT CREATION (SDSO Head can also create events) ===
+    Route::get('/calendar', [SdsoHeadController::class, 'calendar'])->name('calendar');
+    Route::get('/events', [SdsoHeadController::class, 'calendar'])->name('events.calendar');
+    Route::get('/events/create', [SdsoHeadController::class, 'createEvent'])->name('events.create');
+    Route::get('/events/data', [CalendarController::class, 'getEvents'])->name('events.data');
+    Route::post('/events', [SdsoHeadController::class, 'storeEvent'])->name('events.store');
 });
+
+// Route::middleware(['auth', 'role:SDSO_Head'])->group(function () {
+//   Route::view('/sdso/dashboard', 'sdso.dashboard')->name('sdso.dashboard');
+//   Route::get('sdso/profile', [SdsoheadController::class, 'profile'])->name('sdso.profile');
+//   Route::get('/sdso/events/pending', [SdsoheadController::class, 'pending'])->name('sdso.events.pending');
+//   Route::get('/sdso/events/approved', [SdsoheadController::class, 'approved'])->name('sdso.events.approved');
+//   Route::get('/sdso/events/history', [SdsoheadController::class, 'history'])->name('sdso.events.history');
+// });
 
 
 
 //VPSAS
-Route::middleware(['auth', 'role:VP_SAS'])->group(function () {
-  Route::view('/vpsas/dashboard', 'vp_sas.dashboard')->name('vpsas.dashboard');
-  Route::get('vpsas/profile', [Vp_sasController::class, 'profile'])->name('vpsas.profile');
-});
+// Route::middleware(['auth', 'role:VP_SAS'])->group(function () {
+//   Route::view('/vpsas/dashboard', 'vp_sas.dashboard')->name('vpsas.dashboard');
+//   Route::get('vpsas/profile', [Vp_sasController::class, 'profile'])->name('vpsas.profile');
+// });
+Route::middleware(['auth', 'role:VP_SAS'])->prefix('vpsas')->name('vpsas.')->group(function () {
 
+    // === SDSO HEAD DASHBOARD & VIEWS ===
+    Route::get('/dashboard', [Vp_SasController::class, 'dashboard'])->name('dashboard');
+    Route::get('/pending', [Vp_SasController::class, 'pending'])->name('pending');
+    Route::get('/approved', [Vp_SasController::class, 'approved'])->name('approved');
+    Route::get('/rejected', [Vp_SasController::class, 'rejected'])->name('rejected');
+    Route::get('/history', [Vp_SasController::class, 'history'])->name('history');
+
+    // === PERMIT ACTIONS (SDSO Head approves after BARGO) ===
+    Route::get('/permit/{hashed_id}/pdf', [Vp_SasController::class, 'viewPermitPdf'])->name('permit.pdf');
+    Route::post('/approve/{approval_id}', [Vp_SasController::class, 'approve'])->name('approve');
+    Route::post('/reject/{approval_id}', [Vp_SasController::class, 'reject'])->name('reject');
+
+    // === PROFILE & SIGNATURE ===
+    Route::get('/profile', fn() => view('vpsas.profile'))->name('profile');
+
+    Route::post('/profile/signature', [UserController::class, 'uploadSignature'])->name('uploadSignature');
+    Route::delete('/profile/signature', [UserController::class, 'removeSignature'])->name('removeSignature');
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', fn() => view('vpsas.profile'))->name('index');
+        Route::put('/contact', [UserController::class, 'updateContact'])->name('updateContact');
+    });
+
+    // === CALENDAR & EVENT CREATION (SDSO Head can also create events) ===
+    Route::get('/calendar', [Vp_SasController::class, 'calendar'])->name('calendar');
+    Route::get('/events', [Vp_SasController::class, 'calendar'])->name('events.calendar');
+    Route::get('/events/create', [Vp_SasController::class, 'createEvent'])->name('events.create');
+    Route::get('/events/data', [CalendarController::class, 'getEvents'])->name('events.data');
+    Route::post('/events', [Vp_SasController::class, 'storeEvent'])->name('events.store');
+});
 
 //SASDIRECTOR
-Route::middleware(['auth', 'role:SAS_Director'])->group(function () {
-  Route::view('/sas/dashboard', 'sas.dashboard')->name('sas.dashboard');
-  Route::get('sas/profile', [SasController::class, 'profile'])->name('sas.profile');
-});
+// Route::middleware(['auth', 'role:SAS_Director'])->group(function () {
+//   Route::view('/sas/dashboard', 'sas.dashboard')->name('sas.dashboard');
+//   Route::get('sas/profile', [SasController::class, 'profile'])->name('sas.profile');
+// });
+Route::middleware(['auth', 'role:SAS_Director'])->prefix('sas')->name('sas.')->group(function () {
 
+    // === SDSO HEAD DASHBOARD & VIEWS ===
+    Route::get('/dashboard', [SasController::class, 'dashboard'])->name('dashboard');
+    Route::get('/pending', [SasController::class, 'pending'])->name('pending');
+    Route::get('/approved', [SasController::class, 'approved'])->name('approved');
+    Route::get('/rejected', [SasController::class, 'rejected'])->name('rejected');
+    Route::get('/history', [SasController::class, 'history'])->name('history');
+
+    // === PERMIT ACTIONS (SDSO Head approves after BARGO) ===
+    Route::get('/permit/{hashed_id}/pdf', [SasController::class, 'viewPermitPdf'])->name('permit.pdf');
+    Route::post('/approve/{approval_id}', [SasController::class, 'approve'])->name('approve');
+    Route::post('/reject/{approval_id}', [SasController::class, 'reject'])->name('reject');
+
+    // === PROFILE & SIGNATURE ===
+    Route::get('/profile', fn() => view('sas.profile'))->name('profile');
+
+    Route::post('/profile/signature', [UserController::class, 'uploadSignature'])->name('uploadSignature');
+    Route::delete('/profile/signature', [UserController::class, 'removeSignature'])->name('removeSignature');
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', fn() => view('sas.profile'))->name('index');
+        Route::put('/contact', [UserController::class, 'updateContact'])->name('updateContact');
+    });
+
+    // === CALENDAR & EVENT CREATION (SDSO Head can also create events) ===
+    Route::get('/calendar', [SasController::class, 'calendar'])->name('calendar');
+    Route::get('/events', [SasController::class, 'calendar'])->name('events.calendar');
+    Route::get('/events/create', [SasController::class, 'createEvent'])->name('events.create');
+    Route::get('/events/data', [CalendarController::class, 'getEvents'])->name('events.data');
+    Route::post('/events', [SasController::class, 'storeEvent'])->name('events.store');
+});
 
 Route::get('/adviser/temp/view/{hashed_id}', [FacultyAdviserController::class, 'viewTempPdf'])
   ->name('adviser.view.temp.pdf');

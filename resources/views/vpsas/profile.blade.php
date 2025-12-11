@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('signature_data', dataUrl);
         formData.append('_token', '{{ csrf_token() }}');
 
-        fetch('{{ route('sdso.uploadSignature') }}', {
+        fetch('{{ route('vpsas.uploadSignature') }}', {
             method: 'POST',
             body: formData
         })
@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     @if(Auth::user()->signature)
                         <hr class="my-4">
                         <form id="remove-signature-form"
-                              action="{{ route('bargo.removeSignature') }}"
+                              action="{{ route('vpsas.removeSignature') }}"
                               method="POST">
                             @csrf
                             @method('DELETE')

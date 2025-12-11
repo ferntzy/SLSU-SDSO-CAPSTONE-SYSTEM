@@ -86,6 +86,10 @@
     ]
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.19",
+    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/interaction": "^6.1.19",
+    "@fullcalendar/timegrid": "^6.1.19",
     "@mdi/font": "7.2.96",
     "@popperjs/core": "2.11.8",
     "apexcharts-clevision": "3.28.5",

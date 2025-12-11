@@ -11,10 +11,14 @@ class Event extends Model
   public $timestamps = false;
 
   protected $fillable = [
-    'organization_id',
+   'organization_id',
     'event_title',
     'event_date',
+    'venue_id',
     'proposal_status',
+    'current_stage',
+    'event_report_submitted',
+    'event_permit_submitted',
   ];
 
   // ✅ Link to the approval flow

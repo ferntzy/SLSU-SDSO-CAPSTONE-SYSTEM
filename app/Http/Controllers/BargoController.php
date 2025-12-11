@@ -16,10 +16,20 @@ class BargoController extends Controller
   public function dashboard()
   {
     $pendingReviews = EventApprovalFlow::where('approver_role', 'BARGO')
-      ->where('status', 'pending')
-      ->count();
+    ->where('status', 'pending')
+    ->whereHas('permit.approvalFlow', function ($q) {
+        $q->where('approver_role', 'Faculty_Adviser')
+          ->where('status', 'approved');
+    })
 
-    $approved = EventApprovalFlow::where('approver_role', 'VP_SAS')
+    // 2. SAS_Director must be PENDING (not approved, not rejected)
+    ->whereHas('permit.approvalFlow', function ($q) {
+        $q->where('approver_role', 'SDSO_HEAD')
+          ->where('status', 'pending');
+    })
+    ->count();
+
+    $approved = EventApprovalFlow::where('approver_role', 'BARGO')
       ->where('status', 'approved')
       ->count();
 
@@ -32,11 +42,24 @@ class BargoController extends Controller
 
   public function pending()
   {
-    $pendingReviews = EventApprovalFlow::with(['permit.organization'])
-      ->where('approver_role', 'BARGO')
-      ->where('status', 'pending')
-      ->oldest('created_at')
-      ->get();
+   $pendingReviews = EventApprovalFlow::with(['permit.organization'])
+    ->where('approver_role', 'BARGO')
+    ->where('status', 'pending')
+
+    // 1. Faculty Adviser must have approved
+    ->whereHas('permit.approvalFlow', function ($q) {
+        $q->where('approver_role', 'Faculty_Adviser')
+          ->where('status', 'approved');
+    })
+
+    // 2. SAS_Director must be PENDING (not approved, not rejected)
+    ->whereHas('permit.approvalFlow', function ($q) {
+        $q->where('approver_role', 'SDSO_HEAD')
+          ->where('status', 'pending');
+    })
+
+    ->oldest('created_at')
+    ->get();
 
     return view('bargo.events.pending', compact('pendingReviews'));
   }
@@ -89,23 +112,59 @@ class BargoController extends Controller
 
   // BARGO APPROVE – with digital signature (upload or draw)
   public function approve(Request $request, $approval_id)
-  {
+{
     $flow = EventApprovalFlow::findOrFail($approval_id);
 
-    // Security: Only BARGO role can approve BARGO step
+    // Security check
     if ($flow->approver_role !== 'BARGO' || $flow->status !== 'pending') {
-      abort(403);
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized or already processed.'
+        ], 403);
     }
 
     $permit = $flow->permit;
     if (!$permit || !$permit->pdf_data) {
-      return back()->with('error', 'PDF not found.');
+        return response()->json([
+            'success' => false,
+            'message' => 'Permit PDF not found.'
+        ], 400);
     }
 
-    // Get BARGO full name
-    $bargoName = strtoupper(trim(Auth::user()->name ?? 'BARGO OFFICER'));
+    $user = Auth::user();
 
-    // Prepare temp directory
+    // === 1. GET YOUR REAL UPLOADED SIGNATURE ===
+    if (!$user->signature || !Storage::disk('public')->exists($user->signature)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Please upload your signature in your profile first.'
+        ], 400);
+    }
+
+    $signaturePath = storage_path('app/public/' . $user->signature);
+
+    // === 2. GET FULL NAME (SAME AS YOUR CODE) ===
+    $fullName = $user->user_profile
+        ? trim(
+            $user->user_profile->first_name . ' ' .
+            ($user->user_profile->middle_name ? strtoupper(substr($user->user_profile->middle_name, 0, 1)) . '.' : '') . ' ' .
+            $user->user_profile->last_name . ' ' .
+            ($user->user_profile->suffix ?? '')
+        )
+        : $user->username;
+
+    $fullNameUpper = strtoupper($fullName);
+
+    // === 3. UPDATE APPROVAL FLOW FIRST ===
+    $flow->update([
+        'status'        => 'approved',
+        'approver_id'   => $user->user_id,
+        'approver_name' => $fullNameUpper,
+        'signature_path'=> $user->signature,
+        'approved_at'   => now(),
+    ]);
+
+    // === 4. SIGN THE PDF — YOUR STYLE, BUT MOVED 26 UNITS RIGHT + NOT BOLD ===
     $tempDir = storage_path('app/temp');
     if (!is_dir($tempDir)) mkdir($tempDir, 0755, true);
 
@@ -115,73 +174,54 @@ class BargoController extends Controller
     $pdf = new Fpdi();
     $pageCount = $pdf->setSourceFile($tempPdfPath);
 
-    $signaturePath = null;
-
-    // Option 1: Uploaded signature
-    if ($request->hasFile('signature_upload') && $request->file('signature_upload')->isValid()) {
-      $signaturePath = $request->file('signature_upload')->getRealPath();
-    }
-    // Option 2: Drawn signature (canvas)
-    elseif ($request->filled('signature_data')) {
-      $imgData = preg_replace('#^data:image/\w+;base64,#i', '', $request->signature_data);
-      $imgData = str_replace(' ', '+', $imgData);
-      $data = base64_decode($imgData);
-      $signaturePath = $tempDir . "/bargo_sig_{$approval_id}.png";
-      file_put_contents($signaturePath, $data);
-    }
-    // Option 3: Use saved signature from profile (optional)
-    elseif (Auth::user()->signature && Storage::disk('public')->exists(Auth::user()->signature)) {
-      $signaturePath = storage_path('app/public/' . Auth::user()->signature);
-    }
-
     for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-      $tplIdx = $pdf->importPage($pageNo);
-      $size = $pdf->getTemplateSize($tplIdx);
-      $pdf->AddPage($size['orientation'], $size['width'], $size['height']);
-      $pdf->useTemplate($tplIdx);
+        $tplIdx = $pdf->importPage($pageNo);
+        $size = $pdf->getTemplateSize($tplIdx);
+        $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+        $pdf->useTemplate($tplIdx);
 
-      // Only sign on first page (adjust Y position as needed)
-      if ($pageNo === 1 && $signaturePath && file_exists($signaturePath)) {
-        $sigX = 80;      // Adjust X position
-        $sigY = 150;      // Adjust Y position for BARGO signature
-        $sigWidth = 50;
-        list($origW, $origH) = getimagesize($signaturePath);
-        $sigHeight = ($sigWidth / $origW) * $origH;
+        // SIGN ONLY ON FIRST PAGE
+        if ($pageNo === 1 && file_exists($signaturePath)) {
+            // MOVED 26 UNITS TO THE RIGHT → X = 126 (100 + 26)
+            $centerX     = 153;
+            $signatureY  = 120;
+            $nameY       = 138;
 
-        $pdf->Image($signaturePath, $sigX, $sigY, $sigWidth, $sigHeight);
+            // Signature
+            $sigWidth = 40;
+            list($origW, $origH) = getimagesize($signaturePath);
+            $sigHeight = ($sigWidth / $origW) * $origH;
+            $sigX = $centerX - ($sigWidth / 2);
 
-        // Print name below signature
-        $pdf->SetFont('Helvetica', 'B', 10);
-        $pdf->SetXY($sigX - 5, $sigY + $sigHeight + 3);
-        $pdf->Cell($sigWidth + 10, 8, $bargoName, 0, 1, 'C');
-      }
+            $pdf->Image($signaturePath, $sigX, $signatureY, $sigWidth, $sigHeight);
+
+            // Name — CAPITALIZED, NOT BOLD, REGULAR FONT
+            $pdf->SetFont('Helvetica', '', 10);  // ← '' = Regular (not 'B')
+            $pdf->SetTextColor(0, 0, 0);
+
+            $textWidth = $pdf->GetStringWidth($fullNameUpper);
+            $pdf->SetXY($centerX - ($textWidth / 2), $nameY);
+            $pdf->Write(0, $fullNameUpper);
+        }
     }
 
     // Save signed PDF
-    $outputPath = $tempDir . "/bargo_signed_{$permit->hashed_id}.pdf";
-    $pdf->Output($outputPath, 'F');
+    $signedPath = $tempDir . "/bargo_signed_{$permit->hashed_id}.pdf";
+    $pdf->Output($signedPath, 'F');
 
-    // Update permit with new signed PDF
-    $permit->pdf_data = file_get_contents($outputPath);
+    // Update permit with signed version
+    $permit->pdf_data = file_get_contents($signedPath);
     $permit->save();
-
-    // Update approval flow
-    $flow->update([
-      'status' => 'approved',
-      'approver_id' => Auth::id(),
-      'approver_name' => $bargoName,
-      'approved_at' => now(),
-    ]);
 
     // Cleanup
     @unlink($tempPdfPath);
-    @unlink($outputPath);
-    if ($signaturePath && str_contains($signaturePath, 'bargo_sig_')) {
-      @unlink($signaturePath);
-    }
+    @unlink($signedPath);
 
-    return back()->with('success', 'Permit successfully approved and signed by BARGO.');
-  }
+    return response()->json([
+        'success' => true,
+        'message' => 'Permit successfully approved and signed by BARGO.'
+    ]);
+}
 
   // BARGO REJECT
   public function reject(Request $request, $approval_id)
@@ -368,75 +408,87 @@ $stages = ['Faculty_Adviser', 'BARGO', 'SDSO_Head', 'SAS_Director', 'VP_SAS'];
 
     return response()->json(['success' => true, 'message' => 'Event deleted!']);
   }
+
 public function storeBargoEvent(Request $request)
 {
-   $orgId = $this->getUserOrganizationId();
+    $orgId = $this->getUserOrganizationId();
 
     $request->validate([
-        'title_activity' => 'required|string|max:255',
-        'purpose'        => 'required|string',
-        'nature'         => 'required|string',
-        'nature_other_text' => 'nullable|required_if:nature,Other|string|max:255',
-        'venue'          => 'required|exists:venues,venue_id',
-        'participants'   => 'required|string',
-        'participants_other_text' => 'nullable|required_if:participants,Other|string',
-        'number'         => 'nullable|integer|min:1',
-        'date_start'     => 'required|date',
-        'date_end'       => 'nullable|date|after_or_equal:date_start',
+        'title_activity'    => 'required|string|max:255',
+        'purpose'           => 'required|string',
+        'nature'            => 'required|string',                    // ← ONLY ONE!
+        'venue'             => 'required|exists:venues,venue_id',
+        'participants'      => 'nullable|string',
+        'number'            => 'nullable|integer|min:1',
+        'date_start'        => 'required|date',
+        'date_end'          => 'nullable|date|after_or_equal:date_start',
     ]);
 
-    // Create Permit — Always In-Campus
-    $permit = Permit::create([
-        'organization_id' => $orgId,
-        'title_activity'  => $request->title_activity,
-        'purpose'         => $request->purpose,
-        'type'            => 'In-Campus',
-        'nature'          => $request->nature === 'Other' ? $request->nature_other_text : $request->nature,
-        'venue'           => $request->venue,
-        'date_start'      => $request->date_start,
-        'date_end'        => $request->date_end ?? $request->date_start,
-        'time_start'      => null,
-        'time_end'        => null,
-        'participants'    => $request->participants === 'Other' ? $request->participants_other_text : $request->participants,
-        'number'          => $request('number', 0),
-        'is_completed'    => 1,
-        'completed_at'    => now(),
-    ]);
+    try {
+        $venueName = 'Not Specified';
+        if ($request->filled('venue')) {
+            $venue = \App\Models\Venue::find($request->venue);
+            $venueName = $venue?->venue_name ?? 'Invalid Venue';
+        }
 
-    // Auto-approve by VP_SAS (BARGO authority)
-    $user = Auth::user();
-    $fullName = trim(($user->user_profile?->first_name ?? '') . ' ' .
-        ($user->user_profile?->last_name ?? '')) ?: $user->username;
+        $permit = Permit::create([
+            'organization_id' => $orgId,
+            'title_activity'  => $request->title_activity,
+            'purpose'         => $request->purpose,
+            'type'            => 'In-Campus',
+            'nature'          => $request->nature === 'Other'? ($request->nature_other_text ?? 'Other'): $request->nature,
+            'venue'           => $venueName,
+            'date_start'      => $request->date_start,
+            'date_end'        => $request->date_end ?? $request->date_start,
+            'time_start'      => Carbon::createFromFormat('h:i A', $request->time_start)->format('H:i:s'),
+            'time_end'        => Carbon::createFromFormat('h:i A', $request->time_end)->format('H:i:s'),
+            'participants'    => $request->participants ?? 'BARGO Members',
+            'number'          => $request->number ?? 0,
+            'is_completed'    => 1,
+            'completed_at'    => now(),
+        ]);
 
-    EventApprovalFlow::create([
-        'permit_id'       => $permit->permit_id,
-        'approver_role'   => 'VP_SAS',
-        'approver_id'     => $user->user_id,
-        'approver_name'   => $fullName,
-        'status'          => 'approved',
-        'approved_at'     => now(),
-        'created_at'      => now(),
-        'updated_at'      => now(),
-    ]);
+        $user = Auth::user();
+        $fullName = trim(($user->user_profile?->first_name ?? '') . ' ' . ($user->user_profile?->last_name ?? '')) ?: $user->username;
 
-    // Create Event in events table (for calendar display)
-    $event = \App\Models\Event::create([
-        'organization_id' => $orgId,
-        'event_title'     => $request->title_activity,
-        'event_date'      => $request->date_start,
-        'venue_id'        => $request->venue,
-        'proposal_status' => 'approved',
-        'current_stage'   => 'completed',
-        'event_report_submitted' => 1,
-        'event_permit_submitted' => 1,
-    ]);
+        $stages = ['Faculty_Adviser', 'BARGO', 'SDSO_Head', 'SAS_Director', 'VP_SAS'];
+        foreach ($stages as $stage) {
+            EventApprovalFlow::create([
+                'permit_id'       => $permit->permit_id,
+                'approver_role'   => $stage,
+                'approver_name'   => $fullName,
+                'status'          => 'approved',
+                'approved_at'     => now(),
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+        }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'BARGO event created and approved instantly!',
-        'permit_id' => $permit->permit_id
-    ]);
+        \App\Models\Event::create([
+            'organization_id'        => $orgId,
+            'event_title'            => $request->title_activity,
+            'event_date'             => $request->date_start,
+            'venue_id'               => $request->venue,
+            'proposal_status'        => 'approved',
+            'current_stage'          => 'completed',
+            'event_report_submitted' => 1,
+            'event_permit_submitted' => 1,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'BARGO event created and fully approved!'
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('BARGO Event Error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ], 500);
+    }
 }
+
 public function updateBargoEvent(Request $request, Event $event)
 {
     // Only allow BARGO to edit their own auto-approved events
@@ -469,5 +521,10 @@ public function deleteBargoEvent(Event $event)
     $event->delete();
 
     return response()->json(['success' => true, 'message' => 'Event deleted!']);
+}
+
+public function createEvent()
+{
+    return view('bargo.events.create');
 }
 }

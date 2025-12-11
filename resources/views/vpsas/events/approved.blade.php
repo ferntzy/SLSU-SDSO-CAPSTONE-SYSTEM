@@ -36,11 +36,11 @@
                             @foreach($approvedReviews as $flow)
                                 @php $permit = $flow->permit; @endphp
                                 <tr>
-                                    <td><strong>{{ $permit->organization->acronym }}</strong></td>
-                                    <td>{{ Str::limit($permit->title_activity, 50) }}</td>
+                                    <td><strong>{{ $permit->organization->acronym ?? 'NA' }}</strong></td>
+                                    <td>{{ Str::limit($permit->title_activity ?? 'NA', 50) }}</td>
 
                                     <td>
-                                        <a href="{{ route('sdso.permit.pdf', $permit->hashed_id) }}" target="_blank"
+                                        <a href="{{ route('vpsas.permit.pdf', $permit->hashed_id ?? 'NA' ) }}" target="_blank"
                                            class="btn btn-sm btn-success">
                                             <i class="mdi mdi-file-pdf-box"></i> View Signed PDF
                                         </a>

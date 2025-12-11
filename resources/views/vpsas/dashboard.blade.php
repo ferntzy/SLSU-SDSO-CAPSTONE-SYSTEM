@@ -1,7 +1,7 @@
 {{-- resources/views/bargo/dashboard.blade.php --}}
 @extends('layouts.contentNavbarLayout')
 
-@section('title', 'SDSO Dashboard')
+@section('title', 'VP SAS Dashboard')
 
 @section('page-style')
 <style>
@@ -53,12 +53,12 @@
         $greeting = $hour < 12 ? 'Good Morning' : ($hour < 17 ? 'Good Afternoon' : 'Good Evening');
 
         $thisMonth = now()->startOfMonth();
-        $approvedThisMonth = \App\Models\EventApprovalFlow::where('approver_role', 'SDSO_Head')
+        $approvedThisMonth = \App\Models\EventApprovalFlow::where('approver_role', 'VP_SAS')
             ->where('status', 'approved')
             ->where('updated_at', '>=', $thisMonth)
             ->count();
 
-        $rejectedThisMonth = \App\Models\EventApprovalFlow::where('approver_role', 'SDSO_Head')
+        $rejectedThisMonth = \App\Models\EventApprovalFlow::where('approver_role', 'VP_SAS')
             ->where('status', 'rejected')
             ->where('updated_at', '>=', $thisMonth)
             ->count();
@@ -68,7 +68,7 @@
             : 0;
 
       $approvedByYou = \DB::table('event_approval_flow')
-    ->where('approver_role', 'SDSO_Head')
+    ->where('approver_role', 'VP_SAS')
     ->where('status', 'approved')
     ->count();
     @endphp
@@ -91,7 +91,7 @@
                             </div>
                         </div>
                         <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                            <h5 class="text-white fw-semibold mb-1">SDS DASHBOARD</h5>
+                            <h5 class="text-white fw-semibold mb-1">VP SAS DASHBOARD</h5>
 
                         </div>
                     </div>
@@ -106,7 +106,7 @@
         <div class="col-xl-3 col-sm-6">
             <div class="card stat-card">
                 <div class="card-body">
-                    <a href="{{ route('sdso.pending') }}" class="text-decoration-none">
+                    <a href="{{ route('vpsas.pending') }}" class="text-decoration-none">
                         <div class="d-flex justify-content-between">
                             <div class="card-info">
                                 <p class="card-text mb-1">Pending Review</p>
@@ -157,7 +157,7 @@
         <div class="col-xl-3 col-sm-6">
             <div class="card stat-card">
                 <div class="card-body">
-                    <a href="{{ route('sdso.approved') }}" class="text-decoration-none">
+                    <a href="{{ route('vpsas.approved') }}" class="text-decoration-none">
                         <div class="d-flex justify-content-between">
                             <div class="card-info">
                                 <p class="card-text mb-1">Approved</p>
@@ -181,7 +181,7 @@
         <div class="col-xl-3 col-sm-6">
             <div class="card stat-card">
                 <div class="card-body">
-                    <a href="{{ route('sdso.rejected') }}" class="text-decoration-none">
+                    <a href="{{ route('vpsas.rejected') }}" class="text-decoration-none">
                         <div class="d-flex justify-content-between">
                             <div class="card-info">
                                 <p class="card-text mb-1">Rejected</p>
@@ -205,7 +205,7 @@
         <div class="col-xl-3 col-sm-6">
             <div class="card stat-card">
                 <div class="card-body">
-                    <a href="{{ route('sdso.history') }}" class="text-decoration-none">
+                    <a href="{{ route('vpsas.history') }}" class="text-decoration-none">
                         <div class="d-flex justify-content-between">
                             <div class="card-info">
                                 <p class="card-text mb-1">Total Processed</p>
